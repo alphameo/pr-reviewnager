@@ -11,6 +11,19 @@ type User struct {
 	active bool
 }
 
+func NewUserWithID(id v.ID, name string, active bool) *User {
+	u := User{
+		id:     id,
+		name:   name,
+		active: active,
+	}
+	return &u
+}
+
+func NewUser(name string, active bool) *User {
+	return NewUserWithID(v.NewID(), name, active)
+}
+
 func (u *User) ID() v.ID {
 	return u.id
 }

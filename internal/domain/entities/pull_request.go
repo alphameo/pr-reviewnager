@@ -19,11 +19,15 @@ type PullRequest struct {
 }
 
 func NewPullRequest(title string, authorID v.ID) *PullRequest {
+	return NewPullRequestWithID(v.NewID(), title, authorID, v.OPEN)
+}
+
+func NewPullRequestWithID(id v.ID, title string, authorID v.ID, status v.PRStatus) *PullRequest {
 	p := PullRequest{
-		id:          v.NewID(),
+		id:          id,
 		title:       title,
 		authorID:    authorID,
-		status:      v.OPEN,
+		status:      status,
 		reviewerIDs: make([]v.ID, 0, MaxCountOfReviewers),
 	}
 
