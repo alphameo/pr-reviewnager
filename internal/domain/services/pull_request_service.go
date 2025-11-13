@@ -13,8 +13,8 @@ import (
 )
 
 type PullRequestDomainService interface {
-	CreatePullRequest(pullRequest e.PullRequest) error
-	ReassignReviewer(reviewerID v.ID, pullRequestID v.ID) error
+	CreatePullRequestWithReviewers(pullRequest e.PullRequest) error
+	ReassignReviewerWithUserID(userID v.ID, pullRequestID v.ID) error
 }
 
 type DefaultPullRequestDomainService struct {
@@ -45,7 +45,7 @@ func NewDefaultPullRequestDomainService(
 	return &s, nil
 }
 
-func (s *DefaultPullRequestDomainService) CreatePullRequest(pullRequest e.PullRequest) error {
+func (s *DefaultPullRequestDomainService) CreatePullRequestWithReviewers(pullRequest e.PullRequest) error {
 	authorID := pullRequest.AuthorID()
 	_, err := s.userRepo.FindById(authorID)
 	if err != nil {
@@ -71,15 +71,15 @@ func (s *DefaultPullRequestDomainService) CreatePullRequest(pullRequest e.PullRe
 	return nil
 }
 
-func (s *DefaultPullRequestDomainService) ReassignReviewer(reviewerID v.ID, pullRequestID v.ID) error {
+func (s *DefaultPullRequestDomainService) ReassignReviewerWithUserID(userID v.ID, pullRequestID v.ID) error {
 	pullRequest, err := s.prRepo.FindById(pullRequestID)
 	if err != nil {
 		return err
 	}
 	reviewerIDs := pullRequest.ReviewerIDs()
-	reviewerIdx := slices.Index(reviewerIDs, reviewerID)
+	reviewerIdx := slices.Index(reviewerIDs, userID)
 	if reviewerIdx == -1 {
-		return fmt.Errorf("cannot reassign reviewer with id=%s: he is not a reviewer", reviewerID.String())
+		return fmt.Errorf("cannot reassign reviewer with id=%s: he is not a reviewer", userID.String())
 	}
 	authorID := pullRequest.AuthorID()
 	team, err := s.teamRepo.FindTeamByTeammateID(authorID)
@@ -94,7 +94,7 @@ func (s *DefaultPullRequestDomainService) ReassignReviewer(reviewerID v.ID, pull
 	exceptionalReviewerIDs = append(exceptionalReviewerIDs, authorID)
 	newReviewer := chooseRandomUser(availableUsers, exceptionalReviewerIDs...)
 
-	pullRequest.UnassignReviewer(reviewerID)
+	pullRequest.UnassignReviewer(userID)
 	pullRequest.AssignReviewer(newReviewer.ID())
 	s.prRepo.Update(pullRequest)
 	return nil
