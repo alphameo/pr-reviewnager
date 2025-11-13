@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"slices"
+	"time"
 
 	v "github.com/alphameo/pr-reviewnager/internal/domain/valueobjects"
 )
@@ -15,19 +16,21 @@ type PullRequest struct {
 	title       string
 	authorID    v.ID
 	status      v.PRStatus
+	mergedAt    *time.Time
 	reviewerIDs []v.ID
 }
 
 func NewPullRequest(title string, authorID v.ID) *PullRequest {
-	return NewPullRequestWithID(v.NewID(), title, authorID, v.OPEN)
+	return NewPullRequestWithID(v.NewID(), title, authorID, v.OPEN, nil)
 }
 
-func NewPullRequestWithID(id v.ID, title string, authorID v.ID, status v.PRStatus) *PullRequest {
+func NewPullRequestWithID(id v.ID, title string, authorID v.ID, status v.PRStatus, mergedAt *time.Time) *PullRequest {
 	p := PullRequest{
 		id:          id,
 		title:       title,
 		authorID:    authorID,
 		status:      status,
+		mergedAt:    mergedAt,
 		reviewerIDs: make([]v.ID, 0, MaxCountOfReviewers),
 	}
 
@@ -48,6 +51,10 @@ func (p *PullRequest) AuthorID() v.ID {
 
 func (p *PullRequest) Status() v.PRStatus {
 	return p.status
+}
+
+func (p *PullRequest) MergedAt() *time.Time {
+	return p.mergedAt
 }
 
 func (p *PullRequest) ReviewerIDs() []v.ID {
@@ -84,5 +91,10 @@ func (p *PullRequest) UnassignReviewer(reviewerID v.ID) error {
 }
 
 func (p *PullRequest) MarkAsMerged() {
+	if p.status == v.MERGED {
+		return
+	}
+	time := time.Now()
 	p.status = v.MERGED
+	p.mergedAt = &time
 }
