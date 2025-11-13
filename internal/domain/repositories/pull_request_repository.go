@@ -7,5 +7,5 @@ import (
 
 type PullRequestRepository interface {
 	Repository[e.PullRequest, v.ID]
-	findPullRequestsByUserID(userID v.ID) ([]e.PullRequest, error)
+	findPullRequestsForReviewerWithUserID(userID v.ID) ([]e.PullRequest, error)
 }
