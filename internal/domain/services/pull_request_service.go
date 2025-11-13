@@ -12,8 +12,8 @@ import (
 )
 
 type PullRequestDomainService interface {
-	CreatePullRequest(pullRequest e.PullRequest)
-	ReassignReviewer(userID v.ID)
+	CreatePullRequest(pullRequest e.PullRequest) error
+	ReassignReviewer(reviewerID v.ID, pullRequestID v.ID) error
 }
 
 type DefaultPullRequestDomainService struct {
