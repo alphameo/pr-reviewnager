@@ -2,6 +2,7 @@
 package services
 
 import (
+	"errors"
 	"fmt"
 	"math/rand"
 	"slices"
@@ -26,13 +27,22 @@ func NewDefaultPullRequestDomainService(
 	userRepository *r.UserRepository,
 	pullRequestRepository *r.PullRequestRepository,
 	teamRepository *r.TeamRepository,
-) *DefaultPullRequestDomainService {
+) (*DefaultPullRequestDomainService, error) {
+	if userRepository == nil {
+		return nil, errors.New("userRepository cannot be nil")
+	}
+	if pullRequestRepository == nil {
+		return nil, errors.New("pullRequestRepository cannot be nil")
+	}
+	if teamRepository == nil {
+		return nil, errors.New("teamRepository cannot be nil")
+	}
 	s := DefaultPullRequestDomainService{
 		userRepo: *userRepository,
 		prRepo:   *pullRequestRepository,
 		teamRepo: *teamRepository,
 	}
-	return &s
+	return &s, nil
 }
 
 func (s *DefaultPullRequestDomainService) CreatePullRequest(pullRequest e.PullRequest) error {
