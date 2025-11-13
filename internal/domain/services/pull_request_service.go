@@ -64,7 +64,7 @@ func (s *DefaultPullRequestDomainService) CreatePullRequest(pullRequest e.PullRe
 	for _, u := range reviewers {
 		pullRequest.AssignReviewer(u.ID())
 	}
-	err = s.prRepo.Create(pullRequest)
+	err = s.prRepo.Create(&pullRequest)
 	if err != nil {
 		return err
 	}
@@ -96,7 +96,7 @@ func (s *DefaultPullRequestDomainService) ReassignReviewer(reviewerID v.ID, pull
 
 	pullRequest.UnassignReviewer(reviewerID)
 	pullRequest.AssignReviewer(newReviewer.ID())
-	s.prRepo.Update(*pullRequest)
+	s.prRepo.Update(pullRequest)
 	return nil
 }
 
