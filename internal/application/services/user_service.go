@@ -11,5 +11,4 @@ type UserService interface {
 	UnregisterUserByID(userID v.ID) error
 	ListUsers() ([]dto.UserDTO, error)
 	SetUserActiveByID(userID v.ID, active bool) error
-	FindUserReviewingPullRequestsByID(userID v.ID) ([]dto.PullRequestDTO, error)
 }
