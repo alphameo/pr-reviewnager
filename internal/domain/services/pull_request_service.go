@@ -1,5 +1,5 @@
-// Package domainservices provides domain services for domain model
-package domainservices
+// Package services provides domain services for domain model
+package services
 
 import (
 	"fmt"
