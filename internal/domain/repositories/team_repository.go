@@ -7,5 +7,6 @@ import (
 
 type TeamRepository interface {
 	Repository[e.Team, v.ID]
+	FindTeamByName(name string) (e.Team, error)
 	FindTeamByTeammateID(teamateID v.ID) (e.Team, error)
 }
