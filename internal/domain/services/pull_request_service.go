@@ -13,7 +13,7 @@ import (
 )
 
 type PullRequestDomainService interface {
-	CreatePullRequestAndAssignReviewers(pullRequest e.PullRequest) error
+	CreatePullRequestAndAssignReviewers(pullRequest *e.PullRequest) error
 	ReassignReviewerWithUserID(userID v.ID, pullRequestID v.ID) error
 }
 
@@ -46,7 +46,7 @@ func NewDefaultPullRequestDomainService(
 	return &s, nil
 }
 
-func (s *DefaultPullRequestDomainService) CreatePullRequestAndAssignReviewers(pullRequest e.PullRequest) error {
+func (s *DefaultPullRequestDomainService) CreatePullRequestAndAssignReviewers(pullRequest *e.PullRequest) error {
 	authorID := pullRequest.AuthorID()
 	_, err := s.userRepo.FindById(authorID)
 	if err != nil {
@@ -65,7 +65,7 @@ func (s *DefaultPullRequestDomainService) CreatePullRequestAndAssignReviewers(pu
 	for _, u := range reviewers {
 		pullRequest.AssignReviewer(u.ID())
 	}
-	err = s.prRepo.Create(&pullRequest)
+	err = s.prRepo.Create(pullRequest)
 	if err != nil {
 		return err
 	}
