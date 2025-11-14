@@ -15,6 +15,7 @@ import (
 type PullRequestDomainService interface {
 	CreatePullRequestAndAssignReviewers(pullRequest *e.PullRequest) error
 	ReassignReviewerWithUserID(userID v.ID, pullRequestID v.ID) error
+	MarkPullRequestAsMergedByIDAndGet(pullRequestID v.ID) (*e.PullRequest, error)
 }
 
 type DefaultPullRequestDomainService struct {
@@ -138,4 +139,21 @@ func chooseRandomUsers(availableUsers []e.User, maxCount int, except ...v.ID) []
 	}
 
 	return reviewers
+}
+
+func (s *DefaultPullRequestDomainService) MarkPullRequestAsMergedByIDAndGet(pullRequestID v.ID) (*e.PullRequest, error) {
+	pr, err := s.prRepo.FindById(pullRequestID)
+	if err != nil {
+		return nil, err
+	}
+	if pr == nil {
+		return nil, fmt.Errorf("no such pull request with id=%s", pullRequestID.String())
+	}
+
+	pr.MarkAsMerged()
+	err = s.prRepo.Update(pr)
+	if err != nil {
+		return nil, err
+	}
+	return pr, nil
 }
