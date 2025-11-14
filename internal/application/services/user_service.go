@@ -47,7 +47,7 @@ func (s *DefaultUserService) RegisterUser(user *dto.UserDTO) error {
 }
 
 func (s *DefaultUserService) UnregisterUserByID(userID v.ID) error {
-	err := s.userRepo.DeleteById(userID)
+	err := s.userRepo.DeleteByID(userID)
 	if err != nil {
 		return err
 	}
@@ -63,7 +63,7 @@ func (s *DefaultUserService) ListUsers() ([]dto.UserDTO, error) {
 }
 
 func (s *DefaultUserService) SetUserActiveByID(userID v.ID, active bool) error {
-	user, err := s.userRepo.FindById(userID)
+	user, err := s.userRepo.FindByID(userID)
 	if err != nil {
 		return err
 	}

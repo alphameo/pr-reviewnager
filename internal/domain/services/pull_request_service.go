@@ -49,7 +49,7 @@ func NewDefaultPullRequestDomainService(
 
 func (s *DefaultPullRequestDomainService) CreatePullRequestAndAssignReviewers(pullRequest *e.PullRequest) error {
 	authorID := pullRequest.AuthorID()
-	_, err := s.userRepo.FindById(authorID)
+	_, err := s.userRepo.FindByID(authorID)
 	if err != nil {
 		return err
 	}
@@ -74,7 +74,7 @@ func (s *DefaultPullRequestDomainService) CreatePullRequestAndAssignReviewers(pu
 }
 
 func (s *DefaultPullRequestDomainService) ReassignReviewerWithUserID(userID v.ID, pullRequestID v.ID) error {
-	pullRequest, err := s.prRepo.FindById(pullRequestID)
+	pullRequest, err := s.prRepo.FindByID(pullRequestID)
 	if err != nil {
 		return err
 	}
@@ -142,7 +142,7 @@ func chooseRandomUsers(availableUsers []e.User, maxCount int, except ...v.ID) []
 }
 
 func (s *DefaultPullRequestDomainService) MarkPullRequestAsMergedByIDAndGet(pullRequestID v.ID) (*e.PullRequest, error) {
-	pr, err := s.prRepo.FindById(pullRequestID)
+	pr, err := s.prRepo.FindByID(pullRequestID)
 	if err != nil {
 		return nil, err
 	}
