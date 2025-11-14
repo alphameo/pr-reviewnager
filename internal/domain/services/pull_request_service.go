@@ -18,9 +18,10 @@ type PullRequestDomainService interface {
 }
 
 type DefaultPullRequestDomainService struct {
-	userRepo r.UserRepository
-	teamRepo r.TeamRepository
-	prRepo   r.PullRequestRepository
+	userRepo     r.UserRepository
+	teamRepo     r.TeamRepository
+	userTeamRepo r.UserTeamRepository
+	prRepo       r.PullRequestRepository
 }
 
 func NewDefaultPullRequestDomainService(
@@ -51,7 +52,7 @@ func (s *DefaultPullRequestDomainService) CreatePullRequestAndAssignReviewers(pu
 	if err != nil {
 		return err
 	}
-	team, err := s.teamRepo.FindTeamByTeammateID(authorID)
+	team, err := s.userTeamRepo.FindTeamByTeammateID(authorID)
 	if err != nil {
 		return err
 	}
@@ -82,7 +83,7 @@ func (s *DefaultPullRequestDomainService) ReassignReviewerWithUserID(userID v.ID
 		return fmt.Errorf("cannot reassign reviewer with id=%s: he is not a reviewer", userID.String())
 	}
 	authorID := pullRequest.AuthorID()
-	team, err := s.teamRepo.FindTeamByTeammateID(authorID)
+	team, err := s.userTeamRepo.FindTeamByTeammateID(authorID)
 	if err != nil {
 		return err
 	}
