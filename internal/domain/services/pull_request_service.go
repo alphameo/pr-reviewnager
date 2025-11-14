@@ -13,9 +13,16 @@ import (
 )
 
 type PullRequestDomainService interface {
-	CreatePullRequestAndAssignReviewers(pullRequest *e.PullRequest) error
-	ReassignReviewerWithUserID(userID v.ID, pullRequestID v.ID) error
-	MarkPullRequestAsMergedByIDAndGet(pullRequestID v.ID) (*e.PullRequest, error)
+	// CreateWithReviewers() creates a new pull request and automatically assigns
+	// 2 reviewers by randomly selecting from the author's team.
+	CreateWithReviewers(pullRequest *e.PullRequest) error
+
+	// ReassignReviewerAndReturnNew() unassign user-reviewer with given id and assigns another from his team, excluding
+	// him and pr author. After, method returns id of new user-reviewer
+	ReassignReviewerAndReturnNew(userID v.ID, pullRequestID v.ID) (*v.ID, error)
+
+	// MarkAsMergedAndReturn() idempotently marks pull request as merged and sets time of marking
+	MarkAsMergedAndReturn(pullRequestID v.ID) (*e.PullRequest, error)
 }
 
 type DefaultPullRequestDomainService struct {
@@ -47,7 +54,7 @@ func NewDefaultPullRequestDomainService(
 	return &s, nil
 }
 
-func (s *DefaultPullRequestDomainService) CreatePullRequestAndAssignReviewers(pullRequest *e.PullRequest) error {
+func (s *DefaultPullRequestDomainService) CreateWithReviewers(pullRequest *e.PullRequest) error {
 	authorID := pullRequest.AuthorID()
 	_, err := s.userRepo.FindByID(authorID)
 	if err != nil {
@@ -57,7 +64,7 @@ func (s *DefaultPullRequestDomainService) CreatePullRequestAndAssignReviewers(pu
 	if err != nil {
 		return err
 	}
-	availableUsers, err := s.userRepo.FindActiveUsersByTeamID(team.ID())
+	availableUsers, err := s.userTeamRepo.FindActiveUsersByTeamID(team.ID())
 	if err != nil {
 		return err
 	}
@@ -73,33 +80,34 @@ func (s *DefaultPullRequestDomainService) CreatePullRequestAndAssignReviewers(pu
 	return nil
 }
 
-func (s *DefaultPullRequestDomainService) ReassignReviewerWithUserID(userID v.ID, pullRequestID v.ID) error {
+func (s *DefaultPullRequestDomainService) ReassignReviewerAndReturnNew(userID v.ID, pullRequestID v.ID) (*v.ID, error) {
 	pullRequest, err := s.prRepo.FindByID(pullRequestID)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	reviewerIDs := pullRequest.ReviewerIDs()
 	reviewerIdx := slices.Index(reviewerIDs, userID)
 	if reviewerIdx == -1 {
-		return fmt.Errorf("cannot reassign reviewer with id=%s: he is not a reviewer", userID.String())
+		return nil, fmt.Errorf("cannot reassign reviewer with id=%s: he is not a reviewer", userID.String())
 	}
 	authorID := pullRequest.AuthorID()
 	team, err := s.userTeamRepo.FindTeamByTeammateID(authorID)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	availableUsers, err := s.userRepo.FindActiveUsersByTeamID(team.ID())
+	availableUsers, err := s.userTeamRepo.FindActiveUsersByTeamID(team.ID())
 	if err != nil {
-		return err
+		return nil, err
 	}
 	exceptionalReviewerIDs := pullRequest.ReviewerIDs()
 	exceptionalReviewerIDs = append(exceptionalReviewerIDs, authorID)
 	newReviewer := chooseRandomUser(availableUsers, exceptionalReviewerIDs...)
 
 	pullRequest.UnassignReviewer(userID)
-	pullRequest.AssignReviewer(newReviewer.ID())
+	newReviewerID := newReviewer.ID()
+	pullRequest.AssignReviewer(newReviewerID)
 	s.prRepo.Update(pullRequest)
-	return nil
+	return &newReviewerID, nil
 }
 
 func chooseRandomUser(availableUsers []e.User, except ...v.ID) e.User {
@@ -141,13 +149,16 @@ func chooseRandomUsers(availableUsers []e.User, maxCount int, except ...v.ID) []
 	return reviewers
 }
 
-func (s *DefaultPullRequestDomainService) MarkPullRequestAsMergedByIDAndGet(pullRequestID v.ID) (*e.PullRequest, error) {
+func (s *DefaultPullRequestDomainService) MarkAsMergedAndReturn(pullRequestID v.ID) (*e.PullRequest, error) {
 	pr, err := s.prRepo.FindByID(pullRequestID)
 	if err != nil {
 		return nil, err
 	}
 	if pr == nil {
 		return nil, fmt.Errorf("no such pull request with id=%s", pullRequestID.String())
+	}
+	if pr.Status() == v.MERGED {
+		return pr, nil
 	}
 
 	pr.MarkAsMerged()
