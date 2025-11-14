@@ -5,6 +5,6 @@ import (
 )
 
 type TeamService interface {
-	CreateTeam(team dto.TeamDTO) error
+	CreateTeamWithUsers(teamDTO dto.CreateTeamWithUsersDTO) error
 	FindTeamByName(name string) (*dto.TeamDTO, error)
 }
