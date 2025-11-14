@@ -1,6 +1,7 @@
 package services
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/alphameo/pr-reviewnager/internal/application/dto"
@@ -18,6 +19,29 @@ type DefaultTeamService struct {
 	teamRepo     r.TeamRepository
 	userRepo     r.UserRepository
 	userTeamRepo r.UserTeamRepository
+}
+
+func NewDefaultTeamService(
+	teamRepository *r.TeamRepository,
+	userRepository *r.UserRepository,
+	userTeamRepository *r.UserTeamRepository,
+) (*DefaultTeamService, error) {
+	if teamRepository == nil {
+		return nil, errors.New("teamRepository cannot be nil")
+	}
+	if userRepository == nil {
+		return nil, errors.New("userRepository cannot be nil")
+	}
+	if userTeamRepository == nil {
+		return nil, errors.New("userTeamRepository cannot be nil")
+	}
+
+	s := DefaultTeamService{
+		teamRepo:     *teamRepository,
+		userRepo:     *userRepository,
+		userTeamRepo: *userTeamRepository,
+	}
+	return &s, nil
 }
 
 func (s *DefaultTeamService) CreateTeamWithUsers(teamDTO dto.CreateTeamWithUsersDTO) error {
