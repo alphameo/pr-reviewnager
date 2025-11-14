@@ -6,8 +6,8 @@ import (
 )
 
 type PullRequestService interface {
-	CreatePullRequest(pullReques dto.PullRequestDTO) error
-	MarkPullRequestAsMergedByID(pullRequestID v.ID) error
-	ReassignReviewerByID(reviewerID v.ID, pullRequestID v.ID) error
-	findPullRequestsForReviewerWithUserID(userID v.ID) ([]dto.PullRequestDTO, error)
+	CreatePullRequest(pullRequest *dto.PullRequestDTO) error
+	MarkAsMerged(pullRequestID v.ID) (*dto.PullRequestDTO, error)
+	ReassignReviewer(userID v.ID, pullRequestID v.ID) (*dto.PullRequestWithNewReviewerIDDTO, error)
+	FindPullRequestsForReviewerWithUserID(userID v.ID) ([]dto.PullRequestDTO, error)
 }
