@@ -18,10 +18,6 @@ func UserToDTO(entity *e.User) *dto.UserDTO {
 }
 
 func UsersToDTOs(entities []e.User) ([]dto.UserDTO, error) {
-	if entities == nil {
-		return nil, errors.New("entitites cannot be nil")
-	}
-
 	dtos := make([]dto.UserDTO, len(entities))
 	for i, entity := range entities {
 		dtos[i] = *UserToDTO(&entity)
@@ -45,10 +41,6 @@ func UserDTOToEntity(dto *dto.UserDTO) (*e.User, error) {
 }
 
 func UserDTOsToEntities(dtos []dto.UserDTO) ([]e.User, error) {
-	if dtos == nil {
-		return nil, errors.New("dtos cannot be nil")
-	}
-
 	entities := make([]e.User, len(dtos))
 	for i, dto := range dtos {
 		entity, err := UserDTOToEntity(&dto)

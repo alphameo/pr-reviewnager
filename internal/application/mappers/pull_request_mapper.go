@@ -24,10 +24,6 @@ func PullRequestToDTO(entity *e.PullRequest) *dto.PullRequestDTO {
 }
 
 func PullRequestsToDTOs(entities []e.PullRequest) ([]dto.PullRequestDTO, error) {
-	if entities == nil {
-		return nil, errors.New("entitites cannot be nil")
-	}
-
 	dtos := make([]dto.PullRequestDTO, len(entities))
 	for i, entity := range entities {
 		dtos[i] = *PullRequestToDTO(&entity)
@@ -54,10 +50,6 @@ func PullRequestDTOToEntity(dto *dto.PullRequestDTO) (*e.PullRequest, error) {
 }
 
 func PullRequestDTOsToEntities(dtos []dto.PullRequestDTO) ([]e.PullRequest, error) {
-	if dtos == nil {
-		return nil, errors.New("dtos cannot be nil")
-	}
-
 	entities := make([]e.PullRequest, len(dtos))
 	for i, dto := range dtos {
 		entity, err := PullRequestDTOToEntity(&dto)

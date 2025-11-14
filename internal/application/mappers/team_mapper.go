@@ -18,10 +18,6 @@ func TeamToDTO(entity *e.Team) *dto.TeamDTO {
 }
 
 func TeamsToDTOs(entities []e.Team) ([]dto.TeamDTO, error) {
-	if entities == nil {
-		return nil, errors.New("entitites cannot be nil")
-	}
-
 	dtos := make([]dto.TeamDTO, len(entities))
 	for i, entity := range entities {
 		dtos[i] = *TeamToDTO(&entity)
@@ -44,10 +40,6 @@ func TeamDTOToEntity(dto *dto.TeamDTO) (*e.Team, error) {
 }
 
 func TeamDTOsToEntities(dtos []dto.TeamDTO) ([]e.Team, error) {
-	if dtos == nil {
-		return nil, errors.New("dtos cannot be nil")
-	}
-
 	entities := make([]e.Team, len(dtos))
 	for i, dto := range dtos {
 		entity, err := TeamDTOToEntity(&dto)
