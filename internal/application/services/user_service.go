@@ -59,7 +59,7 @@ func (s *DefaultUserService) ListUsers() ([]dto.UserDTO, error) {
 	if err != nil {
 		return nil, err
 	}
-	return mappers.UsersToDTOs(users)
+	return mappers.UsersToDTOs(users), nil
 }
 
 func (s *DefaultUserService) SetUserActiveByID(userID v.ID, active bool) error {

@@ -17,13 +17,13 @@ func TeamToDTO(entity *e.Team) *dto.TeamDTO {
 	return &dto
 }
 
-func TeamsToDTOs(entities []e.Team) ([]dto.TeamDTO, error) {
+func TeamsToDTOs(entities []e.Team) []dto.TeamDTO {
 	dtos := make([]dto.TeamDTO, len(entities))
 	for i, entity := range entities {
 		dtos[i] = *TeamToDTO(&entity)
 	}
-	
-	return dtos, nil
+
+	return dtos
 }
 
 func TeamDTOToEntity(dto *dto.TeamDTO) (*e.Team, error) {

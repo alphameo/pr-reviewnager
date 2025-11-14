@@ -17,13 +17,13 @@ func UserToDTO(entity *e.User) *dto.UserDTO {
 	return &dto
 }
 
-func UsersToDTOs(entities []e.User) ([]dto.UserDTO, error) {
+func UsersToDTOs(entities []e.User) []dto.UserDTO {
 	dtos := make([]dto.UserDTO, len(entities))
 	for i, entity := range entities {
 		dtos[i] = *UserToDTO(&entity)
 	}
 
-	return dtos, nil
+	return dtos
 }
 
 func UserDTOToEntity(dto *dto.UserDTO) (*e.User, error) {

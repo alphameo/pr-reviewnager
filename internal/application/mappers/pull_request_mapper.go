@@ -23,13 +23,13 @@ func PullRequestToDTO(entity *e.PullRequest) *dto.PullRequestDTO {
 	return &dto
 }
 
-func PullRequestsToDTOs(entities []e.PullRequest) ([]dto.PullRequestDTO, error) {
+func PullRequestsToDTOs(entities []e.PullRequest) []dto.PullRequestDTO {
 	dtos := make([]dto.PullRequestDTO, len(entities))
 	for i, entity := range entities {
 		dtos[i] = *PullRequestToDTO(&entity)
 	}
 
-	return dtos, nil
+	return dtos
 }
 
 func PullRequestDTOToEntity(dto *dto.PullRequestDTO) (*e.PullRequest, error) {
