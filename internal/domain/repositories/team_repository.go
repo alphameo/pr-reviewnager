@@ -7,5 +7,5 @@ import (
 
 type TeamRepository interface {
 	Repository[e.Team, v.ID]
-	FindTeamByName(name string) (*e.Team, error)
+	FindTeamByName(teamName string) (*e.Team, error)
 }

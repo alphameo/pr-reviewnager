@@ -7,5 +7,4 @@ import (
 
 type UserRepository interface {
 	Repository[e.User, v.ID]
-	FindActiveUsersByTeamID(teamID v.ID) ([]e.User, error)
 }
