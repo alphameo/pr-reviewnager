@@ -5,7 +5,7 @@ import (
 	v "github.com/alphameo/pr-reviewnager/internal/domain/valueobjects"
 )
 
-type TeamRepository interface {
-	Repository[e.Team, v.ID]
-	FindTeamByName(name string) (*e.Team, error)
+type UserTeamRepository interface {
+	CreateTeamAndModifyUsers(team *e.Team, users []e.User) error
+	FindTeamByTeammateID(teamateID v.ID) (*e.Team, error)
 }
