@@ -9,5 +9,5 @@ type PullRequestService interface {
 	CreatePullRequest(pullRequest *dto.PullRequestDTO) error
 	MarkAsMerged(pullRequestID v.ID) (*dto.PullRequestDTO, error)
 	ReassignReviewer(userID v.ID, pullRequestID v.ID) (*dto.PullRequestWithNewReviewerIDDTO, error)
-	FindPullRequestsForReviewerWithUserID(userID v.ID) ([]dto.PullRequestDTO, error)
+	FindPullRequestsByReviewer(userID v.ID) ([]dto.PullRequestDTO, error)
 }
