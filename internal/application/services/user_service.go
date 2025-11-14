@@ -3,6 +3,7 @@ package services
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/alphameo/pr-reviewnager/internal/application/dto"
 	"github.com/alphameo/pr-reviewnager/internal/application/mappers"
@@ -66,7 +67,12 @@ func (s *DefaultUserService) SetUserActiveByID(userID v.ID, active bool) error {
 	if err != nil {
 		return err
 	}
+
+	if user == nil {
+		return fmt.Errorf("no such user with id=%d", userID)
+	}
 	user.SetActive(active)
+
 	err = s.userRepo.Update(user)
 	if err != nil {
 		return err
