@@ -54,7 +54,7 @@ func (s *DefaultTeamService) CreateTeamWithUsers(teamDTO dto.CreateTeamWithUsers
 	}
 
 	team := entities.NewTeam(teamDTO.TeamName)
-	users, err := mappers.UserDTOsToEntities(teamDTO.TeamUsers)
+	users, err := mappers.UsersToEntities(teamDTO.TeamUsers)
 	if err != nil {
 		return err
 	}
@@ -76,6 +76,9 @@ func (s *DefaultTeamService) FindTeamByName(name string) (*dto.TeamDTO, error) {
 	if team == nil {
 		return nil, nil
 	}
-	dto := mappers.TeamToDTO(team)
+	dto, err := mappers.TeamToDTO(team)
+	if err != nil {
+		return nil, err
+	}
 	return dto, nil
 }

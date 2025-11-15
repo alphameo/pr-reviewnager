@@ -34,7 +34,7 @@ func (s *DefaultUserService) RegisterUser(user *dto.UserDTO) error {
 	if user == nil {
 		return errors.New("user cannot be nil")
 	}
-	entity, err := mappers.UserDTOToEntity(user)
+	entity, err := mappers.UserToEntity(user)
 	if err != nil {
 		return err
 	}
@@ -54,12 +54,12 @@ func (s *DefaultUserService) UnregisterUserByID(userID v.ID) error {
 	return nil
 }
 
-func (s *DefaultUserService) ListUsers() ([]dto.UserDTO, error) {
+func (s *DefaultUserService) ListUsers() ([]*dto.UserDTO, error) {
 	users, err := s.userRepo.FindAll()
 	if err != nil {
 		return nil, err
 	}
-	return mappers.UsersToDTOs(users), nil
+	return mappers.UsersToDTOs(users)
 }
 
 func (s *DefaultUserService) SetUserActiveByID(userID v.ID, active bool) error {

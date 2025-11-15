@@ -41,7 +41,7 @@ func NewDefaultPullRequestService(
 }
 
 func (s *DefaultPullRequestService) CreatePullRequest(pullRequest *dto.PullRequestDTO) error {
-	entity, err := mappers.PullRequestDTOToEntity(pullRequest)
+	entity, err := mappers.PullRequestToEntity(pullRequest)
 	if err != nil {
 		return err
 	}
@@ -58,28 +58,34 @@ func (s *DefaultPullRequestService) MarkAsMerged(pullRequestID v.ID) (*dto.PullR
 	if err != nil {
 		return nil, err
 	}
-	dto := mappers.PullRequestToDTO(pr)
+	dto, err := mappers.PullRequestToDTO(pr)
+	if err != nil {
+		return nil, err
+	}
 	return dto, nil
 }
 
 func (s *DefaultPullRequestService) ReassignReviewer(userID v.ID, pullRequestID v.ID) (*dto.PullRequestWithNewReviewerIDDTO, error) {
-	newReviewerID, err := s.prDomainServ.ReassignReviewer(userID, pullRequestID)
+	newReviewer, err := s.prDomainServ.ReassignReviewer(userID, pullRequestID)
 	if err != nil {
 		return nil, err
 	}
-
+	d, err := mappers.PullRequestToDTO(&newReviewer.PullRequest)
+	if err != nil {
+		return nil, err
+	}
 	response := dto.PullRequestWithNewReviewerIDDTO{
-		PullRequest:       *mappers.PullRequestToDTO(&newReviewerID.PullRequest),
-		NewReviewerUserID: newReviewerID.NewReviewerID,
+		PullRequest:       d,
+		NewReviewerUserID: newReviewer.NewReviewerID,
 	}
 	return &response, nil
 }
 
-func (s *DefaultPullRequestService) FindPullRequestsByReviewer(userID v.ID) ([]dto.PullRequestDTO, error) {
-	pr, err := s.prRepo.FindPullRequestsByReviewer(userID)
+func (s *DefaultPullRequestService) FindPullRequestsByReviewer(userID v.ID) ([]*dto.PullRequestDTO, error) {
+	prs, err := s.prRepo.FindPullRequestsByReviewer(userID)
 	if err != nil {
 		return nil, err
 	}
 
-	return mappers.PullRequestsToDTOs(pr), nil
+	return mappers.PullRequestsToDTOs(prs)
 }
