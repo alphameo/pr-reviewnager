@@ -24,6 +24,6 @@ func NewPRStatusFromString(value string) (PRStatus, error) {
 	}
 }
 
-func (s *PRStatus) String() string {
-	return string(*s)
+func (s PRStatus) String() string {
+	return string(s)
 }

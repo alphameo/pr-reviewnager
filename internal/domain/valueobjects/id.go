@@ -21,6 +21,6 @@ func NewIDFromString(str string) (ID, error) {
 	return id, nil
 }
 
-func (id *ID) String() string {
-	return uuid.UUID.String(uuid.UUID(*id))
+func (id ID) String() string {
+	return uuid.UUID.String(uuid.UUID(id))
 }
