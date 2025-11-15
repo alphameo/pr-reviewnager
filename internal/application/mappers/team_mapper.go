@@ -7,26 +7,21 @@ import (
 	e "github.com/alphameo/pr-reviewnager/internal/domain/entities"
 )
 
-func TeamToDTO(entity *e.Team) *dto.TeamDTO {
+func TeamToDTO(entity *e.Team) (*dto.TeamDTO, error) {
+	if entity == nil {
+		return nil, errors.New("entity cannot be nil")
+	}
+
 	dto := dto.TeamDTO{
 		ID:      entity.ID(),
 		Name:    entity.Name(),
 		UserIDs: entity.UserIDs(),
 	}
 
-	return &dto
+	return &dto, nil
 }
 
-func TeamsToDTOs(entities []e.Team) []dto.TeamDTO {
-	dtos := make([]dto.TeamDTO, len(entities))
-	for i, entity := range entities {
-		dtos[i] = *TeamToDTO(&entity)
-	}
-
-	return dtos
-}
-
-func TeamDTOToEntity(dto *dto.TeamDTO) (*e.Team, error) {
+func TeamToEntity(dto *dto.TeamDTO) (*e.Team, error) {
 	if dto == nil {
 		return nil, errors.New("dto cannot be nil")
 	}
@@ -39,15 +34,10 @@ func TeamDTOToEntity(dto *dto.TeamDTO) (*e.Team, error) {
 	return entity, nil
 }
 
-func TeamDTOsToEntities(dtos []dto.TeamDTO) ([]e.Team, error) {
-	entities := make([]e.Team, len(dtos))
-	for i, dto := range dtos {
-		entity, err := TeamDTOToEntity(&dto)
-		if err != nil {
-			return nil, err
-		}
-		entities[i] = *entity
-	}
+func TeamsToDTOs(entities []*e.Team) ([]*dto.TeamDTO, error) {
+	return EntitiesToDTOs(entities, TeamToDTO)
+}
 
-	return entities, nil
+func TeamsToEntities(dtos []*dto.TeamDTO) ([]*e.Team, error) {
+	return DTOsToEntities(dtos, TeamToEntity)
 }

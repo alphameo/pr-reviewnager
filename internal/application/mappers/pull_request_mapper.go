@@ -9,7 +9,11 @@ import (
 	v "github.com/alphameo/pr-reviewnager/internal/domain/valueobjects"
 )
 
-func PullRequestToDTO(entity *e.PullRequest) *dto.PullRequestDTO {
+func PullRequestToDTO(entity *e.PullRequest) (*dto.PullRequestDTO, error) {
+	if entity == nil {
+		return nil, errors.New("entity cannot be nil")
+	}
+
 	status := entity.Status()
 	dto := dto.PullRequestDTO{
 		ID:          entity.ID(),
@@ -20,19 +24,10 @@ func PullRequestToDTO(entity *e.PullRequest) *dto.PullRequestDTO {
 		ReviewerIDs: entity.ReviewerIDs(),
 	}
 
-	return &dto
+	return &dto, nil
 }
 
-func PullRequestsToDTOs(entities []e.PullRequest) []dto.PullRequestDTO {
-	dtos := make([]dto.PullRequestDTO, len(entities))
-	for i, entity := range entities {
-		dtos[i] = *PullRequestToDTO(&entity)
-	}
-
-	return dtos
-}
-
-func PullRequestDTOToEntity(dto *dto.PullRequestDTO) (*e.PullRequest, error) {
+func PullRequestToEntity(dto *dto.PullRequestDTO) (*e.PullRequest, error) {
 	if dto == nil {
 		return nil, errors.New("dto cannot be nil")
 	}
@@ -49,15 +44,10 @@ func PullRequestDTOToEntity(dto *dto.PullRequestDTO) (*e.PullRequest, error) {
 	return entity, nil
 }
 
-func PullRequestDTOsToEntities(dtos []dto.PullRequestDTO) ([]e.PullRequest, error) {
-	entities := make([]e.PullRequest, len(dtos))
-	for i, dto := range dtos {
-		entity, err := PullRequestDTOToEntity(&dto)
-		if err != nil {
-			return nil, err
-		}
-		entities[i] = *entity
-	}
+func PullRequestsToDTOs(entities []*e.PullRequest) ([]*dto.PullRequestDTO, error) {
+	return EntitiesToDTOs(entities, PullRequestToDTO)
+}
 
-	return entities, nil
+func PullRequestsToEntities(dtos []*dto.PullRequestDTO) ([]*e.PullRequest, error) {
+	return DTOsToEntities(dtos, PullRequestToEntity)
 }

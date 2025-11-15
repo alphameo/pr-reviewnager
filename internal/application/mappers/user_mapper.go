@@ -7,48 +7,30 @@ import (
 	e "github.com/alphameo/pr-reviewnager/internal/domain/entities"
 )
 
-func UserToDTO(entity *e.User) *dto.UserDTO {
-	dto := dto.UserDTO{
-		ID:     entity.ID(),
-		Name:   entity.Name(),
-		Active: entity.Active(),
+func UserToDTO(user *e.User) (*dto.UserDTO, error) {
+	if user == nil {
+		return nil, errors.New("entity cannot be nil")
 	}
 
-	return &dto
+	return &dto.UserDTO{
+		ID:     user.ID(),
+		Name:   user.Name(),
+		Active: user.Active(),
+	}, nil
 }
 
-func UsersToDTOs(entities []e.User) []dto.UserDTO {
-	dtos := make([]dto.UserDTO, len(entities))
-	for i, entity := range entities {
-		dtos[i] = *UserToDTO(&entity)
-	}
-
-	return dtos
-}
-
-func UserDTOToEntity(dto *dto.UserDTO) (*e.User, error) {
+func UserToEntity(dto *dto.UserDTO) (*e.User, error) {
 	if dto == nil {
 		return nil, errors.New("dto cannot be nil")
 	}
 
-	entity := e.NewUserWithID(
-		dto.ID,
-		dto.Name,
-		dto.Active,
-	)
-
-	return entity, nil
+	return e.NewUserWithID(dto.ID, dto.Name, dto.Active), nil
 }
 
-func UserDTOsToEntities(dtos []dto.UserDTO) ([]e.User, error) {
-	entities := make([]e.User, len(dtos))
-	for i, dto := range dtos {
-		entity, err := UserDTOToEntity(&dto)
-		if err != nil {
-			return nil, err
-		}
-		entities[i] = *entity
-	}
+func UsersToDTOs(users []*e.User) ([]*dto.UserDTO, error) {
+	return EntitiesToDTOs(users, UserToDTO)
+}
 
-	return entities, nil
+func UsersToEntities(dtos []*dto.UserDTO) ([]*e.User, error) {
+	return DTOsToEntities(dtos, UserToEntity)
 }
