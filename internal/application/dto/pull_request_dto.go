@@ -16,6 +16,6 @@ type PullRequestDTO struct {
 }
 
 type PullRequestWithNewReviewerIDDTO struct {
-	PullRequest       PullRequestDTO
+	PullRequest       *PullRequestDTO
 	NewReviewerUserID v.ID
 }

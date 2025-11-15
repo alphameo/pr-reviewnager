@@ -10,5 +10,5 @@ type TeamDTO struct {
 
 type CreateTeamWithUsersDTO struct {
 	TeamName  string
-	TeamUsers []UserDTO
+	TeamUsers []*UserDTO
 }
