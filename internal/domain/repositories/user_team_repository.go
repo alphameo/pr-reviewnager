@@ -6,7 +6,7 @@ import (
 )
 
 type UserTeamRepository interface {
-	CreateTeamAndModifyUsers(team *e.Team, users []e.User) error
+	CreateTeamAndModifyUsers(team *e.Team, users []*e.User) error
 	FindTeamByTeammateID(userID v.ID) (*e.Team, error)
-	FindActiveUsersByTeamID(teamID v.ID) ([]e.User, error)
+	FindActiveUsersByTeamID(teamID v.ID) ([]*e.User, error)
 }

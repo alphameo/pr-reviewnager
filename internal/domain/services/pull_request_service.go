@@ -121,7 +121,7 @@ func (s *DefaultPullRequestDomainService) ReassignReviewer(userID v.ID, pullRequ
 	return &resp, nil
 }
 
-func chooseRandomUser(availableUsers []e.User, except ...v.ID) e.User {
+func chooseRandomUser(availableUsers []*e.User, except ...v.ID) *e.User {
 	for i, u := range availableUsers {
 		for _, exceptionalU := range except {
 			if u.ID() == exceptionalU {
@@ -134,7 +134,7 @@ func chooseRandomUser(availableUsers []e.User, except ...v.ID) e.User {
 	return availableUsers[idx]
 }
 
-func chooseRandomUsers(availableUsers []e.User, maxCount int, except ...v.ID) []e.User {
+func chooseRandomUsers(availableUsers []*e.User, maxCount int, except ...v.ID) []*e.User {
 	for i, u := range availableUsers {
 		for _, exceptionalU := range except {
 			if u.ID() == exceptionalU {
@@ -144,7 +144,7 @@ func chooseRandomUsers(availableUsers []e.User, maxCount int, except ...v.ID) []
 		}
 	}
 
-	reviewers := make([]e.User, 0, maxCount)
+	reviewers := make([]*e.User, 0, maxCount)
 	if len(availableUsers) <= maxCount {
 		for i := range min(maxCount, len(availableUsers)) {
 			reviewers = append(reviewers, availableUsers[i])
