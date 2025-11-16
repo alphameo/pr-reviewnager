@@ -13,16 +13,17 @@ import (
 )
 
 const createPullRequest = `-- name: CreatePullRequest :exec
-INSERT INTO pull_request (id, title, author_id, status, merged_at)
-VALUES ($1, $2, $3, $4, $5)
+INSERT INTO pull_request (id, title, author_id, created_at, status, merged_at)
+VALUES ($1, $2, $3, $4, $5, $6)
 `
 
 type CreatePullRequestParams struct {
-	ID       uuid.UUID        `db:"id" json:"id"`
-	Title    string           `db:"title" json:"title"`
-	AuthorID uuid.UUID        `db:"author_id" json:"author_id"`
-	Status   string           `db:"status" json:"status"`
-	MergedAt pgtype.Timestamp `db:"merged_at" json:"merged_at"`
+	ID        uuid.UUID        `db:"id" json:"id"`
+	Title     string           `db:"title" json:"title"`
+	AuthorID  uuid.UUID        `db:"author_id" json:"author_id"`
+	CreatedAt pgtype.Timestamp `db:"created_at" json:"created_at"`
+	Status    string           `db:"status" json:"status"`
+	MergedAt  pgtype.Timestamp `db:"merged_at" json:"merged_at"`
 }
 
 func (q *Queries) CreatePullRequest(ctx context.Context, arg CreatePullRequestParams) error {
@@ -30,6 +31,7 @@ func (q *Queries) CreatePullRequest(ctx context.Context, arg CreatePullRequestPa
 		arg.ID,
 		arg.Title,
 		arg.AuthorID,
+		arg.CreatedAt,
 		arg.Status,
 		arg.MergedAt,
 	)
@@ -47,7 +49,7 @@ func (q *Queries) DeletePullRequest(ctx context.Context, id uuid.UUID) error {
 }
 
 const getPullRequest = `-- name: GetPullRequest :one
-SELECT id, title, author_id, status, merged_at FROM pull_request WHERE id = $1
+SELECT id, title, author_id, created_at, status, merged_at FROM pull_request WHERE id = $1
 `
 
 func (q *Queries) GetPullRequest(ctx context.Context, id uuid.UUID) (PullRequest, error) {
@@ -57,6 +59,7 @@ func (q *Queries) GetPullRequest(ctx context.Context, id uuid.UUID) (PullRequest
 		&i.ID,
 		&i.Title,
 		&i.AuthorID,
+		&i.CreatedAt,
 		&i.Status,
 		&i.MergedAt,
 	)
@@ -64,7 +67,7 @@ func (q *Queries) GetPullRequest(ctx context.Context, id uuid.UUID) (PullRequest
 }
 
 const getPullRequests = `-- name: GetPullRequests :many
-SELECT id, title, author_id, status, merged_at FROM pull_request
+SELECT id, title, author_id, created_at, status, merged_at FROM pull_request
 `
 
 func (q *Queries) GetPullRequests(ctx context.Context) ([]PullRequest, error) {
@@ -80,6 +83,7 @@ func (q *Queries) GetPullRequests(ctx context.Context) ([]PullRequest, error) {
 			&i.ID,
 			&i.Title,
 			&i.AuthorID,
+			&i.CreatedAt,
 			&i.Status,
 			&i.MergedAt,
 		); err != nil {
@@ -95,16 +99,17 @@ func (q *Queries) GetPullRequests(ctx context.Context) ([]PullRequest, error) {
 
 const updatePullRequest = `-- name: UpdatePullRequest :exec
 UPDATE pull_request
-SET title = $2, author_id = $3, status = $4, merged_at = $5
+SET title = $2, author_id = $3, created_at = $4, status = $5, merged_at = $6
 WHERE id = $1
 `
 
 type UpdatePullRequestParams struct {
-	ID       uuid.UUID        `db:"id" json:"id"`
-	Title    string           `db:"title" json:"title"`
-	AuthorID uuid.UUID        `db:"author_id" json:"author_id"`
-	Status   string           `db:"status" json:"status"`
-	MergedAt pgtype.Timestamp `db:"merged_at" json:"merged_at"`
+	ID        uuid.UUID        `db:"id" json:"id"`
+	Title     string           `db:"title" json:"title"`
+	AuthorID  uuid.UUID        `db:"author_id" json:"author_id"`
+	CreatedAt pgtype.Timestamp `db:"created_at" json:"created_at"`
+	Status    string           `db:"status" json:"status"`
+	MergedAt  pgtype.Timestamp `db:"merged_at" json:"merged_at"`
 }
 
 func (q *Queries) UpdatePullRequest(ctx context.Context, arg UpdatePullRequestParams) error {
@@ -112,6 +117,7 @@ func (q *Queries) UpdatePullRequest(ctx context.Context, arg UpdatePullRequestPa
 		arg.ID,
 		arg.Title,
 		arg.AuthorID,
+		arg.CreatedAt,
 		arg.Status,
 		arg.MergedAt,
 	)

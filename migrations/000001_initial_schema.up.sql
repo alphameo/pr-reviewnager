@@ -29,6 +29,7 @@ CREATE TABLE pull_request (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     title VARCHAR NOT NULL,
     author_id UUID NOT NULL,
+    created_at TIMESTAMP NOT NULL,
     status pull_request_status NOT NULL,
     merged_at TIMESTAMP,
     FOREIGN KEY (author_id) REFERENCES "user"(id)

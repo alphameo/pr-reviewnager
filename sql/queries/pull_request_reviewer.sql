@@ -28,6 +28,7 @@ SELECT
     pr.id,
     pr.title,
     pr.author_id,
+    pr.created_at,
     pr.status,
     pr.merged_at,
     prr.reviewer_id
@@ -43,6 +44,7 @@ SELECT
     pr.id,
     pr.title,
     pr.author_id,
+    pr.created_at,
     pr.status,
     pr.merged_at,
     prr.reviewer_id
@@ -60,6 +62,7 @@ SELECT
     pr.id,
     pr.title,
     pr.author_id,
+    pr.created_at,
     pr.status,
     pr.merged_at,
     prr.reviewer_id

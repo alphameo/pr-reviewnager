@@ -28,7 +28,7 @@ type Querier interface {
 	GetPullRequestReviewerReviewerIDs(ctx context.Context, pullRequestID uuid.UUID) ([]uuid.UUID, error)
 	GetPullRequestWithReviewersByID(ctx context.Context, id uuid.UUID) ([]GetPullRequestWithReviewersByIDRow, error)
 	GetPullRequests(ctx context.Context) ([]PullRequest, error)
-	GetPullRequestsByReviewer(ctx context.Context, reviewerID uuid.UUID) ([]PullRequest, error)
+	GetPullRequestsByReviewer(ctx context.Context, reviewerID uuid.UUID) ([]GetPullRequestsByReviewerRow, error)
 	GetPullRequestsWithReviewers(ctx context.Context) ([]GetPullRequestsWithReviewersRow, error)
 	GetPullRequestsWithReviewersByReviewerID(ctx context.Context, reviewerID uuid.UUID) ([]GetPullRequestsWithReviewersByReviewerIDRow, error)
 	GetTeam(ctx context.Context, id uuid.UUID) (Team, error)

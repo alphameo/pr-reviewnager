@@ -15,20 +15,22 @@ type PullRequest struct {
 	id          v.ID
 	title       string
 	authorID    v.ID
+	createdAt   time.Time
 	status      v.PRStatus
 	mergedAt    *time.Time
 	reviewerIDs []v.ID
 }
 
 func NewPullRequest(title string, authorID v.ID) *PullRequest {
-	return NewPullRequestWithID(v.NewID(), title, authorID, v.OPEN, nil)
+	return NewExistingPullRequest(v.NewID(), title, authorID, time.Now(), v.OPEN, nil)
 }
 
-func NewPullRequestWithID(id v.ID, title string, authorID v.ID, status v.PRStatus, mergedAt *time.Time) *PullRequest {
+func NewExistingPullRequest(id v.ID, title string, authorID v.ID, createdAt time.Time, status v.PRStatus, mergedAt *time.Time) *PullRequest {
 	p := PullRequest{
 		id:          id,
 		title:       title,
 		authorID:    authorID,
+		createdAt:   createdAt,
 		status:      status,
 		mergedAt:    mergedAt,
 		reviewerIDs: make([]v.ID, 0, MaxCountOfReviewers),
@@ -54,7 +56,15 @@ func (p *PullRequest) Status() v.PRStatus {
 }
 
 func (p *PullRequest) MergedAt() *time.Time {
-	return p.mergedAt
+	if p.mergedAt == nil {
+		return nil
+	}
+	copy := *p.mergedAt
+	return &copy
+}
+
+func (p *PullRequest) CreatedAt() time.Time {
+	return p.createdAt
 }
 
 func (p *PullRequest) ReviewerIDs() []v.ID {

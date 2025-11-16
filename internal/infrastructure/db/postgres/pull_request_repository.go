@@ -100,10 +100,11 @@ func (r *PullRequestRepository) FindByID(id v.ID) (*e.PullRequest, error) {
 				mergedAt = &t
 			}
 
-			pr = e.NewPullRequestWithID(
+			pr = e.NewExistingPullRequest(
 				v.ID(prID),
 				row.Title,
 				v.ID(row.AuthorID),
+				TimeFromTimestamp(row.CreatedAt),
 				status,
 				mergedAt,
 			)
@@ -162,10 +163,11 @@ func (r *PullRequestRepository) FindAll() ([]*e.PullRequest, error) {
 				mergedAt = &t
 			}
 
-			pr = e.NewPullRequestWithID(
+			pr = e.NewExistingPullRequest(
 				v.ID(prID),
 				row.Title,
 				v.ID(row.AuthorID),
+				TimeFromTimestamp(row.CreatedAt),
 				status,
 				mergedAt,
 			)
@@ -279,10 +281,11 @@ func (r *PullRequestRepository) FindPullRequestsByReviewer(userID v.ID) ([]*e.Pu
 				mergedAt = &t
 			}
 
-			pr = e.NewPullRequestWithID(
+			pr = e.NewExistingPullRequest(
 				v.ID(prID),
 				row.Title,
 				v.ID(row.AuthorID),
+				TimeFromTimestamp((row.CreatedAt)),
 				status,
 				mergedAt,
 			)

@@ -55,11 +55,12 @@ func (ns NullPullRequestStatus) Value() (driver.Value, error) {
 }
 
 type PullRequest struct {
-	ID       uuid.UUID        `db:"id" json:"id"`
-	Title    string           `db:"title" json:"title"`
-	AuthorID uuid.UUID        `db:"author_id" json:"author_id"`
-	Status   string           `db:"status" json:"status"`
-	MergedAt pgtype.Timestamp `db:"merged_at" json:"merged_at"`
+	ID        uuid.UUID        `db:"id" json:"id"`
+	Title     string           `db:"title" json:"title"`
+	AuthorID  uuid.UUID        `db:"author_id" json:"author_id"`
+	CreatedAt pgtype.Timestamp `db:"created_at" json:"created_at"`
+	Status    string           `db:"status" json:"status"`
+	MergedAt  pgtype.Timestamp `db:"merged_at" json:"merged_at"`
 }
 
 type PullRequestReviewer struct {

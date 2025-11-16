@@ -10,6 +10,7 @@ type PullRequestDTO struct {
 	ID          v.ID
 	Title       string
 	AuthorID    v.ID
+	CreatedAt time.Time
 	Status      string
 	MergedAt    *time.Time
 	ReviewerIDs []v.ID

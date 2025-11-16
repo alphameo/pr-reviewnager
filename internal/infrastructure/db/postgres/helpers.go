@@ -35,10 +35,11 @@ func PullRequestToEntity(dbPR *db.PullRequest) (*e.PullRequest, error) {
 		mergedAt = nil
 	}
 
-	pr := e.NewPullRequestWithID(
+	pr := e.NewExistingPullRequest(
 		v.ID(dbPR.ID),
 		dbPR.Title,
 		v.ID(dbPR.AuthorID),
+		TimeFromTimestamp(dbPR.CreatedAt),
 		status,
 		mergedAt,
 	)

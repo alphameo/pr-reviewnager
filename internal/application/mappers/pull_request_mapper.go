@@ -18,6 +18,7 @@ func PullRequestToDTO(entity *e.PullRequest) (*dto.PullRequestDTO, error) {
 		ID:          entity.ID(),
 		Title:       entity.Title(),
 		AuthorID:    entity.AuthorID(),
+		CreatedAt:   entity.CreatedAt(),
 		Status:      entity.Status().String(),
 		MergedAt:    entity.MergedAt(),
 		ReviewerIDs: entity.ReviewerIDs(),
@@ -35,7 +36,7 @@ func PullRequestToEntity(dto *dto.PullRequestDTO) (*e.PullRequest, error) {
 	if err != nil {
 		return nil, err
 	}
-	entity := e.NewPullRequestWithID(dto.ID, dto.Title, dto.AuthorID, status, dto.MergedAt)
+	entity := e.NewExistingPullRequest(dto.ID, dto.Title, dto.AuthorID, dto.CreatedAt, status, dto.MergedAt)
 	for _, id := range dto.ReviewerIDs {
 		entity.AssignReviewer(id)
 	}
