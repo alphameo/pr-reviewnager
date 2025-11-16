@@ -3,6 +3,7 @@ package postgres
 import (
 	"context"
 	"errors"
+	"time"
 
 	e "github.com/alphameo/pr-reviewnager/internal/domain/entities"
 	v "github.com/alphameo/pr-reviewnager/internal/domain/valueobjects"
@@ -82,9 +83,48 @@ func (r *PullRequestRepository) FindByID(id v.ID) (*e.PullRequest, error) {
 		return nil, nil
 	}
 
-	prs, err := aggregatePRsFromSinglePRRows(rows)
-	if err != nil {
-		return nil, err
+	prMap := make(map[uuid.UUID]*e.PullRequest)
+
+	for _, row := range rows {
+		prID := uuid.UUID(row.ID)
+		pr, exists := prMap[prID]
+
+		if !exists {
+			status, err := v.NewPRStatusFromString(row.Status)
+			if err != nil {
+				return nil, err
+			}
+			var mergedAt *time.Time
+			if row.MergedAt.Valid {
+				t := TimeFromTimestamp(row.MergedAt)
+				mergedAt = &t
+			}
+
+			pr = e.NewPullRequestWithID(
+				v.ID(prID),
+				row.Title,
+				v.ID(row.AuthorID),
+				status,
+				mergedAt,
+			)
+			prMap[prID] = pr
+		}
+
+		if row.ReviewerID.Valid {
+			reviewerID, err := v.NewIDFromString(row.ReviewerID.String())
+			if err != nil {
+				return nil, err
+			}
+			err = pr.AssignReviewer(reviewerID)
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
+
+	prs := make([]*e.PullRequest, 0, len(prMap))
+	for _, pr := range prMap {
+		prs = append(prs, pr)
 	}
 
 	if len(prs) == 0 {
@@ -105,9 +145,48 @@ func (r *PullRequestRepository) FindAll() ([]*e.PullRequest, error) {
 		return nil, err
 	}
 
-	prs, err := aggregatePRsFromRows(rows)
-	if err != nil {
-		return nil, err
+	prMap := make(map[uuid.UUID]*e.PullRequest)
+
+	for _, row := range rows {
+		prID := uuid.UUID(row.ID)
+		pr, exists := prMap[prID]
+
+		if !exists {
+			status, err := v.NewPRStatusFromString(row.Status)
+			if err != nil {
+				return nil, err
+			}
+			var mergedAt *time.Time
+			if row.MergedAt.Valid {
+				t := TimeFromTimestamp(row.MergedAt)
+				mergedAt = &t
+			}
+
+			pr = e.NewPullRequestWithID(
+				v.ID(prID),
+				row.Title,
+				v.ID(row.AuthorID),
+				status,
+				mergedAt,
+			)
+			prMap[prID] = pr
+		}
+
+		if row.ReviewerID.Valid {
+			reviewerID, err := v.NewIDFromString(row.ReviewerID.String())
+			if err != nil {
+				return nil, err
+			}
+			err = pr.AssignReviewer(reviewerID)
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
+
+	prs := make([]*e.PullRequest, 0, len(prMap))
+	for _, pr := range prMap {
+		prs = append(prs, pr)
 	}
 
 	return prs, nil
@@ -183,9 +262,48 @@ func (r *PullRequestRepository) FindPullRequestsByReviewer(userID v.ID) ([]*e.Pu
 		return nil, err
 	}
 
-	prs, err := aggregatePRsFromReviewerRows(rows)
-	if err != nil {
-		return nil, err
+	prMap := make(map[uuid.UUID]*e.PullRequest)
+
+	for _, row := range rows {
+		prID := uuid.UUID(row.ID)
+		pr, exists := prMap[prID]
+
+		if !exists {
+			status, err := v.NewPRStatusFromString(row.Status)
+			if err != nil {
+				return nil, err
+			}
+			var mergedAt *time.Time
+			if row.MergedAt.Valid {
+				t := TimeFromTimestamp(row.MergedAt)
+				mergedAt = &t
+			}
+
+			pr = e.NewPullRequestWithID(
+				v.ID(prID),
+				row.Title,
+				v.ID(row.AuthorID),
+				status,
+				mergedAt,
+			)
+			prMap[prID] = pr
+		}
+
+		if row.ReviewerID.Valid {
+			reviewerID, err := v.NewIDFromString(row.ReviewerID.String())
+			if err != nil {
+				return nil, err
+			}
+			err = pr.AssignReviewer(reviewerID)
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
+
+	prs := make([]*e.PullRequest, 0, len(prMap))
+	for _, pr := range prMap {
+		prs = append(prs, pr)
 	}
 
 	return prs, nil
