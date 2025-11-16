@@ -19,7 +19,7 @@ WHERE id = $1;
 -- name: DeleteUser :exec
 DELETE FROM "user" WHERE id = $1;
 
--- name: UpsetUser :exec
+-- name: UpsertUser :exec
 INSERT INTO "user" (id, name, active) 
 VALUES ($1, $2, $3)
 ON CONFLICT (id)

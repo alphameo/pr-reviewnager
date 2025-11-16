@@ -46,7 +46,7 @@ func (r *UserRepository) FindByID(id v.ID) (*e.User, error) {
 	ctx := context.Background()
 
 	user, err := r.queries.GetUser(ctx, uuid.UUID(id))
-	if err != pgx.ErrNoRows {
+	if err == pgx.ErrNoRows {
 		return nil, nil
 	} else if err != nil {
 		return nil, err
@@ -61,9 +61,7 @@ func (r *UserRepository) FindAll() ([]*e.User, error) {
 	ctx := context.Background()
 
 	users, err := r.queries.GetUsers(ctx)
-	if err == pgx.ErrNoRows {
-		return []*e.User{}, nil
-	} else if err != nil {
+	if err != nil {
 		return nil, err
 	}
 

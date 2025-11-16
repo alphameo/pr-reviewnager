@@ -45,7 +45,7 @@ type Querier interface {
 	UpdatePullRequestStatus(ctx context.Context, arg UpdatePullRequestStatusParams) error
 	UpdateTeam(ctx context.Context, arg UpdateTeamParams) error
 	UpdateUser(ctx context.Context, arg UpdateUserParams) error
-	UpsetUser(ctx context.Context, arg UpsetUserParams) error
+	UpsertUser(ctx context.Context, arg UpsertUserParams) error
 }
 
 var _ Querier = (*Queries)(nil)

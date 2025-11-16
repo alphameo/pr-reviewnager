@@ -99,7 +99,7 @@ func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) error {
 	return err
 }
 
-const upsetUser = `-- name: UpsetUser :exec
+const upsertUser = `-- name: UpsertUser :exec
 INSERT INTO "user" (id, name, active) 
 VALUES ($1, $2, $3)
 ON CONFLICT (id)
@@ -108,13 +108,13 @@ DO UPDATE SET
     active = EXCLUDED.active
 `
 
-type UpsetUserParams struct {
+type UpsertUserParams struct {
 	ID     uuid.UUID `db:"id" json:"id"`
 	Name   string    `db:"name" json:"name"`
 	Active bool      `db:"active" json:"active"`
 }
 
-func (q *Queries) UpsetUser(ctx context.Context, arg UpsetUserParams) error {
-	_, err := q.db.Exec(ctx, upsetUser, arg.ID, arg.Name, arg.Active)
+func (q *Queries) UpsertUser(ctx context.Context, arg UpsertUserParams) error {
+	_, err := q.db.Exec(ctx, upsertUser, arg.ID, arg.Name, arg.Active)
 	return err
 }
