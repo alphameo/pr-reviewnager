@@ -15,7 +15,7 @@ import (
 type PullRequestDomainService interface {
 	// CreateWithReviewers() creates a new pull request and automatically assigns
 	// 2 reviewers by randomly selecting from the author's team.
-	CreateWithReviewers(pullRequest *e.PullRequest) error
+	CreateWithReviewers(pullRequest *e.PullRequest) (*e.PullRequest, error)
 
 	// ReassignReviewer() unassign user-reviewer with given id and assigns another from his team, excluding
 	// him and pr author. After, method returns id of new user-reviewer and pull request
@@ -53,30 +53,29 @@ func NewDefaultPullRequestDomainService(
 	return &s, nil
 }
 
-func (s *DefaultPullRequestDomainService) CreateWithReviewers(pullRequest *e.PullRequest) error {
+func (s *DefaultPullRequestDomainService) CreateWithReviewers(pullRequest *e.PullRequest) (*e.PullRequest, error) {
 	authorID := pullRequest.AuthorID()
 	_, err := s.userRepo.FindByID(authorID)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	team, err := s.teamRepo.FindTeamByTeammateID(authorID)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	availableUsers, err := s.teamRepo.FindActiveUsersByTeamID(team.ID())
 	if err != nil {
-		return err
+		return nil, err
 	}
 	reviewers := chooseRandomUsers(availableUsers, e.MaxCountOfReviewers, authorID)
-
 	for _, u := range reviewers {
 		pullRequest.AssignReviewer(u.ID())
 	}
 	err = s.prRepo.Create(pullRequest)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+	return pullRequest, nil
 }
 
 type ReassignReviewerResponse struct {
