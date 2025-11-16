@@ -23,8 +23,8 @@ type DefaultPullRequestService struct {
 }
 
 func NewDefaultPullRequestService(
-	pullRequestDomainService *s.PullRequestDomainService,
-	pullRequestRepository *r.PullRequestRepository,
+	pullRequestDomainService s.PullRequestDomainService,
+	pullRequestRepository r.PullRequestRepository,
 ) (*DefaultPullRequestService, error) {
 	if pullRequestDomainService == nil {
 		return nil, errors.New("pullRequestDomainService cannot bi nil")
@@ -34,8 +34,8 @@ func NewDefaultPullRequestService(
 	}
 
 	s := DefaultPullRequestService{
-		prDomainServ: *pullRequestDomainService,
-		prRepo:       *pullRequestRepository,
+		prDomainServ: pullRequestDomainService,
+		prRepo:       pullRequestRepository,
 	}
 	return &s, nil
 }

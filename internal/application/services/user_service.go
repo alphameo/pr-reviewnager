@@ -22,11 +22,11 @@ type DefaultUserService struct {
 	userRepo r.UserRepository
 }
 
-func NewDefaulUserService(userRepository *r.UserRepository) (*DefaultUserService, error) {
+func NewDefaulUserService(userRepository r.UserRepository) (*DefaultUserService, error) {
 	if userRepository == nil {
 		return nil, errors.New("userRepository cannot be nil")
 	}
-	s := DefaultUserService{userRepo: *userRepository}
+	s := DefaultUserService{userRepo: userRepository}
 	return &s, nil
 }
 

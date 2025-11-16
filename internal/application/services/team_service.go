@@ -21,8 +21,8 @@ type DefaultTeamService struct {
 }
 
 func NewDefaultTeamService(
-	teamRepository *r.TeamRepository,
-	userRepository *r.UserRepository,
+	teamRepository r.TeamRepository,
+	userRepository r.UserRepository,
 ) (*DefaultTeamService, error) {
 	if teamRepository == nil {
 		return nil, errors.New("teamRepository cannot be nil")
@@ -32,8 +32,8 @@ func NewDefaultTeamService(
 	}
 
 	s := DefaultTeamService{
-		teamRepo: *teamRepository,
-		userRepo: *userRepository,
+		teamRepo: teamRepository,
+		userRepo: userRepository,
 	}
 	return &s, nil
 }
