@@ -26,15 +26,15 @@ type PullRequestDomainService interface {
 }
 
 type DefaultPullRequestDomainService struct {
-	userRepo     r.UserRepository
-	teamRepo     r.TeamRepository
-	prRepo       r.PullRequestRepository
+	userRepo r.UserRepository
+	teamRepo r.TeamRepository
+	prRepo   r.PullRequestRepository
 }
 
 func NewDefaultPullRequestDomainService(
-	userRepository *r.UserRepository,
-	pullRequestRepository *r.PullRequestRepository,
-	teamRepository *r.TeamRepository,
+	userRepository r.UserRepository,
+	pullRequestRepository r.PullRequestRepository,
+	teamRepository r.TeamRepository,
 ) (*DefaultPullRequestDomainService, error) {
 	if userRepository == nil {
 		return nil, errors.New("userRepository cannot be nil")
@@ -46,9 +46,9 @@ func NewDefaultPullRequestDomainService(
 		return nil, errors.New("teamRepository cannot be nil")
 	}
 	s := DefaultPullRequestDomainService{
-		userRepo: *userRepository,
-		prRepo:   *pullRequestRepository,
-		teamRepo: *teamRepository,
+		userRepo: userRepository,
+		prRepo:   pullRequestRepository,
+		teamRepo: teamRepository,
 	}
 	return &s, nil
 }
