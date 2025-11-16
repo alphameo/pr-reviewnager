@@ -13,21 +13,27 @@ import (
 )
 
 type TeamRepository struct {
-	queries  *db.Queries
-	database *pgx.Conn
+	queries *db.Queries
+	dbConn  *pgx.Conn
 }
 
-func NewTeamRepository(queries *db.Queries) (*TeamRepository, error) {
-	if queries != nil {
+func NewTeamRepository(queries *db.Queries, databaseConnection *pgx.Conn) (*TeamRepository, error) {
+	if queries == nil {
 		return nil, errors.New("queries cannot be nil")
 	}
-	r := TeamRepository{queries: queries}
+	if databaseConnection == nil {
+		return nil, errors.New("database connection cannot be nil")
+	}
+	r := TeamRepository{
+		queries: queries,
+		dbConn:  databaseConnection,
+	}
 	return &r, nil
 }
 
 func (r *TeamRepository) Create(team *e.Team) error {
 	ctx := context.Background()
-	tx, err := r.database.Begin(ctx)
+	tx, err := r.dbConn.Begin(ctx)
 	if err != nil {
 		return err
 	}
@@ -70,7 +76,7 @@ func (r *TeamRepository) Create(team *e.Team) error {
 
 func (r *TeamRepository) FindByID(id v.ID) (*e.Team, error) {
 	ctx := context.Background()
-	tx, err := r.database.Begin(ctx)
+	tx, err := r.dbConn.Begin(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -106,7 +112,7 @@ func (r *TeamRepository) FindByID(id v.ID) (*e.Team, error) {
 
 func (r *TeamRepository) FindAll() ([]*e.Team, error) {
 	ctx := context.Background()
-	tx, err := r.database.Begin(ctx)
+	tx, err := r.dbConn.Begin(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -139,7 +145,7 @@ func (r *TeamRepository) FindAll() ([]*e.Team, error) {
 
 func (r *TeamRepository) Update(team *e.Team) error {
 	ctx := context.Background()
-	tx, err := r.database.Begin(ctx)
+	tx, err := r.dbConn.Begin(ctx)
 	if err != nil {
 		return err
 	}
@@ -199,7 +205,7 @@ func (r *TeamRepository) DeleteByID(id v.ID) error {
 
 func (r *TeamRepository) FindByName(teamName string) (*e.Team, error) {
 	ctx := context.Background()
-	tx, err := r.database.Begin(ctx)
+	tx, err := r.dbConn.Begin(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -235,7 +241,7 @@ func (r *TeamRepository) FindByName(teamName string) (*e.Team, error) {
 
 func (r *TeamRepository) CreateTeamAndModifyUsers(team *e.Team, users []*e.User) error {
 	ctx := context.Background()
-	tx, err := r.database.Begin(ctx)
+	tx, err := r.dbConn.Begin(ctx)
 	if err != nil {
 		return err
 	}
@@ -289,7 +295,7 @@ func (r *TeamRepository) CreateTeamAndModifyUsers(team *e.Team, users []*e.User)
 
 func (r *TeamRepository) FindTeamByTeammateID(userID v.ID) (*e.Team, error) {
 	ctx := context.Background()
-	tx, err := r.database.Begin(ctx)
+	tx, err := r.dbConn.Begin(ctx)
 	if err != nil {
 		return nil, err
 	}

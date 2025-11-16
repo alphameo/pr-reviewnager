@@ -14,20 +14,26 @@ import (
 
 type PullRequestRepository struct {
 	queries  *db.Queries
-	database *pgx.Conn
+	dbConn *pgx.Conn
 }
 
-func NewPullRequestRepository(queries *db.Queries) (*PullRequestRepository, error) {
-	if queries != nil {
+func NewPullRequestRepository(queries *db.Queries, databaseConnection *pgx.Conn) (*PullRequestRepository, error) {
+	if queries == nil {
 		return nil, errors.New("queries cannot be nil")
 	}
-	r := PullRequestRepository{queries: queries}
+	if databaseConnection == nil {
+		return nil, errors.New("database connection cannot be nil")
+	}
+	r := PullRequestRepository{
+		queries:  queries,
+		dbConn: databaseConnection,
+	}
 	return &r, nil
 }
 
 func (r *PullRequestRepository) Create(pullRequest *e.PullRequest) error {
 	ctx := context.Background()
-	tx, err := r.database.Begin(ctx)
+	tx, err := r.dbConn.Begin(ctx)
 	if err != nil {
 		return err
 	}
@@ -66,7 +72,7 @@ func (r *PullRequestRepository) Create(pullRequest *e.PullRequest) error {
 
 func (r *PullRequestRepository) FindByID(id v.ID) (*e.PullRequest, error) {
 	ctx := context.Background()
-	tx, err := r.database.Begin(ctx)
+	tx, err := r.dbConn.Begin(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -105,7 +111,7 @@ func (r *PullRequestRepository) FindByID(id v.ID) (*e.PullRequest, error) {
 
 func (r *PullRequestRepository) FindAll() ([]*e.PullRequest, error) {
 	ctx := context.Background()
-	tx, err := r.database.Begin(ctx)
+	tx, err := r.dbConn.Begin(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -144,7 +150,7 @@ func (r *PullRequestRepository) FindAll() ([]*e.PullRequest, error) {
 
 func (r *PullRequestRepository) Update(pullRequest *e.PullRequest) error {
 	ctx := context.Background()
-	tx, err := r.database.Begin(ctx)
+	tx, err := r.dbConn.Begin(ctx)
 	if err != nil {
 		return err
 	}
@@ -206,7 +212,7 @@ func (r *PullRequestRepository) DeleteByID(id v.ID) error {
 
 func (r *PullRequestRepository) FindPullRequestsByReviewer(userID v.ID) ([]*e.PullRequest, error) {
 	ctx := context.Background()
-	tx, err := r.database.Begin(ctx)
+	tx, err := r.dbConn.Begin(ctx)
 	if err != nil {
 		return nil, err
 	}
