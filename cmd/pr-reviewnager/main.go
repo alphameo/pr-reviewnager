@@ -13,7 +13,7 @@ import (
 )
 
 func main() {
-	dsn := "host=localhost user=marketplace password=marketplace dbname=marketplace port=5432 sslmode=disable"
+	dsn := "host=localhost user=postgres password='' dbname=pr-reviewnager port=5432 sslmode=disable"
 	port := ":8080"
 
 	ctx := context.Background()
