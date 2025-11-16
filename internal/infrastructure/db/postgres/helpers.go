@@ -9,13 +9,13 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-func TimestampFromTime(t time.Time) pgtype.Timestamp {
-	var ts pgtype.Timestamp
+func TimestamptzFromTime(t time.Time) pgtype.Timestamptz {
+	var ts pgtype.Timestamptz
 	ts.Scan(t)
 	return ts
 }
 
-func TimeFromTimestamp(ts pgtype.Timestamp) time.Time {
+func TimeFromTimestamptz(ts pgtype.Timestamptz) time.Time {
 	if ts.Valid {
 		return ts.Time
 	}
@@ -29,7 +29,7 @@ func PullRequestToEntity(dbPR *db.PullRequest) (*e.PullRequest, error) {
 	}
 	var mergedAt *time.Time
 	if dbPR.MergedAt.Valid {
-		t := TimeFromTimestamp(dbPR.MergedAt)
+		t := TimeFromTimestamptz(dbPR.MergedAt)
 		mergedAt = &t
 	} else {
 		mergedAt = nil
@@ -39,7 +39,7 @@ func PullRequestToEntity(dbPR *db.PullRequest) (*e.PullRequest, error) {
 		v.ID(dbPR.ID),
 		dbPR.Title,
 		v.ID(dbPR.AuthorID),
-		TimeFromTimestamp(dbPR.CreatedAt),
+		TimeFromTimestamptz(dbPR.CreatedAt),
 		status,
 		mergedAt,
 	)

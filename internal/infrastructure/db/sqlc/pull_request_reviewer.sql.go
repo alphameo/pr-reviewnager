@@ -106,13 +106,13 @@ ORDER BY
 `
 
 type GetPullRequestWithReviewersByIDRow struct {
-	ID         uuid.UUID        `db:"id" json:"id"`
-	Title      string           `db:"title" json:"title"`
-	AuthorID   uuid.UUID        `db:"author_id" json:"author_id"`
-	CreatedAt  pgtype.Timestamp `db:"created_at" json:"created_at"`
-	Status     string           `db:"status" json:"status"`
-	MergedAt   pgtype.Timestamp `db:"merged_at" json:"merged_at"`
-	ReviewerID pgtype.UUID      `db:"reviewer_id" json:"reviewer_id"`
+	ID         uuid.UUID          `db:"id" json:"id"`
+	Title      string             `db:"title" json:"title"`
+	AuthorID   uuid.UUID          `db:"author_id" json:"author_id"`
+	CreatedAt  pgtype.Timestamptz `db:"created_at" json:"created_at"`
+	Status     string             `db:"status" json:"status"`
+	MergedAt   pgtype.Timestamptz `db:"merged_at" json:"merged_at"`
+	ReviewerID pgtype.UUID        `db:"reviewer_id" json:"reviewer_id"`
 }
 
 func (q *Queries) GetPullRequestWithReviewersByID(ctx context.Context, id uuid.UUID) ([]GetPullRequestWithReviewersByIDRow, error) {
@@ -151,11 +151,11 @@ WHERE prr.reviewer_id = $1
 `
 
 type GetPullRequestsByReviewerRow struct {
-	ID       uuid.UUID        `db:"id" json:"id"`
-	Title    string           `db:"title" json:"title"`
-	AuthorID uuid.UUID        `db:"author_id" json:"author_id"`
-	Status   string           `db:"status" json:"status"`
-	MergedAt pgtype.Timestamp `db:"merged_at" json:"merged_at"`
+	ID       uuid.UUID          `db:"id" json:"id"`
+	Title    string             `db:"title" json:"title"`
+	AuthorID uuid.UUID          `db:"author_id" json:"author_id"`
+	Status   string             `db:"status" json:"status"`
+	MergedAt pgtype.Timestamptz `db:"merged_at" json:"merged_at"`
 }
 
 func (q *Queries) GetPullRequestsByReviewer(ctx context.Context, reviewerID uuid.UUID) ([]GetPullRequestsByReviewerRow, error) {
@@ -202,13 +202,13 @@ ORDER BY
 `
 
 type GetPullRequestsWithReviewersRow struct {
-	ID         uuid.UUID        `db:"id" json:"id"`
-	Title      string           `db:"title" json:"title"`
-	AuthorID   uuid.UUID        `db:"author_id" json:"author_id"`
-	CreatedAt  pgtype.Timestamp `db:"created_at" json:"created_at"`
-	Status     string           `db:"status" json:"status"`
-	MergedAt   pgtype.Timestamp `db:"merged_at" json:"merged_at"`
-	ReviewerID pgtype.UUID      `db:"reviewer_id" json:"reviewer_id"`
+	ID         uuid.UUID          `db:"id" json:"id"`
+	Title      string             `db:"title" json:"title"`
+	AuthorID   uuid.UUID          `db:"author_id" json:"author_id"`
+	CreatedAt  pgtype.Timestamptz `db:"created_at" json:"created_at"`
+	Status     string             `db:"status" json:"status"`
+	MergedAt   pgtype.Timestamptz `db:"merged_at" json:"merged_at"`
+	ReviewerID pgtype.UUID        `db:"reviewer_id" json:"reviewer_id"`
 }
 
 func (q *Queries) GetPullRequestsWithReviewers(ctx context.Context) ([]GetPullRequestsWithReviewersRow, error) {
@@ -259,13 +259,13 @@ ORDER BY
 `
 
 type GetPullRequestsWithReviewersByReviewerIDRow struct {
-	ID         uuid.UUID        `db:"id" json:"id"`
-	Title      string           `db:"title" json:"title"`
-	AuthorID   uuid.UUID        `db:"author_id" json:"author_id"`
-	CreatedAt  pgtype.Timestamp `db:"created_at" json:"created_at"`
-	Status     string           `db:"status" json:"status"`
-	MergedAt   pgtype.Timestamp `db:"merged_at" json:"merged_at"`
-	ReviewerID pgtype.UUID      `db:"reviewer_id" json:"reviewer_id"`
+	ID         uuid.UUID          `db:"id" json:"id"`
+	Title      string             `db:"title" json:"title"`
+	AuthorID   uuid.UUID          `db:"author_id" json:"author_id"`
+	CreatedAt  pgtype.Timestamptz `db:"created_at" json:"created_at"`
+	Status     string             `db:"status" json:"status"`
+	MergedAt   pgtype.Timestamptz `db:"merged_at" json:"merged_at"`
+	ReviewerID pgtype.UUID        `db:"reviewer_id" json:"reviewer_id"`
 }
 
 func (q *Queries) GetPullRequestsWithReviewersByReviewerID(ctx context.Context, reviewerID uuid.UUID) ([]GetPullRequestsWithReviewersByReviewerIDRow, error) {

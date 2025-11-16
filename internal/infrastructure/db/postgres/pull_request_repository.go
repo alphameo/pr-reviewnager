@@ -47,7 +47,7 @@ func (r *PullRequestRepository) Create(pullRequest *e.PullRequest) error {
 		Title:    pullRequest.Title(),
 		AuthorID: uuid.UUID(pullRequest.AuthorID()),
 		Status:   pullRequest.Status().String(),
-		MergedAt: TimestampFromTime(*pullRequest.MergedAt()),
+		MergedAt: TimestamptzFromTime(*pullRequest.MergedAt()),
 	})
 	if err != nil {
 		return err
@@ -96,7 +96,7 @@ func (r *PullRequestRepository) FindByID(id v.ID) (*e.PullRequest, error) {
 			}
 			var mergedAt *time.Time
 			if row.MergedAt.Valid {
-				t := TimeFromTimestamp(row.MergedAt)
+				t := TimeFromTimestamptz(row.MergedAt)
 				mergedAt = &t
 			}
 
@@ -104,7 +104,7 @@ func (r *PullRequestRepository) FindByID(id v.ID) (*e.PullRequest, error) {
 				v.ID(prID),
 				row.Title,
 				v.ID(row.AuthorID),
-				TimeFromTimestamp(row.CreatedAt),
+				TimeFromTimestamptz(row.CreatedAt),
 				status,
 				mergedAt,
 			)
@@ -159,7 +159,7 @@ func (r *PullRequestRepository) FindAll() ([]*e.PullRequest, error) {
 			}
 			var mergedAt *time.Time
 			if row.MergedAt.Valid {
-				t := TimeFromTimestamp(row.MergedAt)
+				t := TimeFromTimestamptz(row.MergedAt)
 				mergedAt = &t
 			}
 
@@ -167,7 +167,7 @@ func (r *PullRequestRepository) FindAll() ([]*e.PullRequest, error) {
 				v.ID(prID),
 				row.Title,
 				v.ID(row.AuthorID),
-				TimeFromTimestamp(row.CreatedAt),
+				TimeFromTimestamptz(row.CreatedAt),
 				status,
 				mergedAt,
 			)
@@ -204,11 +204,11 @@ func (r *PullRequestRepository) Update(pullRequest *e.PullRequest) error {
 
 	qtx := r.queries.WithTx(tx)
 
-	var mergedAt pgtype.Timestamp
+	var mergedAt pgtype.Timestamptz
 	if pullRequest.MergedAt() == nil {
-		mergedAt = pgtype.Timestamp{Valid: false}
+		mergedAt = pgtype.Timestamptz{Valid: false}
 	} else {
-		mergedAt = TimestampFromTime(*pullRequest.MergedAt())
+		mergedAt = TimestamptzFromTime(*pullRequest.MergedAt())
 	}
 
 	err = qtx.UpdatePullRequest(ctx, db.UpdatePullRequestParams{
@@ -277,7 +277,7 @@ func (r *PullRequestRepository) FindPullRequestsByReviewer(userID v.ID) ([]*e.Pu
 			}
 			var mergedAt *time.Time
 			if row.MergedAt.Valid {
-				t := TimeFromTimestamp(row.MergedAt)
+				t := TimeFromTimestamptz(row.MergedAt)
 				mergedAt = &t
 			}
 
@@ -285,7 +285,7 @@ func (r *PullRequestRepository) FindPullRequestsByReviewer(userID v.ID) ([]*e.Pu
 				v.ID(prID),
 				row.Title,
 				v.ID(row.AuthorID),
-				TimeFromTimestamp((row.CreatedAt)),
+				TimeFromTimestamptz(row.CreatedAt),
 				status,
 				mergedAt,
 			)

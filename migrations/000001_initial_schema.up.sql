@@ -29,9 +29,9 @@ CREATE TABLE pull_request (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     title VARCHAR NOT NULL,
     author_id UUID NOT NULL,
-    created_at TIMESTAMP NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL,
     status pull_request_status NOT NULL,
-    merged_at TIMESTAMP,
+    merged_at TIMESTAMP WITH TIME ZONE,
     FOREIGN KEY (author_id) REFERENCES "user"(id)
         ON DELETE CASCADE ON UPDATE CASCADE,
     CHECK (
