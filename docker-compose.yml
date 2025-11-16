@@ -9,6 +9,23 @@ services:
       - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d pr_reviewnager"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  migrate:
+    build: .
+    command: sh -c "migrate -path /app/migrations -database 'postgres://user:password@db:5432/pr_reviewnager?sslmode=disable' up"
+    environment:
+      DATABASE_URL: "postgres://user:password@db:5432/pr_reviewnager?sslmode=disable"
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./migrations:/app/migrations
+    restart: no
 
   app:
     build: .
@@ -18,7 +35,8 @@ services:
       DATABASE_URL: "postgres://user:password@db:5432/pr_reviewnager?sslmode=disable"
       PORT: 8080
     depends_on:
-      - db
+      migrate:
+        condition: service_completed_successfully
 
 volumes:
   postgres_data:
