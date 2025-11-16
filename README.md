@@ -12,9 +12,12 @@ User -- участник только одной команды
 Для генерации кода взаимодействия с базой данных использован инструмент [sqlc](https://sqlc.dev/)
 
 Для генерации кода по спецификации [openapi.yaml](https://github.com/alphameo/pr-reviewnager/blob/main/openapi.yaml)
-использовался инструмент [oapi-codegen](https://github.com/oapi-codegen/oapi-codegen)
+использовался инструмент [oapi-codegen](https://github.com/oapi-codegen/oapi-codegen).
+Сама генерация выполняется через команду `make generate-api` ([Makefile](https://github.com/alphameo/pr-reviewnager/blob/main/Makefile))
 
-Зависимости для [`go.mod`](https://github.com/alphameo/pr-reviewnager/blob/main/go.mod):
+Для выполнения миграций используется [migrate](https://github.com/golang-migrate/migrate)
+
+Основные зависимости в [`go.mod`](https://github.com/alphameo/pr-reviewnager/blob/main/go.mod):
 
 - [UUID](https://github.com/google/uuid) в качестве ID для сущностей и БД
 - [Драйвер для `PostgreSQL`](https://github.com/jackc/pgx)
