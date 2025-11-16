@@ -9,6 +9,7 @@ import (
 	"context"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createPullRequestReviewer = `-- name: CreatePullRequestReviewer :exec
@@ -85,6 +86,60 @@ func (q *Queries) GetPullRequestReviewerReviewerIDs(ctx context.Context, pullReq
 	return items, nil
 }
 
+const getPullRequestWithReviewersByID = `-- name: GetPullRequestWithReviewersByID :many
+SELECT 
+    pr.id,
+    pr.title,
+    pr.author_id,
+    pr.status,
+    pr.merged_at,
+    prr.reviewer_id
+FROM 
+    pull_request AS pr
+LEFT JOIN 
+    pull_request_reviewer AS prr ON pr.id = prr.pull_request_id
+WHERE
+    pr.id = $1
+ORDER BY 
+    pr.id, prr.reviewer_id
+`
+
+type GetPullRequestWithReviewersByIDRow struct {
+	ID         uuid.UUID        `db:"id" json:"id"`
+	Title      string           `db:"title" json:"title"`
+	AuthorID   uuid.UUID        `db:"author_id" json:"author_id"`
+	Status     string           `db:"status" json:"status"`
+	MergedAt   pgtype.Timestamp `db:"merged_at" json:"merged_at"`
+	ReviewerID pgtype.UUID      `db:"reviewer_id" json:"reviewer_id"`
+}
+
+func (q *Queries) GetPullRequestWithReviewersByID(ctx context.Context, id uuid.UUID) ([]GetPullRequestWithReviewersByIDRow, error) {
+	rows, err := q.db.Query(ctx, getPullRequestWithReviewersByID, id)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []GetPullRequestWithReviewersByIDRow{}
+	for rows.Next() {
+		var i GetPullRequestWithReviewersByIDRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Title,
+			&i.AuthorID,
+			&i.Status,
+			&i.MergedAt,
+			&i.ReviewerID,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getPullRequestsByReviewer = `-- name: GetPullRequestsByReviewer :many
 SELECT pr.id, pr.title, pr.author_id, pr.status, pr.merged_at
 FROM pull_request pr
@@ -107,6 +162,112 @@ func (q *Queries) GetPullRequestsByReviewer(ctx context.Context, reviewerID uuid
 			&i.AuthorID,
 			&i.Status,
 			&i.MergedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getPullRequestsWithReviewers = `-- name: GetPullRequestsWithReviewers :many
+SELECT 
+    pr.id,
+    pr.title,
+    pr.author_id,
+    pr.status,
+    pr.merged_at,
+    prr.reviewer_id
+FROM 
+    pull_request AS pr
+LEFT JOIN 
+    pull_request_reviewer AS prr ON pr.id = prr.pull_request_id
+ORDER BY 
+    pr.id, prr.reviewer_id
+`
+
+type GetPullRequestsWithReviewersRow struct {
+	ID         uuid.UUID        `db:"id" json:"id"`
+	Title      string           `db:"title" json:"title"`
+	AuthorID   uuid.UUID        `db:"author_id" json:"author_id"`
+	Status     string           `db:"status" json:"status"`
+	MergedAt   pgtype.Timestamp `db:"merged_at" json:"merged_at"`
+	ReviewerID pgtype.UUID      `db:"reviewer_id" json:"reviewer_id"`
+}
+
+func (q *Queries) GetPullRequestsWithReviewers(ctx context.Context) ([]GetPullRequestsWithReviewersRow, error) {
+	rows, err := q.db.Query(ctx, getPullRequestsWithReviewers)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []GetPullRequestsWithReviewersRow{}
+	for rows.Next() {
+		var i GetPullRequestsWithReviewersRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Title,
+			&i.AuthorID,
+			&i.Status,
+			&i.MergedAt,
+			&i.ReviewerID,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getPullRequestsWithReviewersByReviewerID = `-- name: GetPullRequestsWithReviewersByReviewerID :many
+SELECT 
+    pr.id,
+    pr.title,
+    pr.author_id,
+    pr.status,
+    pr.merged_at,
+    prr.reviewer_id
+FROM 
+    pull_request AS pr
+LEFT JOIN 
+    pull_request_reviewer AS prr ON pr.id = prr.pull_request_id
+WHERE
+    prr.reviewer_id = $1
+ORDER BY 
+    pr.id, prr.reviewer_id
+`
+
+type GetPullRequestsWithReviewersByReviewerIDRow struct {
+	ID         uuid.UUID        `db:"id" json:"id"`
+	Title      string           `db:"title" json:"title"`
+	AuthorID   uuid.UUID        `db:"author_id" json:"author_id"`
+	Status     string           `db:"status" json:"status"`
+	MergedAt   pgtype.Timestamp `db:"merged_at" json:"merged_at"`
+	ReviewerID pgtype.UUID      `db:"reviewer_id" json:"reviewer_id"`
+}
+
+func (q *Queries) GetPullRequestsWithReviewersByReviewerID(ctx context.Context, reviewerID uuid.UUID) ([]GetPullRequestsWithReviewersByReviewerIDRow, error) {
+	rows, err := q.db.Query(ctx, getPullRequestsWithReviewersByReviewerID, reviewerID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []GetPullRequestsWithReviewersByReviewerIDRow{}
+	for rows.Next() {
+		var i GetPullRequestsWithReviewersByReviewerIDRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Title,
+			&i.AuthorID,
+			&i.Status,
+			&i.MergedAt,
+			&i.ReviewerID,
 		); err != nil {
 			return nil, err
 		}

@@ -13,8 +13,8 @@ import (
 )
 
 type PullRequestRepository struct {
-	queries  *db.Queries
-	dbConn *pgx.Conn
+	queries *db.Queries
+	dbConn  *pgx.Conn
 }
 
 func NewPullRequestRepository(queries *db.Queries, databaseConnection *pgx.Conn) (*PullRequestRepository, error) {
@@ -25,8 +25,8 @@ func NewPullRequestRepository(queries *db.Queries, databaseConnection *pgx.Conn)
 		return nil, errors.New("database connection cannot be nil")
 	}
 	r := PullRequestRepository{
-		queries:  queries,
-		dbConn: databaseConnection,
+		queries: queries,
+		dbConn:  databaseConnection,
 	}
 	return &r, nil
 }
@@ -72,77 +72,42 @@ func (r *PullRequestRepository) Create(pullRequest *e.PullRequest) error {
 
 func (r *PullRequestRepository) FindByID(id v.ID) (*e.PullRequest, error) {
 	ctx := context.Background()
-	tx, err := r.dbConn.Begin(ctx)
+
+	rows, err := r.queries.GetPullRequestWithReviewersByID(ctx, uuid.UUID(id))
 	if err != nil {
 		return nil, err
 	}
-	defer tx.Rollback(ctx)
 
-	qtx := r.queries.WithTx(tx)
-
-	dbPR, err := qtx.GetPullRequest(ctx, uuid.UUID(id))
-	if err == pgx.ErrNoRows {
+	if len(rows) == 0 {
 		return nil, nil
-	} else if err != nil {
-		return nil, err
-	}
-	reviewerIDs, err := qtx.GetPullRequestReviewerReviewerIDs(ctx, uuid.UUID(id))
-	if err != nil && err != pgx.ErrNoRows {
-		return nil, err
 	}
 
-	pr, err := PullRequestToEntity(&dbPR)
+	prs, err := aggregatePRsFromSinglePRRows(rows)
 	if err != nil {
 		return nil, err
 	}
-	for _, reviewerID := range reviewerIDs {
-		err = pr.AssignReviewer(v.ID(reviewerID))
-		if err != nil {
-			return nil, err
-		}
+
+	if len(prs) == 0 {
+		return nil, nil
+	}
+	if len(prs) > 1 {
+		return nil, errors.New("unexpected multiple PRs returned for a single ID")
 	}
 
-	err = tx.Commit(ctx)
-	if err != nil {
-		return nil, err
-	}
-	return pr, nil
+	return prs[0], nil
 }
 
 func (r *PullRequestRepository) FindAll() ([]*e.PullRequest, error) {
 	ctx := context.Background()
-	tx, err := r.dbConn.Begin(ctx)
+
+	rows, err := r.queries.GetPullRequestsWithReviewers(ctx)
 	if err != nil {
 		return nil, err
 	}
-	defer tx.Rollback(ctx)
 
-	qtx := r.queries.WithTx(tx)
-
-	dbPRs, err := qtx.GetPullRequests(ctx)
-	if err != nil && err != pgx.ErrNoRows {
+	prs, err := aggregatePRsFromRows(rows)
+	if err != nil {
 		return nil, err
-	}
-
-	prs := make([]*e.PullRequest, len(dbPRs))
-	for i, dbPR := range dbPRs {
-		reviewerIDs, err := qtx.GetPullRequestReviewerReviewerIDs(ctx, uuid.UUID(dbPR.ID))
-		if err != nil && err != pgx.ErrNoRows {
-			return nil, err
-		}
-
-		pr, err := PullRequestToEntity(&dbPR)
-		if err != nil {
-			return nil, err
-		}
-		for _, reviewerID := range reviewerIDs {
-			err = pr.AssignReviewer(v.ID(reviewerID))
-			if err != nil {
-				return nil, err
-			}
-		}
-
-		prs[i] = pr
 	}
 
 	return prs, nil
@@ -205,45 +170,22 @@ func (r *PullRequestRepository) DeleteByID(id v.ID) error {
 
 	err := r.queries.DeletePullRequest(ctx, uuid.UUID(id))
 	if err != nil {
-		return nil
+		return err
 	}
 	return nil
 }
 
 func (r *PullRequestRepository) FindPullRequestsByReviewer(userID v.ID) ([]*e.PullRequest, error) {
 	ctx := context.Background()
-	tx, err := r.dbConn.Begin(ctx)
+
+	rows, err := r.queries.GetPullRequestsWithReviewersByReviewerID(ctx, uuid.UUID(userID))
 	if err != nil {
 		return nil, err
 	}
-	defer tx.Rollback(ctx)
 
-	qtx := r.queries.WithTx(tx)
-
-	dbPRs, err := qtx.GetPullRequestsByReviewer(ctx, uuid.UUID(userID))
-	if err != nil && err != pgx.ErrNoRows {
+	prs, err := aggregatePRsFromReviewerRows(rows)
+	if err != nil {
 		return nil, err
-	}
-
-	prs := make([]*e.PullRequest, len(dbPRs))
-	for i, dbPR := range dbPRs {
-		reviewerIDs, err := qtx.GetPullRequestReviewerReviewerIDs(ctx, uuid.UUID(dbPR.ID))
-		if err != nil && err != pgx.ErrNoRows {
-			return nil, err
-		}
-
-		pr, err := PullRequestToEntity(&dbPR)
-		if err != nil {
-			return nil, err
-		}
-		for _, reviewerID := range reviewerIDs {
-			err = pr.AssignReviewer(v.ID(reviewerID))
-			if err != nil {
-				return nil, err
-			}
-		}
-
-		prs[i] = pr
 	}
 
 	return prs, nil
