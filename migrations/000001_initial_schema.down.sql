@@ -1,7 +1,10 @@
+-- +migrate Down
+
 DROP TABLE IF EXISTS pull_request_reviewer;
 DROP TABLE IF EXISTS pull_request;
+DROP TYPE IF EXISTS pull_request_status;
 DROP TABLE IF EXISTS team_user;
 DROP TABLE IF EXISTS team;
 DROP TABLE IF EXISTS "user";
 
-DROP EXTENSION IF EXISTS "uuid-ossp";
+DROP EXTENSION IF EXISTS pgcrypto;

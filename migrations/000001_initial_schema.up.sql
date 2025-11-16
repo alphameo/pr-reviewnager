@@ -1,19 +1,21 @@
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+-- +migrate Up
 
-CREATE TABLE "user" (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
+CREATE TABLE IF NOT EXISTS "user" (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name VARCHAR NOT NULL,
-    active BOOLEAN NOT NULL,
+    active BOOLEAN NOT NULL DEFAULT TRUE,
     UNIQUE(name)
 );
 
-CREATE TABLE team (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+CREATE TABLE IF NOT EXISTS team (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name VARCHAR NOT NULL,
     UNIQUE(name)
 );
 
-CREATE TABLE team_user (
+CREATE TABLE IF NOT EXISTS team_user (
     team_id UUID NOT NULL,
     user_id UUID NOT NULL,
     PRIMARY KEY (team_id, user_id),
@@ -23,13 +25,18 @@ CREATE TABLE team_user (
         ON DELETE CASCADE ON UPDATE CASCADE
 );
 
-CREATE TYPE pull_request_status AS ENUM ('open', 'merged');
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'pull_request_status') THEN
+        CREATE TYPE pull_request_status AS ENUM ('open', 'merged');
+    END IF;
+END $$;
 
-CREATE TABLE pull_request (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+CREATE TABLE IF NOT EXISTS pull_request (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     title VARCHAR NOT NULL,
     author_id UUID NOT NULL,
-    created_at TIMESTAMP WITH TIME ZONE NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     status pull_request_status NOT NULL,
     merged_at TIMESTAMP WITH TIME ZONE,
     FOREIGN KEY (author_id) REFERENCES "user"(id)
@@ -40,7 +47,7 @@ CREATE TABLE pull_request (
     )
 );
 
-CREATE TABLE pull_request_reviewer (
+CREATE TABLE IF NOT EXISTS pull_request_reviewer (
     pull_request_id UUID NOT NULL,
     reviewer_id UUID NOT NULL,
     PRIMARY KEY (pull_request_id, reviewer_id),
