@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"log"
+	"os"
 
 	"github.com/alphameo/pr-reviewnager/internal/adapters/api"
 	s "github.com/alphameo/pr-reviewnager/internal/application/services"
@@ -13,8 +14,17 @@ import (
 )
 
 func main() {
-	dsn := "host=localhost user=postgres password='' dbname=pr-reviewnager port=5432 sslmode=disable"
-	port := ":8080"
+	dsn := os.Getenv("DATABASE_URL")
+	if dsn == "" {
+		log.Fatal("DATABASE_URL environment variable is not set")
+	}
+
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = ":8080"
+	} else {
+		port = ":" + port
+	}
 
 	ctx := context.Background()
 	conn, err := postgres.NewConnection(ctx, dsn)
