@@ -3,7 +3,6 @@ package services
 
 import (
 	"errors"
-	"fmt"
 
 	"github.com/alphameo/pr-reviewnager/internal/application/dto"
 	"github.com/alphameo/pr-reviewnager/internal/application/mappers"
@@ -15,7 +14,6 @@ type UserService interface {
 	RegisterUser(user *dto.UserDTO) error
 	UnregisterUserByID(userID v.ID) error
 	ListUsers() ([]*dto.UserDTO, error)
-	SetUserActiveByID(userID v.ID, active bool) (*dto.UserDTO, error)
 }
 
 type DefaultUserService struct {
@@ -60,26 +58,4 @@ func (s *DefaultUserService) ListUsers() ([]*dto.UserDTO, error) {
 		return nil, err
 	}
 	return mappers.UsersToDTOs(users)
-}
-
-func (s *DefaultUserService) SetUserActiveByID(userID v.ID, active bool) (*dto.UserDTO, error) {
-	user, err := s.userRepo.FindByID(userID)
-	if err != nil {
-		return nil, err
-	}
-
-	if user == nil {
-		return nil, fmt.Errorf("no such user with id=%d", userID)
-	}
-	user.SetActive(active)
-
-	err = s.userRepo.Update(user)
-	if err != nil {
-		return nil, err
-	}
-	dto, err := mappers.UserToDTO(user)
-	if err != nil {
-		return nil, err
-	}
-	return dto, nil
 }

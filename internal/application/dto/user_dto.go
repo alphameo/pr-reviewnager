@@ -8,3 +8,8 @@ type UserDTO struct {
 	Name   string
 	Active bool
 }
+
+type UserWithTeamNameDTO struct {
+	User   *UserDTO
+	TeamName string
+}

@@ -8,7 +8,8 @@ type TeamDTO struct {
 	UserIDs []v.ID
 }
 
-type CreateTeamWithUsersDTO struct {
+type TeamWithUsersDTO struct {
+	ID      v.ID
 	TeamName  string
 	TeamUsers []*UserDTO
 }
