@@ -11,27 +11,62 @@ import (
 	"github.com/google/uuid"
 )
 
-const addReviewerToPullRequest = `-- name: AddReviewerToPullRequest :exec
+const createPullRequestReviewer = `-- name: CreatePullRequestReviewer :exec
 INSERT INTO pull_request_reviewer (pull_request_id, reviewer_id)
 VALUES ($1, $2)
 `
 
-type AddReviewerToPullRequestParams struct {
+type CreatePullRequestReviewerParams struct {
 	PullRequestID uuid.UUID `db:"pull_request_id" json:"pull_request_id"`
 	ReviewerID    uuid.UUID `db:"reviewer_id" json:"reviewer_id"`
 }
 
-func (q *Queries) AddReviewerToPullRequest(ctx context.Context, arg AddReviewerToPullRequestParams) error {
-	_, err := q.db.Exec(ctx, addReviewerToPullRequest, arg.PullRequestID, arg.ReviewerID)
+func (q *Queries) CreatePullRequestReviewer(ctx context.Context, arg CreatePullRequestReviewerParams) error {
+	_, err := q.db.Exec(ctx, createPullRequestReviewer, arg.PullRequestID, arg.ReviewerID)
 	return err
 }
 
-const getPullRequestReviewers = `-- name: GetPullRequestReviewers :many
+const deletePullRequestReviewer = `-- name: DeletePullRequestReviewer :exec
+DELETE FROM pull_request_reviewer
+WHERE pull_request_id = $1 AND reviewer_id = $2
+`
+
+type DeletePullRequestReviewerParams struct {
+	PullRequestID uuid.UUID `db:"pull_request_id" json:"pull_request_id"`
+	ReviewerID    uuid.UUID `db:"reviewer_id" json:"reviewer_id"`
+}
+
+func (q *Queries) DeletePullRequestReviewer(ctx context.Context, arg DeletePullRequestReviewerParams) error {
+	_, err := q.db.Exec(ctx, deletePullRequestReviewer, arg.PullRequestID, arg.ReviewerID)
+	return err
+}
+
+const deletePullRequestReviewersByPRID = `-- name: DeletePullRequestReviewersByPRID :exec
+DELETE FROM pull_request_reviewer
+WHERE pull_request_id = $1
+`
+
+func (q *Queries) DeletePullRequestReviewersByPRID(ctx context.Context, pullRequestID uuid.UUID) error {
+	_, err := q.db.Exec(ctx, deletePullRequestReviewersByPRID, pullRequestID)
+	return err
+}
+
+const deletePullRequestReviewersByReviewerID = `-- name: DeletePullRequestReviewersByReviewerID :exec
+DELETE FROM pull_request_reviewer
+WHERE reviewer_id = $1
+`
+
+func (q *Queries) DeletePullRequestReviewersByReviewerID(ctx context.Context, reviewerID uuid.UUID) error {
+	_, err := q.db.Exec(ctx, deletePullRequestReviewersByReviewerID, reviewerID)
+	return err
+}
+
+const getPullRequestReviewerReviewerIDs = `-- name: GetPullRequestReviewerReviewerIDs :many
 SELECT reviewer_id FROM pull_request_reviewer WHERE pull_request_id = $1
 `
 
-func (q *Queries) GetPullRequestReviewers(ctx context.Context, pullRequestID uuid.UUID) ([]uuid.UUID, error) {
-	rows, err := q.db.Query(ctx, getPullRequestReviewers, pullRequestID)
+func (q *Queries) GetPullRequestReviewerReviewerIDs(ctx context.Context, pullRequestID uuid.UUID) ([]uuid.UUID, error) {
+	rows, err := q.db.Query(ctx, getPullRequestReviewerReviewerIDs, pullRequestID)
 	if err != nil {
 		return nil, err
 	}
@@ -50,17 +85,35 @@ func (q *Queries) GetPullRequestReviewers(ctx context.Context, pullRequestID uui
 	return items, nil
 }
 
-const removeReviewerFromPullRequest = `-- name: RemoveReviewerFromPullRequest :exec
-DELETE FROM pull_request_reviewer
-WHERE pull_request_id = $1 AND reviewer_id = $2
+const getPullRequestsByReviewer = `-- name: GetPullRequestsByReviewer :many
+SELECT pr.id, pr.title, pr.author_id, pr.status, pr.merged_at
+FROM pull_request pr
+JOIN pull_request_reviewer prr ON pr.id = prr.pull_request_id
+WHERE prr.reviewer_id = $1
 `
 
-type RemoveReviewerFromPullRequestParams struct {
-	PullRequestID uuid.UUID `db:"pull_request_id" json:"pull_request_id"`
-	ReviewerID    uuid.UUID `db:"reviewer_id" json:"reviewer_id"`
-}
-
-func (q *Queries) RemoveReviewerFromPullRequest(ctx context.Context, arg RemoveReviewerFromPullRequestParams) error {
-	_, err := q.db.Exec(ctx, removeReviewerFromPullRequest, arg.PullRequestID, arg.ReviewerID)
-	return err
+func (q *Queries) GetPullRequestsByReviewer(ctx context.Context, reviewerID uuid.UUID) ([]PullRequest, error) {
+	rows, err := q.db.Query(ctx, getPullRequestsByReviewer, reviewerID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []PullRequest{}
+	for rows.Next() {
+		var i PullRequest
+		if err := rows.Scan(
+			&i.ID,
+			&i.Title,
+			&i.AuthorID,
+			&i.Status,
+			&i.MergedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }

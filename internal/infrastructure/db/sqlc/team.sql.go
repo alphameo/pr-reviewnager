@@ -11,10 +11,9 @@ import (
 	"github.com/google/uuid"
 )
 
-const createTeam = `-- name: CreateTeam :one
+const createTeam = `-- name: CreateTeam :exec
 INSERT INTO team (id, name)
 VALUES ($1, $2)
-RETURNING id, name
 `
 
 type CreateTeamParams struct {
@@ -22,11 +21,9 @@ type CreateTeamParams struct {
 	Name string    `db:"name" json:"name"`
 }
 
-func (q *Queries) CreateTeam(ctx context.Context, arg CreateTeamParams) (Team, error) {
-	row := q.db.QueryRow(ctx, createTeam, arg.ID, arg.Name)
-	var i Team
-	err := row.Scan(&i.ID, &i.Name)
-	return i, err
+func (q *Queries) CreateTeam(ctx context.Context, arg CreateTeamParams) error {
+	_, err := q.db.Exec(ctx, createTeam, arg.ID, arg.Name)
+	return err
 }
 
 const deleteTeam = `-- name: DeleteTeam :exec

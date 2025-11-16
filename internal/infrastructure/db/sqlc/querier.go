@@ -11,29 +11,38 @@ import (
 )
 
 type Querier interface {
-	AddReviewerToPullRequest(ctx context.Context, arg AddReviewerToPullRequestParams) error
-	AddUserToTeam(ctx context.Context, arg AddUserToTeamParams) error
-	CreatePullRequest(ctx context.Context, arg CreatePullRequestParams) (PullRequest, error)
-	CreateTeam(ctx context.Context, arg CreateTeamParams) (Team, error)
+	CreatePullRequest(ctx context.Context, arg CreatePullRequestParams) error
+	CreatePullRequestReviewer(ctx context.Context, arg CreatePullRequestReviewerParams) error
+	CreateTeam(ctx context.Context, arg CreateTeamParams) error
+	CreateTeamUser(ctx context.Context, arg CreateTeamUserParams) error
 	CreateUser(ctx context.Context, arg CreateUserParams) error
+	DeletePullRequest(ctx context.Context, id uuid.UUID) error
+	DeletePullRequestReviewer(ctx context.Context, arg DeletePullRequestReviewerParams) error
+	DeletePullRequestReviewersByPRID(ctx context.Context, pullRequestID uuid.UUID) error
+	DeletePullRequestReviewersByReviewerID(ctx context.Context, reviewerID uuid.UUID) error
 	DeleteTeam(ctx context.Context, id uuid.UUID) error
+	DeleteTeamUsersByTeamID(ctx context.Context, teamID uuid.UUID) error
 	DeleteUser(ctx context.Context, id uuid.UUID) error
 	GetPullRequest(ctx context.Context, id uuid.UUID) (PullRequest, error)
-	GetPullRequestReviewers(ctx context.Context, pullRequestID uuid.UUID) ([]uuid.UUID, error)
+	GetPullRequestReviewerReviewerIDs(ctx context.Context, pullRequestID uuid.UUID) ([]uuid.UUID, error)
 	GetPullRequests(ctx context.Context) ([]PullRequest, error)
+	GetPullRequestsByReviewer(ctx context.Context, reviewerID uuid.UUID) ([]PullRequest, error)
 	GetTeam(ctx context.Context, id uuid.UUID) (Team, error)
 	GetTeamByName(ctx context.Context, name string) (Team, error)
+	GetTeamForUser(ctx context.Context, userID uuid.UUID) (Team, error)
+	GetTeamIDForUser(ctx context.Context, userID uuid.UUID) (uuid.UUID, error)
 	GetTeams(ctx context.Context) ([]Team, error)
-	GetTeamsForUser(ctx context.Context, userID uuid.UUID) ([]Team, error)
 	GetUser(ctx context.Context, id uuid.UUID) (User, error)
 	GetUserByName(ctx context.Context, name string) (User, error)
+	GetUserIDsInTeam(ctx context.Context, teamID uuid.UUID) ([]uuid.UUID, error)
 	GetUsers(ctx context.Context) ([]User, error)
 	GetUsersInTeam(ctx context.Context, teamID uuid.UUID) ([]User, error)
-	RemoveReviewerFromPullRequest(ctx context.Context, arg RemoveReviewerFromPullRequestParams) error
 	RemoveUserFromTeam(ctx context.Context, arg RemoveUserFromTeamParams) error
+	UpdatePullRequest(ctx context.Context, arg UpdatePullRequestParams) error
 	UpdatePullRequestStatus(ctx context.Context, arg UpdatePullRequestStatusParams) error
 	UpdateTeam(ctx context.Context, arg UpdateTeamParams) error
 	UpdateUser(ctx context.Context, arg UpdateUserParams) error
+	UpsetUser(ctx context.Context, arg UpsetUserParams) error
 }
 
 var _ Querier = (*Queries)(nil)

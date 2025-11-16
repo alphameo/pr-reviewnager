@@ -11,41 +11,78 @@ import (
 	"github.com/google/uuid"
 )
 
-const addUserToTeam = `-- name: AddUserToTeam :exec
+const createTeamUser = `-- name: CreateTeamUser :exec
 INSERT INTO team_user (team_id, user_id)
 VALUES ($1, $2)
 `
 
-type AddUserToTeamParams struct {
+type CreateTeamUserParams struct {
 	TeamID uuid.UUID `db:"team_id" json:"team_id"`
 	UserID uuid.UUID `db:"user_id" json:"user_id"`
 }
 
-func (q *Queries) AddUserToTeam(ctx context.Context, arg AddUserToTeamParams) error {
-	_, err := q.db.Exec(ctx, addUserToTeam, arg.TeamID, arg.UserID)
+func (q *Queries) CreateTeamUser(ctx context.Context, arg CreateTeamUserParams) error {
+	_, err := q.db.Exec(ctx, createTeamUser, arg.TeamID, arg.UserID)
 	return err
 }
 
-const getTeamsForUser = `-- name: GetTeamsForUser :many
+const deleteTeamUsersByTeamID = `-- name: DeleteTeamUsersByTeamID :exec
+DELETE FROM team_user
+WHERE team_id = $1
+`
+
+func (q *Queries) DeleteTeamUsersByTeamID(ctx context.Context, teamID uuid.UUID) error {
+	_, err := q.db.Exec(ctx, deleteTeamUsersByTeamID, teamID)
+	return err
+}
+
+const getTeamForUser = `-- name: GetTeamForUser :one
 SELECT t.id, t.name
 FROM team t
 JOIN team_user tu ON t.id = tu.team_id
 WHERE tu.user_id = $1
 `
 
-func (q *Queries) GetTeamsForUser(ctx context.Context, userID uuid.UUID) ([]Team, error) {
-	rows, err := q.db.Query(ctx, getTeamsForUser, userID)
+func (q *Queries) GetTeamForUser(ctx context.Context, userID uuid.UUID) (Team, error) {
+	row := q.db.QueryRow(ctx, getTeamForUser, userID)
+	var i Team
+	err := row.Scan(&i.ID, &i.Name)
+	return i, err
+}
+
+const getTeamIDForUser = `-- name: GetTeamIDForUser :one
+SELECT t.id
+FROM team t
+JOIN team_user tu ON t.id = tu.team_id
+WHERE tu.user_id = $1
+`
+
+func (q *Queries) GetTeamIDForUser(ctx context.Context, userID uuid.UUID) (uuid.UUID, error) {
+	row := q.db.QueryRow(ctx, getTeamIDForUser, userID)
+	var id uuid.UUID
+	err := row.Scan(&id)
+	return id, err
+}
+
+const getUserIDsInTeam = `-- name: GetUserIDsInTeam :many
+SELECT user_id
+FROM team_user
+WHERE team_id = $1
+`
+
+func (q *Queries) GetUserIDsInTeam(ctx context.Context, teamID uuid.UUID) ([]uuid.UUID, error) {
+	rows, err := q.db.Query(ctx, getUserIDsInTeam, teamID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	items := []Team{}
+	items := []uuid.UUID{}
 	for rows.Next() {
-		var i Team
-		if err := rows.Scan(&i.ID, &i.Name); err != nil {
+		var user_id uuid.UUID
+		if err := rows.Scan(&user_id); err != nil {
 			return nil, err
 		}
-		items = append(items, i)
+		items = append(items, user_id)
 	}
 	if err := rows.Err(); err != nil {
 		return nil, err

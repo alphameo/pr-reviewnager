@@ -12,10 +12,9 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-const createPullRequest = `-- name: CreatePullRequest :one
+const createPullRequest = `-- name: CreatePullRequest :exec
 INSERT INTO pull_request (id, title, author_id, status, merged_at)
 VALUES ($1, $2, $3, $4, $5)
-RETURNING id, title, author_id, status, merged_at
 `
 
 type CreatePullRequestParams struct {
@@ -26,23 +25,25 @@ type CreatePullRequestParams struct {
 	MergedAt pgtype.Timestamp `db:"merged_at" json:"merged_at"`
 }
 
-func (q *Queries) CreatePullRequest(ctx context.Context, arg CreatePullRequestParams) (PullRequest, error) {
-	row := q.db.QueryRow(ctx, createPullRequest,
+func (q *Queries) CreatePullRequest(ctx context.Context, arg CreatePullRequestParams) error {
+	_, err := q.db.Exec(ctx, createPullRequest,
 		arg.ID,
 		arg.Title,
 		arg.AuthorID,
 		arg.Status,
 		arg.MergedAt,
 	)
-	var i PullRequest
-	err := row.Scan(
-		&i.ID,
-		&i.Title,
-		&i.AuthorID,
-		&i.Status,
-		&i.MergedAt,
-	)
-	return i, err
+	return err
+}
+
+const deletePullRequest = `-- name: DeletePullRequest :exec
+DELETE FROM pull_request
+WHERE id = $1
+`
+
+func (q *Queries) DeletePullRequest(ctx context.Context, id uuid.UUID) error {
+	_, err := q.db.Exec(ctx, deletePullRequest, id)
+	return err
 }
 
 const getPullRequest = `-- name: GetPullRequest :one
@@ -90,6 +91,31 @@ func (q *Queries) GetPullRequests(ctx context.Context) ([]PullRequest, error) {
 		return nil, err
 	}
 	return items, nil
+}
+
+const updatePullRequest = `-- name: UpdatePullRequest :exec
+UPDATE pull_request
+SET title = $2, author_id = $3, status = $4, merged_at = $5
+WHERE id = $1
+`
+
+type UpdatePullRequestParams struct {
+	ID       uuid.UUID        `db:"id" json:"id"`
+	Title    string           `db:"title" json:"title"`
+	AuthorID uuid.UUID        `db:"author_id" json:"author_id"`
+	Status   string           `db:"status" json:"status"`
+	MergedAt pgtype.Timestamp `db:"merged_at" json:"merged_at"`
+}
+
+func (q *Queries) UpdatePullRequest(ctx context.Context, arg UpdatePullRequestParams) error {
+	_, err := q.db.Exec(ctx, updatePullRequest,
+		arg.ID,
+		arg.Title,
+		arg.AuthorID,
+		arg.Status,
+		arg.MergedAt,
+	)
+	return err
 }
 
 const updatePullRequestStatus = `-- name: UpdatePullRequestStatus :exec
