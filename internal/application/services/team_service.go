@@ -39,7 +39,7 @@ func NewDefaultTeamService(
 }
 
 func (s *DefaultTeamService) CreateTeamWithUsers(teamDTO dto.CreateTeamWithUsersDTO) error {
-	existingTeam, err := s.teamRepo.FindTeamByName(teamDTO.TeamName)
+	existingTeam, err := s.teamRepo.FindByName(teamDTO.TeamName)
 	if err != nil {
 		return err
 	}
@@ -62,7 +62,7 @@ func (s *DefaultTeamService) CreateTeamWithUsers(teamDTO dto.CreateTeamWithUsers
 }
 
 func (s *DefaultTeamService) FindTeamByName(name string) (*dto.TeamDTO, error) {
-	team, err := s.teamRepo.FindTeamByName(name)
+	team, err := s.teamRepo.FindByName(name)
 	if err != nil {
 		return nil, err
 	}
