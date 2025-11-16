@@ -15,7 +15,7 @@ const (
 func NewPRStatusFromString(value string) (PRStatus, error) {
 	processed := strings.ToLower(strings.TrimSpace(value))
 	switch value {
-	case "open":
+	case "", "open", "opened":
 		return OPEN, nil
 	case "merged":
 		return MERGED, nil
