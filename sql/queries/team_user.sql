@@ -33,3 +33,20 @@ FROM team t
 JOIN team_user tu ON t.id = tu.team_id
 WHERE tu.user_id = $1;
 
+-- name: GetActiveUsersInTeam :many
+SELECT u.id, u.name, u.active
+FROM "user" u
+JOIN team_user tu ON u.id = tu.user_id
+WHERE tu.team_id = $1 AND u.active = true;
+
+-- name: GetTeamsWithUsers :many
+SELECT 
+    t.id as team_id,
+    t.name as team_name,
+    u.id as user_id,
+    u.name as user_name,
+    u.active as user_active
+FROM team t
+LEFT JOIN team_user tu ON t.id = tu.team_id
+LEFT JOIN "user" u ON tu.user_id = u.id
+ORDER BY t.id;

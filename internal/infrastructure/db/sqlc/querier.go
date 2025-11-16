@@ -23,6 +23,7 @@ type Querier interface {
 	DeleteTeam(ctx context.Context, id uuid.UUID) error
 	DeleteTeamUsersByTeamID(ctx context.Context, teamID uuid.UUID) error
 	DeleteUser(ctx context.Context, id uuid.UUID) error
+	GetActiveUsersInTeam(ctx context.Context, teamID uuid.UUID) ([]User, error)
 	GetPullRequest(ctx context.Context, id uuid.UUID) (PullRequest, error)
 	GetPullRequestReviewerReviewerIDs(ctx context.Context, pullRequestID uuid.UUID) ([]uuid.UUID, error)
 	GetPullRequestWithReviewersByID(ctx context.Context, id uuid.UUID) ([]GetPullRequestWithReviewersByIDRow, error)
@@ -35,6 +36,7 @@ type Querier interface {
 	GetTeamForUser(ctx context.Context, userID uuid.UUID) (Team, error)
 	GetTeamIDForUser(ctx context.Context, userID uuid.UUID) (uuid.UUID, error)
 	GetTeams(ctx context.Context) ([]Team, error)
+	GetTeamsWithUsers(ctx context.Context) ([]GetTeamsWithUsersRow, error)
 	GetUser(ctx context.Context, id uuid.UUID) (User, error)
 	GetUserByName(ctx context.Context, name string) (User, error)
 	GetUserIDsInTeam(ctx context.Context, teamID uuid.UUID) ([]uuid.UUID, error)

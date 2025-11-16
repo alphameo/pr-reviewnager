@@ -9,6 +9,7 @@ import (
 	"context"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createTeamUser = `-- name: CreateTeamUser :exec
@@ -34,6 +35,33 @@ WHERE team_id = $1
 func (q *Queries) DeleteTeamUsersByTeamID(ctx context.Context, teamID uuid.UUID) error {
 	_, err := q.db.Exec(ctx, deleteTeamUsersByTeamID, teamID)
 	return err
+}
+
+const getActiveUsersInTeam = `-- name: GetActiveUsersInTeam :many
+SELECT u.id, u.name, u.active
+FROM "user" u
+JOIN team_user tu ON u.id = tu.user_id
+WHERE tu.team_id = $1 AND u.active = true
+`
+
+func (q *Queries) GetActiveUsersInTeam(ctx context.Context, teamID uuid.UUID) ([]User, error) {
+	rows, err := q.db.Query(ctx, getActiveUsersInTeam, teamID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []User{}
+	for rows.Next() {
+		var i User
+		if err := rows.Scan(&i.ID, &i.Name, &i.Active); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const getTeamForUser = `-- name: GetTeamForUser :one
@@ -62,6 +90,53 @@ func (q *Queries) GetTeamIDForUser(ctx context.Context, userID uuid.UUID) (uuid.
 	var id uuid.UUID
 	err := row.Scan(&id)
 	return id, err
+}
+
+const getTeamsWithUsers = `-- name: GetTeamsWithUsers :many
+SELECT 
+    t.id as team_id,
+    t.name as team_name,
+    u.id as user_id,
+    u.name as user_name,
+    u.active as user_active
+FROM team t
+LEFT JOIN team_user tu ON t.id = tu.team_id
+LEFT JOIN "user" u ON tu.user_id = u.id
+ORDER BY t.id
+`
+
+type GetTeamsWithUsersRow struct {
+	TeamID     uuid.UUID   `db:"team_id" json:"team_id"`
+	TeamName   string      `db:"team_name" json:"team_name"`
+	UserID     pgtype.UUID `db:"user_id" json:"user_id"`
+	UserName   pgtype.Text `db:"user_name" json:"user_name"`
+	UserActive pgtype.Bool `db:"user_active" json:"user_active"`
+}
+
+func (q *Queries) GetTeamsWithUsers(ctx context.Context) ([]GetTeamsWithUsersRow, error) {
+	rows, err := q.db.Query(ctx, getTeamsWithUsers)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []GetTeamsWithUsersRow{}
+	for rows.Next() {
+		var i GetTeamsWithUsersRow
+		if err := rows.Scan(
+			&i.TeamID,
+			&i.TeamName,
+			&i.UserID,
+			&i.UserName,
+			&i.UserActive,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const getUserIDsInTeam = `-- name: GetUserIDsInTeam :many

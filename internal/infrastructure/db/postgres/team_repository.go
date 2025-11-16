@@ -84,21 +84,19 @@ func (r *TeamRepository) FindByID(id v.ID) (*e.Team, error) {
 
 	qtx := r.queries.WithTx(tx)
 
-	dbTeam, err := qtx.GetTeam(ctx, uuid.UUID(id))
+	teamID := uuid.UUID(id)
+	dbTeam, err := qtx.GetTeam(ctx, teamID)
 	if err == pgx.ErrNoRows {
 		return nil, nil
 	} else if err != nil {
 		return nil, err
 	}
-	userIDs, err := qtx.GetUserIDsInTeam(ctx, uuid.UUID(id))
-	if err != nil && err != pgx.ErrNoRows {
+	userIDs, err := qtx.GetUserIDsInTeam(ctx, teamID)
+	if err != nil {
 		return nil, err
 	}
 
 	team := e.NewTeamWithID(v.ID(dbTeam.ID), dbTeam.Name)
-	if err != nil {
-		return nil, err
-	}
 	for _, userID := range userIDs {
 		team.AddUser(v.ID(userID))
 	}
@@ -120,24 +118,36 @@ func (r *TeamRepository) FindAll() ([]*e.Team, error) {
 
 	qtx := r.queries.WithTx(tx)
 
-	dbTeams, err := qtx.GetTeams(ctx)
-	if err != nil && err != pgx.ErrNoRows {
+	rows, err := qtx.GetTeamsWithUsers(ctx)
+	if err != nil {
 		return nil, err
 	}
 
-	teams := make([]*e.Team, len(dbTeams))
-	for i, dbTeam := range dbTeams {
-		userIDs, err := qtx.GetUserIDsInTeam(ctx, uuid.UUID(dbTeam.ID))
-		if err != nil && err != pgx.ErrNoRows {
-			return nil, err
+	teamMap := make(map[uuid.UUID]*e.Team)
+	teams := make([]*e.Team, 0)
+
+	for _, row := range rows {
+		teamID := uuid.UUID(row.TeamID)
+
+		team, exists := teamMap[teamID]
+		if !exists {
+			team = e.NewTeamWithID(v.ID(row.TeamID), row.TeamName)
+			teamMap[teamID] = team
+			teams = append(teams, team)
 		}
 
-		team := e.NewTeamWithID(v.ID(dbTeams[i].ID), dbTeams[i].Name)
-		for _, userID := range userIDs {
+		if row.UserID.Valid {
+			userID, err := v.NewIDFromString(row.UserID.String())
+			if err != nil {
+				return nil, err
+			}
 			team.AddUser(v.ID(userID))
 		}
+	}
 
-		teams[i] = team
+	err = tx.Commit(ctx)
+	if err != nil {
+		return nil, err
 	}
 
 	return teams, nil
@@ -198,7 +208,7 @@ func (r *TeamRepository) DeleteByID(id v.ID) error {
 
 	err := r.queries.DeleteTeam(ctx, uuid.UUID(id))
 	if err != nil {
-		return nil
+		return err
 	}
 	return nil
 }
@@ -220,14 +230,11 @@ func (r *TeamRepository) FindByName(teamName string) (*e.Team, error) {
 		return nil, err
 	}
 	userIDs, err := qtx.GetUserIDsInTeam(ctx, dbTeam.ID)
-	if err != nil && err != pgx.ErrNoRows {
+	if err != nil {
 		return nil, err
 	}
 
 	team := e.NewTeamWithID(v.ID(dbTeam.ID), dbTeam.Name)
-	if err != nil {
-		return nil, err
-	}
 	for _, userID := range userIDs {
 		team.AddUser(v.ID(userID))
 	}
@@ -276,7 +283,7 @@ func (r *TeamRepository) CreateTeamAndModifyUsers(team *e.Team, users []*e.User)
 	}
 
 	for _, user := range users {
-		err = qtx.UpsetUser(ctx, db.UpsetUserParams{
+		err = qtx.UpsertUser(ctx, db.UpsertUserParams{
 			ID:     uuid.UUID(user.ID()),
 			Name:   user.Name(),
 			Active: user.Active(),
@@ -310,14 +317,11 @@ func (r *TeamRepository) FindTeamByTeammateID(userID v.ID) (*e.Team, error) {
 		return nil, err
 	}
 	userIDs, err := qtx.GetUserIDsInTeam(ctx, dbTeam.ID)
-	if err != nil && err != pgx.ErrNoRows {
+	if err != nil {
 		return nil, err
 	}
 
 	team := e.NewTeamWithID(v.ID(dbTeam.ID), dbTeam.Name)
-	if err != nil {
-		return nil, err
-	}
 	for _, userID := range userIDs {
 		team.AddUser(v.ID(userID))
 	}
@@ -332,10 +336,8 @@ func (r *TeamRepository) FindTeamByTeammateID(userID v.ID) (*e.Team, error) {
 func (r *TeamRepository) FindActiveUsersByTeamID(teamID v.ID) ([]*e.User, error) {
 	ctx := context.Background()
 
-	users, err := r.queries.GetUsersInTeam(ctx, uuid.UUID(teamID))
-	if err == pgx.ErrNoRows {
-		return []*e.User{}, nil
-	} else if err != nil {
+	users, err := r.queries.GetActiveUsersInTeam(ctx, uuid.UUID(teamID))
+	if err != nil {
 		return nil, err
 	}
 
