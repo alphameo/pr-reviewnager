@@ -6,6 +6,7 @@ import (
 	"github.com/alphameo/pr-reviewnager/internal/application/dto"
 	"github.com/alphameo/pr-reviewnager/internal/application/mappers"
 	r "github.com/alphameo/pr-reviewnager/internal/domain/repositories"
+	ds "github.com/alphameo/pr-reviewnager/internal/domain/services"
 	s "github.com/alphameo/pr-reviewnager/internal/domain/services"
 	v "github.com/alphameo/pr-reviewnager/internal/domain/valueobjects"
 )
@@ -47,7 +48,10 @@ func (s *DefaultPullRequestService) CreatePullRequest(pullRequest *dto.PullReque
 	}
 
 	pr, err := s.prDomainServ.CreateWithReviewers(entity)
-	if err != nil {
+	if errors.Is(err, ds.ErrAuthorNotFound) || errors.Is(err, ds.ErrTeamNotFound) {
+	} else if errors.Is(err, ds.ErrPRAlreadyExists) {
+		return nil, ErrPRExists
+	} else if err != nil {
 		return nil, err
 	}
 	dto, err := mappers.PullRequestToDTO(pr)
@@ -59,7 +63,9 @@ func (s *DefaultPullRequestService) CreatePullRequest(pullRequest *dto.PullReque
 
 func (s *DefaultPullRequestService) MarkAsMerged(pullRequestID v.ID) (*dto.PullRequestDTO, error) {
 	pr, err := s.prDomainServ.MarkAsMerged(pullRequestID)
-	if err != nil {
+	if errors.Is(err, ds.ErrPRNotFound) {
+		return nil, ErrNotFound
+	} else if err != nil {
 		return nil, err
 	}
 	dto, err := mappers.PullRequestToDTO(pr)
@@ -71,7 +77,15 @@ func (s *DefaultPullRequestService) MarkAsMerged(pullRequestID v.ID) (*dto.PullR
 
 func (s *DefaultPullRequestService) ReassignReviewer(userID v.ID, pullRequestID v.ID) (*dto.PullRequestWithNewReviewerIDDTO, error) {
 	newReviewer, err := s.prDomainServ.ReassignReviewer(userID, pullRequestID)
-	if err != nil {
+	if errors.Is(err, ds.ErrPRNotFound) || errors.Is(err, ds.ErrUserNotFound) {
+		return nil, ErrNotFound
+	} else if errors.Is(err, ds.ErrPRAlreadyMerged) {
+		return nil, ErrPRAlreadyMerged
+	} else if errors.Is(err, ds.ErrUserNotReviewer) {
+		return nil, ErrNotAssigned
+	} else if errors.Is(err, ds.ErrNoReviewCandidates) {
+		return nil, ErrNoCandidate
+	} else if err != nil {
 		return nil, err
 	}
 	d, err := mappers.PullRequestToDTO(&newReviewer.PullRequest)

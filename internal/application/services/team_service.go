@@ -18,6 +18,15 @@ type TeamService interface {
 	SetUserActiveByID(userID v.ID, active bool) (*dto.UserWithTeamNameDTO, error)
 }
 
+var (
+	ErrTeamExists      error = errors.New("team already exists")
+	ErrPRExists        error = errors.New("pull request already exists")
+	ErrPRAlreadyMerged error = errors.New("pull request already merged")
+	ErrNoCandidate     error = errors.New("no active candidate for assigning")
+	ErrNotFound        error = errors.New("resource not found")
+	ErrNotAssigned     error = errors.New("reviewer is not assigned to PR")
+)
+
 type DefaultTeamService struct {
 	teamRepo r.TeamRepository
 	userRepo r.UserRepository
@@ -44,7 +53,7 @@ func NewDefaultTeamService(
 func (s *DefaultTeamService) CreateTeamWithUsers(teamDTO dto.TeamWithUsersDTO) error {
 	existingTeam, err := s.teamRepo.FindByName(teamDTO.TeamName)
 	if err != nil {
-		return err
+		return ErrTeamExists
 	}
 	if existingTeam != nil {
 		return fmt.Errorf("team with name=%s already exists", teamDTO.TeamName)
@@ -76,7 +85,7 @@ func (s *DefaultTeamService) FindTeamByName(name string) (*dto.TeamWithUsersDTO,
 	}
 
 	if team == nil {
-		return nil, nil
+		return nil, ErrNotFound
 	}
 	users := make([]*dto.UserDTO, len(team.UserIDs()))
 	for i, userID := range team.UserIDs() {
@@ -106,7 +115,7 @@ func (s *DefaultTeamService) SetUserActiveByID(userID v.ID, active bool) (*dto.U
 	}
 
 	if user == nil {
-		return nil, fmt.Errorf("no such user with id=%d", userID)
+		return nil, fmt.Errorf("%w: no such user with id=%d", ErrNotFound, userID)
 	}
 	user.SetActive(active)
 
