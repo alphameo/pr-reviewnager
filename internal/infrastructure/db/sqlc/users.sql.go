@@ -105,7 +105,7 @@ VALUES ($1, $2, $3)
 ON CONFLICT (id)
 DO UPDATE SET 
     name = EXCLUDED.name,
-    acive = EXCLUDED.active
+    active = EXCLUDED.active
 `
 
 type UpsetUserParams struct {
