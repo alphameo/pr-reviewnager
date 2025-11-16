@@ -18,3 +18,11 @@ WHERE id = $1;
 
 -- name: DeleteUser :exec
 DELETE FROM "user" WHERE id = $1;
+
+-- name: UpsetUser :exec
+INSERT INTO "user" (id, name, active) 
+VALUES ($1, $2, $3)
+ON CONFLICT (id)
+DO UPDATE SET 
+    name = EXCLUDED.name,
+    acive = EXCLUDED.active;

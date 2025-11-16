@@ -1,7 +1,6 @@
--- name: CreateTeam :one
+-- name: CreateTeam :exec
 INSERT INTO team (id, name)
-VALUES ($1, $2)
-RETURNING id, name;
+VALUES ($1, $2);
 
 -- name: GetTeams :many
 SELECT id, name FROM team;
