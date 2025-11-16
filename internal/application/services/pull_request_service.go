@@ -7,7 +7,6 @@ import (
 	"github.com/alphameo/pr-reviewnager/internal/application/mappers"
 	r "github.com/alphameo/pr-reviewnager/internal/domain/repositories"
 	ds "github.com/alphameo/pr-reviewnager/internal/domain/services"
-	s "github.com/alphameo/pr-reviewnager/internal/domain/services"
 	v "github.com/alphameo/pr-reviewnager/internal/domain/valueobjects"
 )
 
@@ -19,12 +18,12 @@ type PullRequestService interface {
 }
 
 type DefaultPullRequestService struct {
-	prDomainServ s.PullRequestDomainService
+	prDomainServ ds.PullRequestDomainService
 	prRepo       r.PullRequestRepository
 }
 
 func NewDefaultPullRequestService(
-	pullRequestDomainService s.PullRequestDomainService,
+	pullRequestDomainService ds.PullRequestDomainService,
 	pullRequestRepository r.PullRequestRepository,
 ) (*DefaultPullRequestService, error) {
 	if pullRequestDomainService == nil {
