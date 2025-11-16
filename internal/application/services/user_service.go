@@ -12,9 +12,9 @@ import (
 )
 
 type UserService interface {
-	RegisterUser(user dto.UserDTO) error
+	RegisterUser(user *dto.UserDTO) error
 	UnregisterUserByID(userID v.ID) error
-	ListUsers() ([]dto.UserDTO, error)
+	ListUsers() ([]*dto.UserDTO, error)
 	SetUserActiveByID(userID v.ID, active bool) error
 }
 
