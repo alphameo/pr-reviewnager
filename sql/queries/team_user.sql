@@ -11,7 +11,10 @@ DELETE FROM team_user
 WHERE team_id = $1;
 
 -- name: GetUsersInTeam :many
-SELECT u.id, u.name, u.active
+SELECT
+    u.id,
+    u.name,
+    u.active
 FROM "user" u
 JOIN team_user tu ON u.id = tu.user_id
 WHERE tu.team_id = $1;
@@ -28,24 +31,29 @@ JOIN team_user tu ON t.id = tu.team_id
 WHERE tu.user_id = $1;
 
 -- name: GetTeamForUser :one
-SELECT t.id, t.name
+SELECT
+    t.id,
+    t.name
 FROM team t
 JOIN team_user tu ON t.id = tu.team_id
 WHERE tu.user_id = $1;
 
 -- name: GetActiveUsersInTeam :many
-SELECT u.id, u.name, u.active
+SELECT
+    u.id,
+    u.name,
+    u.active
 FROM "user" u
 JOIN team_user tu ON u.id = tu.user_id
 WHERE tu.team_id = $1 AND u.active = true;
 
 -- name: GetTeamsWithUsers :many
-SELECT 
-    t.id as team_id,
-    t.name as team_name,
-    u.id as user_id,
-    u.name as user_name,
-    u.active as user_active
+SELECT
+    t.id AS team_id,
+    t.name AS team_name,
+    u.id AS user_id,
+    u.name AS user_name,
+    u.active AS user_active
 FROM team t
 LEFT JOIN team_user tu ON t.id = tu.team_id
 LEFT JOIN "user" u ON tu.user_id = u.id

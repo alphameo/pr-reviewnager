@@ -3,13 +3,27 @@ INSERT INTO "user" (id, name, active)
 VALUES ($1, $2, $3);
 
 -- name: GetUsers :many
-SELECT id, name, active FROM "user";
+SELECT
+    id,
+    name,
+    active
+FROM "user";
 
 -- name: GetUser :one
-SELECT id, name, active FROM "user" WHERE id = $1;
+SELECT
+    id,
+    name,
+    active
+FROM "user"
+WHERE id = $1;
 
 -- name: GetUserByName :one
-SELECT id, name, active FROM "user" WHERE name = $1;
+SELECT
+    id,
+    name,
+    active
+FROM "user"
+WHERE name = $1;
 
 -- name: UpdateUser :exec
 UPDATE "user"
@@ -17,12 +31,13 @@ SET name = $2, active = $3
 WHERE id = $1;
 
 -- name: DeleteUser :exec
-DELETE FROM "user" WHERE id = $1;
+DELETE FROM "user"
+WHERE id = $1;
 
 -- name: UpsertUser :exec
-INSERT INTO "user" (id, name, active) 
+INSERT INTO "user" (id, name, active)
 VALUES ($1, $2, $3)
 ON CONFLICT (id)
-DO UPDATE SET 
-    name = EXCLUDED.name,
-    active = EXCLUDED.active;
+DO UPDATE SET
+    name = excluded.name,
+    active = excluded.active;
