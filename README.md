@@ -1,6 +1,6 @@
 # _pr-reviewnager_
 
-Backend для cервиса менеджмента Pull Request'ов (тестовое задание)
+Backend для cервиса менеджмента Pull Request'ов ([тестовое задание](https://github.com/avito-tech/tech-internship/tree/main/Tech%20Internships/Backend/Backend-trainee-assignment-autumn-2025))
 User -- участник только одной команды
 
 ## Стэк
