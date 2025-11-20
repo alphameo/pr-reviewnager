@@ -12,6 +12,7 @@ import (
 func TimestamptzFromTime(t time.Time) pgtype.Timestamptz {
 	var ts pgtype.Timestamptz
 	ts.Scan(t)
+
 	return ts
 }
 
@@ -19,6 +20,7 @@ func TimeFromTimestamptz(ts pgtype.Timestamptz) time.Time {
 	if ts.Valid {
 		return ts.Time
 	}
+
 	return time.Time{}
 }
 
@@ -35,14 +37,12 @@ func PullRequestToEntity(dbPR *db.PullRequest) (*e.PullRequest, error) {
 		mergedAt = nil
 	}
 
-	pr := e.NewExistingPullRequest(
+	return e.NewExistingPullRequest(
 		v.ID(dbPR.ID),
 		dbPR.Title,
 		v.ID(dbPR.AuthorID),
 		TimeFromTimestamptz(dbPR.CreatedAt),
 		status,
 		mergedAt,
-	)
-
-	return pr, nil
+	), nil
 }

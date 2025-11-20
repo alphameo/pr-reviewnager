@@ -14,7 +14,7 @@ func PullRequestToDTO(entity *e.PullRequest) (*dto.PullRequestDTO, error) {
 		return nil, errors.New("entity cannot be nil")
 	}
 
-	dto := dto.PullRequestDTO{
+	return &dto.PullRequestDTO{
 		ID:          entity.ID(),
 		Title:       entity.Title(),
 		AuthorID:    entity.AuthorID(),
@@ -22,9 +22,7 @@ func PullRequestToDTO(entity *e.PullRequest) (*dto.PullRequestDTO, error) {
 		Status:      entity.Status().String(),
 		MergedAt:    entity.MergedAt(),
 		ReviewerIDs: entity.ReviewerIDs(),
-	}
-
-	return &dto, nil
+	}, nil
 }
 
 func PullRequestToEntity(dto *dto.PullRequestDTO) (*e.PullRequest, error) {

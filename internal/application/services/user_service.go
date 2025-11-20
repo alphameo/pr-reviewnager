@@ -24,8 +24,8 @@ func NewDefaultUserService(userRepository r.UserRepository) (*DefaultUserService
 	if userRepository == nil {
 		return nil, errors.New("userRepository cannot be nil")
 	}
-	s := DefaultUserService{userRepo: userRepository}
-	return &s, nil
+
+	return &DefaultUserService{userRepo: userRepository}, nil
 }
 
 func (s *DefaultUserService) RegisterUser(user *dto.UserDTO) error {

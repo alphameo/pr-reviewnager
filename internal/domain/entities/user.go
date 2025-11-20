@@ -12,12 +12,11 @@ type User struct {
 }
 
 func NewExistingUser(id v.ID, name string, active bool) *User {
-	u := User{
+	return &User{
 		id:     id,
 		name:   name,
 		active: active,
 	}
-	return &u
 }
 
 func NewUser(name string, active bool) *User {

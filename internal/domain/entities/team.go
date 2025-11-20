@@ -20,13 +20,11 @@ func NewTeam(name string) *Team {
 }
 
 func NewExistingTeam(id v.ID, name string) *Team {
-	t := Team{
+	return &Team{
 		id:      v.NewID(),
 		name:    name,
 		userIDs: make([]v.ID, 0, avgUserCountInTeam),
 	}
-
-	return &t
 }
 
 func (t *Team) ID() v.ID {

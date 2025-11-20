@@ -20,8 +20,7 @@ func NewUserRepository(queries *db.Queries) (*UserRepository, error) {
 		return nil, errors.New("queries cannot be nil")
 	}
 
-	r := UserRepository{queries: queries}
-	return &r, nil
+	return &UserRepository{queries: queries}, nil
 }
 
 func (r *UserRepository) Create(user *e.User) error {
@@ -39,6 +38,7 @@ func (r *UserRepository) Create(user *e.User) error {
 	if err != nil {
 		return err
 	}
+
 	return nil
 }
 
@@ -52,9 +52,7 @@ func (r *UserRepository) FindByID(id v.ID) (*e.User, error) {
 		return nil, err
 	}
 
-	entity := e.NewExistingUser(v.ID(user.ID), user.Name, user.Active)
-
-	return entity, nil
+	return e.NewExistingUser(v.ID(user.ID), user.Name, user.Active), nil
 }
 
 func (r *UserRepository) FindAll() ([]*e.User, error) {
@@ -67,8 +65,7 @@ func (r *UserRepository) FindAll() ([]*e.User, error) {
 
 	entities := make([]*e.User, len(users))
 	for i, user := range users {
-		u := e.NewExistingUser(v.ID(user.ID), user.Name, user.Active)
-		entities[i] = u
+		entities[i] = e.NewExistingUser(v.ID(user.ID), user.Name, user.Active)
 	}
 
 	return entities, nil

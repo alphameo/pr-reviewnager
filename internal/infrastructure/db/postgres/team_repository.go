@@ -24,11 +24,11 @@ func NewTeamRepository(queries *db.Queries, databaseConnection *pgx.Conn) (*Team
 	if databaseConnection == nil {
 		return nil, errors.New("database connection cannot be nil")
 	}
-	r := TeamRepository{
+
+	return &TeamRepository{
 		queries: queries,
 		dbConn:  databaseConnection,
-	}
-	return &r, nil
+	}, nil
 }
 
 func (r *TeamRepository) Create(team *e.Team) error {
@@ -71,6 +71,7 @@ func (r *TeamRepository) Create(team *e.Team) error {
 	if err != nil {
 		return err
 	}
+
 	return nil
 }
 
@@ -105,6 +106,7 @@ func (r *TeamRepository) FindByID(id v.ID) (*e.Team, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	return team, nil
 }
 
@@ -200,6 +202,7 @@ func (r *TeamRepository) Update(team *e.Team) error {
 	if err != nil {
 		return err
 	}
+
 	return nil
 }
 
@@ -210,6 +213,7 @@ func (r *TeamRepository) DeleteByID(id v.ID) error {
 	if err != nil {
 		return err
 	}
+
 	return nil
 }
 
@@ -243,6 +247,7 @@ func (r *TeamRepository) FindByName(teamName string) (*e.Team, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	return team, nil
 }
 
@@ -297,6 +302,7 @@ func (r *TeamRepository) CreateTeamAndModifyUsers(team *e.Team, users []*e.User)
 	if err != nil {
 		return err
 	}
+
 	return nil
 }
 
@@ -330,6 +336,7 @@ func (r *TeamRepository) FindTeamByTeammateID(userID v.ID) (*e.Team, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	return team, nil
 }
 

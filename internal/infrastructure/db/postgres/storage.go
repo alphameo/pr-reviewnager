@@ -45,14 +45,12 @@ func NewPSQLStorage(ctx context.Context, dsn string) (*PSQLStorage, error) {
 		return nil, fmt.Errorf("failed to create pull request repository: %w", err)
 	}
 
-	s := PSQLStorage{
+	return &PSQLStorage{
 		teamRepo: teamRepo,
 		userRepo: userRepo,
 		prRepo:   prRepo,
 		conn:     conn,
-	}
-
-	return &s, nil
+	}, nil
 }
 
 func (s *PSQLStorage) UserRepository() r.UserRepository {

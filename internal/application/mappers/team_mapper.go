@@ -12,13 +12,11 @@ func TeamToDTO(entity *e.Team) (*dto.TeamDTO, error) {
 		return nil, errors.New("entity cannot be nil")
 	}
 
-	dto := dto.TeamDTO{
+	return &dto.TeamDTO{
 		ID:      entity.ID(),
 		Name:    entity.Name(),
 		UserIDs: entity.UserIDs(),
-	}
-
-	return &dto, nil
+	}, nil
 }
 
 func TeamToEntity(dto *dto.TeamDTO) (*e.Team, error) {

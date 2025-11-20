@@ -26,7 +26,7 @@ func NewPullRequest(title string, authorID v.ID) *PullRequest {
 }
 
 func NewExistingPullRequest(id v.ID, title string, authorID v.ID, createdAt time.Time, status v.PRStatus, mergedAt *time.Time) *PullRequest {
-	p := PullRequest{
+	return &PullRequest{
 		id:          id,
 		title:       title,
 		authorID:    authorID,
@@ -35,8 +35,6 @@ func NewExistingPullRequest(id v.ID, title string, authorID v.ID, createdAt time
 		mergedAt:    mergedAt,
 		reviewerIDs: make([]v.ID, 0, MaxCountOfReviewers),
 	}
-
-	return &p
 }
 
 func (p *PullRequest) ID() v.ID {

@@ -33,11 +33,10 @@ func NewDefaultPullRequestService(
 		return nil, errors.New("PullRequestRepository cannot be nil")
 	}
 
-	s := DefaultPullRequestService{
+	return &DefaultPullRequestService{
 		prDomainServ: pullRequestDomainService,
 		prRepo:       pullRequestRepository,
-	}
-	return &s, nil
+	}, nil
 }
 
 func (s *DefaultPullRequestService) CreatePullRequest(pullRequest *dto.PullRequestDTO) (*dto.PullRequestDTO, error) {
@@ -91,11 +90,11 @@ func (s *DefaultPullRequestService) ReassignReviewer(userID v.ID, pullRequestID 
 	if err != nil {
 		return nil, err
 	}
-	response := dto.PullRequestWithNewReviewerIDDTO{
+
+	return &dto.PullRequestWithNewReviewerIDDTO{
 		PullRequest:       d,
 		NewReviewerUserID: newReviewer.NewReviewerID,
-	}
-	return &response, nil
+	}, nil
 }
 
 func (s *DefaultPullRequestService) FindPullRequestsByReviewer(userID v.ID) ([]*dto.PullRequestDTO, error) {

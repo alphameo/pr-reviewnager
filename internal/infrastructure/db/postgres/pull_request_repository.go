@@ -25,11 +25,11 @@ func NewPullRequestRepository(queries *db.Queries, databaseConnection *pgx.Conn)
 	if databaseConnection == nil {
 		return nil, errors.New("database connection cannot be nil")
 	}
-	r := PullRequestRepository{
+
+	return &PullRequestRepository{
 		queries: queries,
 		dbConn:  databaseConnection,
-	}
-	return &r, nil
+	}, nil
 }
 
 func (r *PullRequestRepository) Create(pullRequest *e.PullRequest) error {
@@ -253,6 +253,7 @@ func (r *PullRequestRepository) DeleteByID(id v.ID) error {
 	if err != nil {
 		return err
 	}
+
 	return nil
 }
 

@@ -29,8 +29,7 @@ func NewDefaultServiceProvider(storage infrastructure.Storage) (*DefaultServiceP
 		return nil, fmt.Errorf("failed to create domain pull request service: %w", err)
 	}
 
-	p := DefaultServiceProvider{prServ: prDomainServ}
-	return &p, nil
+	return &DefaultServiceProvider{prServ: prDomainServ}, nil
 }
 
 func (p *DefaultServiceProvider) PullRequestDomainService() PullRequestDomainService {

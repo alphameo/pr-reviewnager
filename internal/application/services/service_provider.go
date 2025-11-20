@@ -49,12 +49,11 @@ func NewDefaultServiceProvider(storage infra.Storage, domainServiceProvider doma
 		return nil, fmt.Errorf("failed to create pull request service: %w", err)
 	}
 
-	p := DefaultServiceProvider{
+	return &DefaultServiceProvider{
 		teamServ: teamServ,
 		userServ: userServ,
 		prServ:   prServ,
-	}
-	return &p, nil
+	}, nil
 }
 
 func (p *DefaultServiceProvider) UserService() UserService {

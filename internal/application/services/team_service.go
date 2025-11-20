@@ -43,11 +43,10 @@ func NewDefaultTeamService(
 		return nil, errors.New("userRepository cannot be nil")
 	}
 
-	s := DefaultTeamService{
+	return &DefaultTeamService{
 		teamRepo: teamRepository,
 		userRepo: userRepository,
-	}
-	return &s, nil
+	}, nil
 }
 
 func (s *DefaultTeamService) CreateTeamWithUsers(teamDTO dto.TeamWithUsersDTO) error {
@@ -100,12 +99,11 @@ func (s *DefaultTeamService) FindTeamByName(name string) (*dto.TeamWithUsersDTO,
 		users[i] = dto
 	}
 
-	res := dto.TeamWithUsersDTO{
+	return &dto.TeamWithUsersDTO{
 		ID:        team.ID(),
 		TeamName:  team.Name(),
 		TeamUsers: users,
-	}
-	return &res, nil
+	}, nil
 }
 
 func (s *DefaultTeamService) SetUserActiveByID(userID v.ID, active bool) (*dto.UserWithTeamNameDTO, error) {
@@ -131,9 +129,9 @@ func (s *DefaultTeamService) SetUserActiveByID(userID v.ID, active bool) (*dto.U
 	if err != nil {
 		return nil, err
 	}
-	dto := dto.UserWithTeamNameDTO{
+
+	return &dto.UserWithTeamNameDTO{
 		User:     userDTO,
 		TeamName: team.Name(),
-	}
-	return &dto, nil
+	}, nil
 }

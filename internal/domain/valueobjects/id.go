@@ -8,8 +8,7 @@ import (
 type ID uuid.UUID
 
 func NewID() ID {
-	id := ID(uuid.Must(uuid.NewV7()))
-	return id
+	return ID(uuid.Must(uuid.NewV7()))
 }
 
 func NewIDFromString(str string) (ID, error) {
@@ -17,8 +16,8 @@ func NewIDFromString(str string) (ID, error) {
 	if err != nil {
 		return ID(uuid.Nil), err
 	}
-	id := ID(value)
-	return id, nil
+
+	return ID(value), nil
 }
 
 func (id ID) String() string {
