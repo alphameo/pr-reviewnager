@@ -26,7 +26,7 @@ func TeamToEntity(dto *dto.TeamDTO) (*e.Team, error) {
 		return nil, errors.New("dto cannot be nil")
 	}
 
-	entity := e.NewTeamWithID(dto.ID, dto.Name)
+	entity := e.NewExistingTeam(dto.ID, dto.Name)
 	for _, id := range dto.UserIDs {
 		entity.AddUser(id)
 	}

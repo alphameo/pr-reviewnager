@@ -96,7 +96,7 @@ func (r *TeamRepository) FindByID(id v.ID) (*e.Team, error) {
 		return nil, err
 	}
 
-	team := e.NewTeamWithID(v.ID(dbTeam.ID), dbTeam.Name)
+	team := e.NewExistingTeam(v.ID(dbTeam.ID), dbTeam.Name)
 	for _, userID := range userIDs {
 		team.AddUser(v.ID(userID))
 	}
@@ -131,7 +131,7 @@ func (r *TeamRepository) FindAll() ([]*e.Team, error) {
 
 		team, exists := teamMap[teamID]
 		if !exists {
-			team = e.NewTeamWithID(v.ID(row.TeamID), row.TeamName)
+			team = e.NewExistingTeam(v.ID(row.TeamID), row.TeamName)
 			teamMap[teamID] = team
 			teams = append(teams, team)
 		}
@@ -234,7 +234,7 @@ func (r *TeamRepository) FindByName(teamName string) (*e.Team, error) {
 		return nil, err
 	}
 
-	team := e.NewTeamWithID(v.ID(dbTeam.ID), dbTeam.Name)
+	team := e.NewExistingTeam(v.ID(dbTeam.ID), dbTeam.Name)
 	for _, userID := range userIDs {
 		team.AddUser(v.ID(userID))
 	}
@@ -321,7 +321,7 @@ func (r *TeamRepository) FindTeamByTeammateID(userID v.ID) (*e.Team, error) {
 		return nil, err
 	}
 
-	team := e.NewTeamWithID(v.ID(dbTeam.ID), dbTeam.Name)
+	team := e.NewExistingTeam(v.ID(dbTeam.ID), dbTeam.Name)
 	for _, userID := range userIDs {
 		team.AddUser(v.ID(userID))
 	}
@@ -343,7 +343,7 @@ func (r *TeamRepository) FindActiveUsersByTeamID(teamID v.ID) ([]*e.User, error)
 
 	entities := make([]*e.User, len(users))
 	for i, user := range users {
-		u := e.NewUserWithID(v.ID(user.ID), user.Name, user.Active)
+		u := e.NewExistingUser(v.ID(user.ID), user.Name, user.Active)
 		entities[i] = u
 	}
 

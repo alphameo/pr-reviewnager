@@ -11,7 +11,7 @@ type User struct {
 	active bool
 }
 
-func NewUserWithID(id v.ID, name string, active bool) *User {
+func NewExistingUser(id v.ID, name string, active bool) *User {
 	u := User{
 		id:     id,
 		name:   name,
@@ -21,7 +21,7 @@ func NewUserWithID(id v.ID, name string, active bool) *User {
 }
 
 func NewUser(name string, active bool) *User {
-	return NewUserWithID(v.NewID(), name, active)
+	return NewExistingUser(v.NewID(), name, active)
 }
 
 func (u *User) ID() v.ID {

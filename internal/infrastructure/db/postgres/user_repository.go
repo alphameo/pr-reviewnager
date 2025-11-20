@@ -52,7 +52,7 @@ func (r *UserRepository) FindByID(id v.ID) (*e.User, error) {
 		return nil, err
 	}
 
-	entity := e.NewUserWithID(v.ID(user.ID), user.Name, user.Active)
+	entity := e.NewExistingUser(v.ID(user.ID), user.Name, user.Active)
 
 	return entity, nil
 }
@@ -67,7 +67,7 @@ func (r *UserRepository) FindAll() ([]*e.User, error) {
 
 	entities := make([]*e.User, len(users))
 	for i, user := range users {
-		u := e.NewUserWithID(v.ID(user.ID), user.Name, user.Active)
+		u := e.NewExistingUser(v.ID(user.ID), user.Name, user.Active)
 		entities[i] = u
 	}
 

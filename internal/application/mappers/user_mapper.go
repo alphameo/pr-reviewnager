@@ -24,7 +24,7 @@ func UserToEntity(dto *dto.UserDTO) (*e.User, error) {
 		return nil, errors.New("dto cannot be nil")
 	}
 
-	return e.NewUserWithID(dto.ID, dto.Name, dto.Active), nil
+	return e.NewExistingUser(dto.ID, dto.Name, dto.Active), nil
 }
 
 func UsersToDTOs(users []*e.User) ([]*dto.UserDTO, error) {

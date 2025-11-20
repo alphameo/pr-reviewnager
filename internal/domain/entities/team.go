@@ -16,10 +16,10 @@ type Team struct {
 }
 
 func NewTeam(name string) *Team {
-	return NewTeamWithID(v.NewID(), name)
+	return NewExistingTeam(v.NewID(), name)
 }
 
-func NewTeamWithID(id v.ID, name string) *Team {
+func NewExistingTeam(id v.ID, name string) *Team {
 	t := Team{
 		id:      v.NewID(),
 		name:    name,
