@@ -21,7 +21,7 @@ func NewTeam(name string) *Team {
 
 func NewExistingTeam(id v.ID, name string) *Team {
 	return &Team{
-		id:      v.NewID(),
+		id:      id,
 		name:    name,
 		userIDs: make([]v.ID, 0, avgUserCountInTeam),
 	}
