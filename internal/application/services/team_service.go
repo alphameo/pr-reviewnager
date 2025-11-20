@@ -60,10 +60,14 @@ func (s *DefaultTeamService) CreateTeamWithUsers(teamDTO dto.TeamWithUsersDTO) e
 
 	var team *entities.Team
 	if teamDTO.ID == v.ID(uuid.Nil) {
-		team = entities.NewTeam(teamDTO.TeamName)
+		team, err = entities.NewTeam(teamDTO.TeamName)
 	} else {
-		team = entities.NewExistingTeam(teamDTO.ID, teamDTO.TeamName)
+		team, err = entities.NewExistingTeam(teamDTO.ID, teamDTO.TeamName, nil)
 	}
+	if err != nil {
+		return err
+	}
+
 	users, err := mappers.UsersToEntities(teamDTO.TeamUsers)
 	if err != nil {
 		return err

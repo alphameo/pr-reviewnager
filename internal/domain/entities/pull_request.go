@@ -18,15 +18,16 @@ type PullRequest struct {
 	createdAt   time.Time
 	status      v.PRStatus
 	mergedAt    *time.Time
+	// slice (not map) because reviewers count is often not large
 	reviewerIDs []v.ID
 }
 
-func NewPullRequest(title string, authorID v.ID) *PullRequest {
-	return NewExistingPullRequest(v.NewID(), title, authorID, time.Now(), v.OPEN, nil)
+func NewPullRequest(title string, authorID v.ID) (*PullRequest, error) {
+	return NewExistingPullRequest(v.NewID(), title, authorID, time.Now(), v.OPEN, nil, nil)
 }
 
-func NewExistingPullRequest(id v.ID, title string, authorID v.ID, createdAt time.Time, status v.PRStatus, mergedAt *time.Time) *PullRequest {
-	return &PullRequest{
+func NewExistingPullRequest(id v.ID, title string, authorID v.ID, createdAt time.Time, status v.PRStatus, mergedAt *time.Time, reviewerIDs []v.ID) (*PullRequest, error) {
+	p := &PullRequest{
 		id:          id,
 		title:       title,
 		authorID:    authorID,
@@ -35,6 +36,15 @@ func NewExistingPullRequest(id v.ID, title string, authorID v.ID, createdAt time
 		mergedAt:    mergedAt,
 		reviewerIDs: make([]v.ID, 0, MaxCountOfReviewers),
 	}
+
+	for _, id := range reviewerIDs {
+		err := p.AssignReviewer(id)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return p, nil
 }
 
 func (p *PullRequest) ID() v.ID {
@@ -79,6 +89,10 @@ func (p *PullRequest) AssignReviewer(reviewerID v.ID) error {
 	}
 	if p.status == v.MERGED {
 		return errors.New("cannot assign new reviewer: PR is already MERGED")
+	}
+
+	if slices.Contains(p.reviewerIDs, reviewerID) {
+		return fmt.Errorf("user with id=%v already assigned as review", reviewerID)
 	}
 
 	p.reviewerIDs = append(p.reviewerIDs, reviewerID)

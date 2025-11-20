@@ -97,7 +97,10 @@ func (r *TeamRepository) FindByID(id v.ID) (*e.Team, error) {
 		return nil, err
 	}
 
-	team := e.NewExistingTeam(v.ID(dbTeam.ID), dbTeam.Name)
+	team, err := e.NewExistingTeam(v.ID(dbTeam.ID), dbTeam.Name, nil)
+	if err != nil {
+		return nil, err
+	}
 	for _, userID := range userIDs {
 		team.AddUser(v.ID(userID))
 	}
@@ -133,7 +136,10 @@ func (r *TeamRepository) FindAll() ([]*e.Team, error) {
 
 		team, exists := teamMap[teamID]
 		if !exists {
-			team = e.NewExistingTeam(v.ID(row.TeamID), row.TeamName)
+			team, err = e.NewExistingTeam(v.ID(row.TeamID), row.TeamName, nil)
+			if err != nil {
+				return nil, err
+			}
 			teamMap[teamID] = team
 			teams = append(teams, team)
 		}
@@ -238,7 +244,10 @@ func (r *TeamRepository) FindByName(teamName string) (*e.Team, error) {
 		return nil, err
 	}
 
-	team := e.NewExistingTeam(v.ID(dbTeam.ID), dbTeam.Name)
+	team, err := e.NewExistingTeam(v.ID(dbTeam.ID), dbTeam.Name, nil)
+	if err != nil {
+		return nil, err
+	}
 	for _, userID := range userIDs {
 		team.AddUser(v.ID(userID))
 	}
@@ -327,7 +336,10 @@ func (r *TeamRepository) FindTeamByTeammateID(userID v.ID) (*e.Team, error) {
 		return nil, err
 	}
 
-	team := e.NewExistingTeam(v.ID(dbTeam.ID), dbTeam.Name)
+	team, err := e.NewExistingTeam(v.ID(dbTeam.ID), dbTeam.Name, nil)
+	if err != nil {
+		return nil, err
+	}
 	for _, userID := range userIDs {
 		team.AddUser(v.ID(userID))
 	}

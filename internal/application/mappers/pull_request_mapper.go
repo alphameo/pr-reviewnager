@@ -34,12 +34,15 @@ func PullRequestToEntity(dto *dto.PullRequestDTO) (*e.PullRequest, error) {
 	if err != nil {
 		return nil, err
 	}
-	entity := e.NewExistingPullRequest(dto.ID, dto.Title, dto.AuthorID, dto.CreatedAt, status, dto.MergedAt)
-	for _, id := range dto.ReviewerIDs {
-		entity.AssignReviewer(id)
-	}
-
-	return entity, nil
+	return e.NewExistingPullRequest(
+		dto.ID,
+		dto.Title,
+		dto.AuthorID,
+		dto.CreatedAt,
+		status,
+		nil,
+		dto.ReviewerIDs,
+	)
 }
 
 func PullRequestsToDTOs(entities []*e.PullRequest) ([]*dto.PullRequestDTO, error) {

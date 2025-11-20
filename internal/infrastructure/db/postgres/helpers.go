@@ -44,5 +44,6 @@ func PullRequestToEntity(dbPR *db.PullRequest) (*e.PullRequest, error) {
 		TimeFromTimestamptz(dbPR.CreatedAt),
 		status,
 		mergedAt,
-	), nil
+		nil,
+	)
 }
