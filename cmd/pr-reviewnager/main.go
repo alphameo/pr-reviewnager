@@ -27,43 +27,24 @@ func main() {
 	}
 
 	ctx := context.Background()
-	conn, err := postgres.NewConnection(ctx, dsn)
+	storage, err := postgres.NewPSQLStorage(ctx, dsn)
 	if err != nil {
-		log.Fatalf("Failed to connect to database: %v", err)
+		log.Fatalf("Failed to initialize storage: %v", err)
 	}
-	defer conn.Close(ctx)
+	defer func() {
+		if err := storage.Close(ctx); err != nil {
+			log.Fatalf("Error closing storage: %v", err)
+		}
+	}()
 
-	queries := postgres.NewQueries(conn)
-
-	teamRepo, err := postgres.NewTeamRepository(queries, conn)
+	domainServiceProvider, err := ds.NewDefaultServiceProvider(storage)
 	if err != nil {
-		log.Fatal("Failed to start server:", err)
-	}
-	userRepo, err := postgres.NewUserRepository(queries)
-	if err != nil {
-		log.Fatal("Failed to start server:", err)
-	}
-	prRepo, err := postgres.NewPullRequestRepository(queries, conn)
-	if err != nil {
-		log.Fatal("Failed to start server:", err)
+		log.Fatalf("Failed to create domain service provider: %v", err)
 	}
 
-	prDomainServ, err := ds.NewDefaultPullRequestDomainService(userRepo, prRepo, teamRepo)
+	serviceProvider, err := s.NewDefaultServiceProvider(storage, domainServiceProvider)
 	if err != nil {
-		log.Fatal("Failed to start server:", err)
-	}
-
-	teamServ, err := s.NewDefaultTeamService(teamRepo, userRepo)
-	if err != nil {
-		log.Fatal("Failed to start server:", err)
-	}
-	userServ, err := s.NewDefaulUserService(userRepo)
-	if err != nil {
-		log.Fatal("Failed to start server:", err)
-	}
-	prServ, err := s.NewDefaultPullRequestService(prDomainServ, prRepo)
-	if err != nil {
-		log.Fatal("Failed to start server:", err)
+		log.Fatalf("Failed to create service provider: %v", err)
 	}
 
 	e := echo.New()
@@ -72,12 +53,12 @@ func main() {
 	e.Use(middleware.Recover())
 
 	serverImpl, err := api.NewServer(
-		teamServ,
-		userServ,
-		prServ,
+		serviceProvider.TeamService(),
+		serviceProvider.UserService(),
+		serviceProvider.PullRequestService(),
 	)
 	if err != nil {
-		log.Fatal("Failed to start server:", err)
+		log.Fatal("Failed to create server:", err)
 	}
 
 	api.RegisterHandlers(e, serverImpl)
