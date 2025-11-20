@@ -13,7 +13,7 @@ RUN set -ex && \
     wget -O /tmp/migrate.tgz https://github.com/golang-migrate/migrate/releases/latest/download/migrate.linux-amd64.tar.gz && \
     tar -xzf /tmp/migrate.tgz -C /tmp && \
     mv /tmp/migrate /usr/local/bin/migrate && \
-    rm /tmp/migrate.tgz # <--- Исправлено: migrate, а не migrate.linux-amd64
+    rm /tmp/migrate.tgz
 
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o pr-reviewnager ./cmd/pr-reviewnager
 
