@@ -64,11 +64,7 @@ func (r *PullRequestRepository) Create(pullRequest *e.PullRequest) error {
 
 	}
 
-	err = tx.Commit(ctx)
-	if err != nil {
-		return err
-	}
-	return nil
+	return tx.Commit(ctx)
 }
 
 func (r *PullRequestRepository) FindByID(id v.ID) (*e.PullRequest, error) {
@@ -247,11 +243,7 @@ func (r *PullRequestRepository) Update(pullRequest *e.PullRequest) error {
 		}
 	}
 
-	err = tx.Commit(ctx)
-	if err != nil {
-		return err
-	}
-	return nil
+	return tx.Commit(ctx)
 }
 
 func (r *PullRequestRepository) DeleteByID(id v.ID) error {

@@ -67,12 +67,7 @@ func (r *TeamRepository) Create(team *e.Team) error {
 		}
 	}
 
-	err = tx.Commit(ctx)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return tx.Commit(ctx)
 }
 
 func (r *TeamRepository) FindByID(id v.ID) (*e.Team, error) {
@@ -204,12 +199,7 @@ func (r *TeamRepository) Update(team *e.Team) error {
 		}
 	}
 
-	err = tx.Commit(ctx)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return tx.Commit(ctx)
 }
 
 func (r *TeamRepository) DeleteByID(id v.ID) error {
@@ -307,12 +297,7 @@ func (r *TeamRepository) CreateTeamAndModifyUsers(team *e.Team, users []*e.User)
 		}
 	}
 
-	err = tx.Commit(ctx)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return tx.Commit(ctx)
 }
 
 func (r *TeamRepository) FindTeamByTeammateID(userID v.ID) (*e.Team, error) {
