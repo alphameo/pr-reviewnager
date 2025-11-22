@@ -42,12 +42,19 @@ func (r *PullRequestRepository) Create(pullRequest *e.PullRequest) error {
 
 	qtx := r.queries.WithTx(tx)
 
+	var mergedAt pgtype.Timestamptz
+	if pullRequest.MergedAt() == nil {
+		mergedAt = pgtype.Timestamptz{Valid: false}
+	} else {
+		mergedAt = TimestamptzFromTime(*pullRequest.MergedAt())
+	}
+
 	err = qtx.CreatePullRequest(ctx, db.CreatePullRequestParams{
 		ID:       uuid.UUID(pullRequest.ID()),
 		Title:    pullRequest.Title(),
 		AuthorID: uuid.UUID(pullRequest.AuthorID()),
 		Status:   pullRequest.Status().String(),
-		MergedAt: TimestamptzFromTime(*pullRequest.MergedAt()),
+		MergedAt: mergedAt,
 	})
 	if err != nil {
 		return err
