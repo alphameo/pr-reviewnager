@@ -4,8 +4,8 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/alphameo/pr-reviewnager/internal/application/dto"
 	s "github.com/alphameo/pr-reviewnager/internal/application/services"
+	"github.com/alphameo/pr-reviewnager/internal/domain/dto"
 	"github.com/alphameo/pr-reviewnager/internal/domain/valueobjects"
 	"github.com/labstack/echo/v4"
 )
@@ -122,9 +122,9 @@ func (s *Server) PostTeamAdd(ctx echo.Context) error {
 		return err
 	}
 
-	dtoTeam := FromAPITeam(team)
+	teamDTO := FromAPITeam(team)
 
-	err := s.teamService.CreateTeamWithUsers(dtoTeam)
+	err := s.teamService.CreateTeamWithUsers(&teamDTO)
 	if err != nil {
 		return mapAppErrorToEchoResponse(ctx, err)
 	}

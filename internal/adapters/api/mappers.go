@@ -3,11 +3,12 @@ package api
 import (
 	"time"
 
-	"github.com/alphameo/pr-reviewnager/internal/application/dto"
+	s "github.com/alphameo/pr-reviewnager/internal/application/services"
+	"github.com/alphameo/pr-reviewnager/internal/domain/dto"
 	"github.com/alphameo/pr-reviewnager/internal/domain/valueobjects"
 )
 
-func ToAPITeam(d dto.TeamWithUsersDTO) Team {
+func ToAPITeam(d s.TeamWithUsersDTO) Team {
 	members := make([]TeamMember, len(d.TeamUsers))
 	for i, m := range d.TeamUsers {
 		member := ToAPITeamMember(*m)
@@ -20,14 +21,14 @@ func ToAPITeam(d dto.TeamWithUsersDTO) Team {
 	}
 }
 
-func FromAPITeam(t Team) dto.TeamWithUsersDTO {
+func FromAPITeam(t Team) s.TeamWithUsersDTO {
 	members := make([]*dto.UserDTO, len(t.Members))
 	for i, m := range t.Members {
 		member := FromAPITeamMember(m)
 		members[i] = &member
 	}
 
-	return dto.TeamWithUsersDTO{
+	return s.TeamWithUsersDTO{
 		TeamName:  t.TeamName,
 		TeamUsers: members,
 	}
@@ -51,7 +52,7 @@ func FromAPITeamMember(m TeamMember) dto.UserDTO {
 	}
 }
 
-func ToAPIUser(u dto.UserWithTeamNameDTO) User {
+func ToAPIUser(u s.UserWithTeamNameDTO) User {
 	return User{
 		UserId:   u.User.ID.String(),
 		Username: u.User.Name,
