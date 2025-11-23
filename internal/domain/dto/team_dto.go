@@ -7,9 +7,3 @@ type TeamDTO struct {
 	Name    string
 	UserIDs []v.ID
 }
-
-type TeamWithUsersDTO struct {
-	ID      v.ID
-	TeamName  string
-	TeamUsers []*UserDTO
-}

@@ -18,6 +18,17 @@ type TeamService interface {
 	SetUserActiveByID(userID v.ID, active bool) (*dto.UserWithTeamNameDTO, error)
 }
 
+type TeamWithUsersDTO struct {
+	ID        v.ID
+	TeamName  string
+	TeamUsers []*dto.UserDTO
+}
+
+type UserWithTeamNameDTO struct {
+	User     *dto.UserDTO
+	TeamName string
+}
+
 var (
 	ErrTeamExists      error = errors.New("team already exists")
 	ErrPRExists        error = errors.New("pull request already exists")

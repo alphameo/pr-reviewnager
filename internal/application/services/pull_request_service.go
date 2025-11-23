@@ -17,6 +17,11 @@ type PullRequestService interface {
 	FindPullRequestsByReviewer(userID v.ID) ([]*dto.PullRequestDTO, error)
 }
 
+type PullRequestWithNewReviewerIDDTO struct {
+	PullRequest       *dto.PullRequestDTO
+	NewReviewerUserID v.ID
+}
+
 type DefaultPullRequestService struct {
 	prDomainServ ds.PullRequestDomainService
 	prRepo       r.PullRequestRepository
