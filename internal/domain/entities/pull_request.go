@@ -12,6 +12,12 @@ import (
 
 const MaxReviewersCount int = 2
 
+var (
+	ErrPRAlreadyMerged           = errors.New("PR is already MERGED")
+	ErrMaxReviewersCount         = fmt.Errorf("maximum number of reviewers is %d", MaxReviewersCount)
+	ErrAlreadyAssignedAsReviewer = errors.New("user already assiggned as reviewer")
+)
+
 type PullRequest struct {
 	id          v.ID
 	title       string
@@ -112,15 +118,16 @@ func (p *PullRequest) NeedMoreReviewers() bool {
 }
 
 func (p *PullRequest) AssignReviewer(reviewerID v.ID) error {
-	if !p.NeedMoreReviewers() {
-		return fmt.Errorf("maximum number of reviewers is %d", MaxCountOfReviewers)
+	if len(p.reviewerIDs) == MaxReviewersCount {
+		return ErrMaxReviewersCount
 	}
+
 	if p.status == v.MERGED {
-		return errors.New("cannot assign new reviewer: PR is already MERGED")
+		return ErrPRAlreadyMerged
 	}
 
 	if slices.Contains(p.reviewerIDs, reviewerID) {
-		return fmt.Errorf("user with id=%v already assigned as review", reviewerID)
+		return fmt.Errorf("%w: id=%v", ErrAlreadyAssignedAsReviewer, reviewerID)
 	}
 
 	p.reviewerIDs = append(p.reviewerIDs, reviewerID)
@@ -129,11 +136,11 @@ func (p *PullRequest) AssignReviewer(reviewerID v.ID) error {
 
 func (p *PullRequest) UnassignReviewer(reviewerID v.ID) error {
 	if p.status == v.MERGED {
-		return errors.New("cannot unassign reviewer: PR is already MERGED")
+		return ErrPRAlreadyMerged
 	}
 	idx := slices.Index(p.reviewerIDs, reviewerID)
 	if idx == -1 {
-		return fmt.Errorf("cannot unassing reviwer: no user with id=%d inside reviewers list", reviewerID)
+		return fmt.Errorf("no user with id=%d inside reviewers list", reviewerID)
 	}
 
 	p.reviewerIDs = slices.Delete(p.reviewerIDs, idx, idx+1)

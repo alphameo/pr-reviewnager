@@ -11,6 +11,8 @@ import (
 
 const avgUserCountInTeam = 10
 
+var ErrAlreadyTeamMember = errors.New("user is already a team member")
+
 type Team struct {
 	id   v.ID
 	name string
@@ -60,7 +62,7 @@ func (t *Team) UserIDs() []v.ID {
 
 func (t *Team) AddUser(userID v.ID) error {
 	if slices.Contains(t.userIDs, userID) {
-		return fmt.Errorf("user with id=%v already exists in team", userID)
+		return fmt.Errorf("%w: userID=%v", ErrAlreadyTeamMember, userID)
 	}
 
 	t.userIDs = append(t.userIDs, userID)
