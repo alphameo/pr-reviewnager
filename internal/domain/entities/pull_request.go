@@ -113,10 +113,6 @@ func (p *PullRequest) ReviewerIDs() []v.ID {
 	return slices.Clone(p.reviewerIDs)
 }
 
-func (p *PullRequest) NeedMoreReviewers() bool {
-	return len(p.reviewerIDs) < MaxCountOfReviewers
-}
-
 func (p *PullRequest) AssignReviewer(reviewerID v.ID) error {
 	if len(p.reviewerIDs) == MaxReviewersCount {
 		return ErrMaxReviewersCount
