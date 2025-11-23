@@ -247,7 +247,7 @@ func (r *TeamRepository) FindByName(teamName string) (*dto.TeamDTO, error) {
 	team := dto.TeamDTO{
 		ID:      v.ID(dbTeam.ID),
 		Name:    dbTeam.Name,
-		UserIDs: nil,
+		UserIDs: userIDs,
 	}
 
 	err = tx.Commit(ctx)
@@ -336,7 +336,7 @@ func (r *TeamRepository) FindTeamByTeammateID(userID v.ID) (*dto.TeamDTO, error)
 	team := dto.TeamDTO{
 		ID:      v.ID(dbTeam.ID),
 		Name:    dbTeam.Name,
-		UserIDs: nil,
+		UserIDs: userIDs,
 	}
 
 	err = tx.Commit(ctx)
