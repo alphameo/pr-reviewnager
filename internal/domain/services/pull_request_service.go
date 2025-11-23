@@ -7,6 +7,7 @@ import (
 	"math/rand"
 	"slices"
 
+	"github.com/alphameo/pr-reviewnager/internal/domain/dto"
 	e "github.com/alphameo/pr-reviewnager/internal/domain/entities"
 	r "github.com/alphameo/pr-reviewnager/internal/domain/repositories"
 	v "github.com/alphameo/pr-reviewnager/internal/domain/valueobjects"
@@ -65,11 +66,11 @@ func NewDefaultPullRequestDomainService(
 }
 
 func (s *DefaultPullRequestDomainService) CreateWithReviewers(pullRequest *e.PullRequest) (*e.PullRequest, error) {
-	pr, err := s.prRepo.FindByID(pullRequest.ID())
+	prDTO, err := s.prRepo.FindByID(pullRequest.ID())
 	if err != nil {
 		return nil, err
 	}
-	if pr != nil {
+	if prDTO != nil {
 		return nil, ErrPRAlreadyExists
 	}
 
@@ -91,14 +92,14 @@ func (s *DefaultPullRequestDomainService) CreateWithReviewers(pullRequest *e.Pul
 		return nil, ErrTeamNotFound
 	}
 
-	availableUsers, err := s.teamRepo.FindActiveUsersByTeamID(team.ID())
+	availableUsers, err := s.teamRepo.FindActiveUsersByTeamID(team.ID)
 	if err != nil {
 		return nil, err
 	}
 
-	reviewers := chooseRandomUsers(availableUsers, e.MaxCountOfReviewers, authorID)
+	reviewers := chooseRandomUsers(availableUsers, e.MaxReviewersCount, authorID)
 	for _, u := range reviewers {
-		pullRequest.AssignReviewer(u.ID())
+		pullRequest.AssignReviewer(u.ID)
 	}
 
 	err = s.prRepo.Create(pullRequest)
@@ -115,28 +116,35 @@ type ReassignReviewerResponse struct {
 }
 
 func (s *DefaultPullRequestDomainService) ReassignReviewer(userID v.ID, pullRequestID v.ID) (*ReassignReviewerResponse, error) {
-	pullRequest, err := s.prRepo.FindByID(pullRequestID)
+	prDTO, err := s.prRepo.FindByID(pullRequestID)
 	if err != nil {
 		return nil, err
-	} else if pullRequest == nil {
+	}
+	if prDTO == nil {
 		return nil, ErrPRNotFound
-	} else if pullRequest.Status() == v.MERGED {
+	}
+
+	pr, err := e.NewExistingPullRequest(prDTO)
+	if err != nil {
+		return nil, err
+	}
+	if pr.Status() == v.MERGED {
 		return nil, ErrPRAlreadyMerged
 	}
 
-	reviewerIDs := pullRequest.ReviewerIDs()
+	reviewerIDs := pr.ReviewerIDs()
 	reviewerIdx := slices.Index(reviewerIDs, userID)
 	if reviewerIdx == -1 {
 		return nil, fmt.Errorf("cannot reassign reviewer with id=%s: %w", userID.String(), ErrUserNotReviewer)
 	}
 
-	authorID := pullRequest.AuthorID()
+	authorID := pr.AuthorID()
 	team, err := s.teamRepo.FindTeamByTeammateID(authorID)
 	if err != nil {
 		return nil, err
 	}
 
-	availableUsers, err := s.teamRepo.FindActiveUsersByTeamID(team.ID())
+	availableUsers, err := s.teamRepo.FindActiveUsersByTeamID(team.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -144,27 +152,27 @@ func (s *DefaultPullRequestDomainService) ReassignReviewer(userID v.ID, pullRequ
 		return nil, ErrNoReviewCandidates
 	}
 
-	exceptionalReviewerIDs := pullRequest.ReviewerIDs()
+	exceptionalReviewerIDs := pr.ReviewerIDs()
 	exceptionalReviewerIDs = append(exceptionalReviewerIDs, authorID)
 	newReviewer := chooseRandomUser(availableUsers, exceptionalReviewerIDs...)
 
-	pullRequest.UnassignReviewer(userID)
-	pullRequest.AssignReviewer(newReviewer.ID())
-	err = s.prRepo.Update(pullRequest)
+	pr.UnassignReviewer(userID)
+	pr.AssignReviewer(newReviewer.ID)
+	err = s.prRepo.Update(pr)
 	if err != nil {
 		return nil, err
 	}
 
 	return &ReassignReviewerResponse{
-		NewReviewerID: newReviewer.ID(),
-		PullRequest:   *pullRequest,
+		NewReviewerID: newReviewer.ID,
+		PullRequest:   *pr,
 	}, nil
 }
 
-func chooseRandomUser(availableUsers []*e.User, except ...v.ID) *e.User {
+func chooseRandomUser(availableUsers []*dto.UserDTO, except ...v.ID) *dto.UserDTO {
 	for i, u := range availableUsers {
 		for _, exceptionalU := range except {
-			if u.ID() == exceptionalU {
+			if u.ID == exceptionalU {
 				availableUsers = slices.Delete(availableUsers, i, i+1)
 				continue
 			}
@@ -175,17 +183,17 @@ func chooseRandomUser(availableUsers []*e.User, except ...v.ID) *e.User {
 	return availableUsers[idx]
 }
 
-func chooseRandomUsers(availableUsers []*e.User, maxCount int, except ...v.ID) []*e.User {
+func chooseRandomUsers(availableUsers []*dto.UserDTO, maxCount int, except ...v.ID) []*dto.UserDTO {
 	for i, u := range availableUsers {
 		for _, exceptionalU := range except {
-			if u.ID() == exceptionalU {
+			if u.ID == exceptionalU {
 				availableUsers = slices.Delete(availableUsers, i, i+1)
 				continue
 			}
 		}
 	}
 
-	reviewers := make([]*e.User, 0, maxCount)
+	reviewers := make([]*dto.UserDTO, 0, maxCount)
 	if len(availableUsers) <= maxCount {
 		for i := range min(maxCount, len(availableUsers)) {
 			reviewers = append(reviewers, availableUsers[i])
@@ -202,12 +210,17 @@ func chooseRandomUsers(availableUsers []*e.User, maxCount int, except ...v.ID) [
 }
 
 func (s *DefaultPullRequestDomainService) MarkAsMerged(pullRequestID v.ID) (*e.PullRequest, error) {
-	pr, err := s.prRepo.FindByID(pullRequestID)
+	prDTO, err := s.prRepo.FindByID(pullRequestID)
 	if err != nil {
 		return nil, err
 	}
-	if pr == nil {
+	if prDTO == nil {
 		return nil, ErrPRNotFound
+	}
+
+	pr, err := e.NewExistingPullRequest(prDTO)
+	if err != nil {
+		return nil, err
 	}
 
 	if pr.Status() == v.MERGED {
