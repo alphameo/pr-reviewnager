@@ -10,7 +10,7 @@ import (
 	v "github.com/alphameo/pr-reviewnager/internal/domain/valueobjects"
 )
 
-const MaxCountOfReviewers int = 2
+const MaxReviewersCount int = 2
 
 type PullRequest struct {
 	id          v.ID
@@ -54,6 +54,25 @@ func NewExistingPullRequest(pullRequest *dto.PullRequestDTO) (*PullRequest, erro
 		return nil, fmt.Errorf("pull requests: %w", err)
 	}
 
+	if status == v.MERGED && pullRequest.MergedAt == nil {
+		return nil, errors.New("PR marked as merged, but time is not specified")
+	}
+	if status == v.OPEN && pullRequest.MergedAt != nil {
+		return nil, errors.New("PR marked as opened, but merege time not specified")
+	}
+
+	reviewerIDs := make([]v.ID, 0, MaxReviewersCount)
+	reviewerIDs = append(reviewerIDs, pullRequest.ReviewerIDs...)
+
+	return &PullRequest{
+		pullRequest.ID,
+		pullRequest.Title,
+		pullRequest.AuthorID,
+		pullRequest.CreatedAt,
+		status,
+		pullRequest.MergedAt,
+		reviewerIDs,
+	}, nil
 }
 
 func (p *PullRequest) ID() v.ID {
