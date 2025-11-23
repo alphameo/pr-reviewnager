@@ -71,7 +71,6 @@ func (r *TeamRepository) Create(team *e.Team) error {
 	return tx.Commit(ctx)
 }
 
-// TODO: rewrite with single querry?
 func (r *TeamRepository) FindByID(id v.ID) (*dto.TeamDTO, error) {
 	ctx := context.Background()
 	tx, err := r.dbConn.Begin(ctx)
@@ -83,6 +82,7 @@ func (r *TeamRepository) FindByID(id v.ID) (*dto.TeamDTO, error) {
 	qtx := r.queries.WithTx(tx)
 
 	teamID := uuid.UUID(id)
+	// TODO: rewrite with single query?
 	dbTeam, err := qtx.GetTeam(ctx, teamID)
 	if err == pgx.ErrNoRows {
 		return nil, nil
