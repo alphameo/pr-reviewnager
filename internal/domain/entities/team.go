@@ -1,9 +1,11 @@
 package entities
 
 import (
+	"errors"
 	"fmt"
 	"slices"
 
+	"github.com/alphameo/pr-reviewnager/internal/domain/dto"
 	v "github.com/alphameo/pr-reviewnager/internal/domain/valueobjects"
 )
 
@@ -17,24 +19,31 @@ type Team struct {
 }
 
 func NewTeam(name string) (*Team, error) {
-	return NewExistingTeam(v.NewID(), name, nil)
+	return &Team{
+		id:      v.NewID(),
+		name:    name,
+		userIDs: make([]v.ID, 0, avgUserCountInTeam),
+	}, nil
 }
 
-func NewExistingTeam(id v.ID, name string, userIDs []v.ID) (*Team, error) {
-	t := &Team{
-		id:      id,
-		name:    name,
-		userIDs: make([]v.ID, 0, max(len(userIDs), avgUserCountInTeam)),
+func NewExistingTeam(team *dto.TeamDTO) (*Team, error) {
+	if team == nil {
+		return nil, errors.New("dto cannot be nil")
 	}
 
-	for _, uID := range userIDs {
-		err := t.AddUser(uID)
-		if err != nil {
-			return nil, err
-		}
+	err := validateIDsUniqueness(team.UserIDs)
+	if err != nil {
+		return nil, fmt.Errorf("team members: %w", err)
 	}
 
-	return t, nil
+	userIDs := make([]v.ID, 0, max(len(team.UserIDs), avgUserCountInTeam))
+	userIDs = append(userIDs, team.UserIDs...)
+
+	return &Team{
+		id:      team.ID,
+		name:    team.Name,
+		userIDs: userIDs,
+	}, nil
 }
 
 func (t *Team) ID() v.ID {
