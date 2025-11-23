@@ -19,12 +19,12 @@ var (
 )
 
 type PullRequest struct {
-	id          v.ID
-	title       string
-	authorID    v.ID
-	createdAt   time.Time
-	status      v.PRStatus
-	mergedAt    *time.Time
+	id        v.ID
+	title     string
+	authorID  v.ID
+	createdAt time.Time
+	status    v.PRStatus
+	mergedAt  *time.Time
 	// slice (not map) because reviewers count is often not large
 	reviewerIDs []v.ID
 }
@@ -134,6 +134,7 @@ func (p *PullRequest) UnassignReviewer(reviewerID v.ID) error {
 	if p.status == v.MERGED {
 		return ErrPRAlreadyMerged
 	}
+
 	idx := slices.Index(p.reviewerIDs, reviewerID)
 	if idx == -1 {
 		return fmt.Errorf("no user with id=%d inside reviewers list", reviewerID)
