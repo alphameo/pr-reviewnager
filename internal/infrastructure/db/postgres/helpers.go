@@ -3,7 +3,7 @@ package postgres
 import (
 	"time"
 
-	e "github.com/alphameo/pr-reviewnager/internal/domain/entities"
+	"github.com/alphameo/pr-reviewnager/internal/domain/dto"
 	v "github.com/alphameo/pr-reviewnager/internal/domain/valueobjects"
 	db "github.com/alphameo/pr-reviewnager/internal/infrastructure/db/sqlc"
 	"github.com/jackc/pgx/v5/pgtype"
@@ -24,11 +24,7 @@ func TimeFromTimestamptz(ts pgtype.Timestamptz) time.Time {
 	return time.Time{}
 }
 
-func PullRequestToEntity(dbPR *db.PullRequest) (*e.PullRequest, error) {
-	status, err := v.NewPRStatusFromString(dbPR.Status)
-	if err != nil {
-		return nil, err
-	}
+func PullRequestToEntity(dbPR *db.PullRequest) (*dto.PullRequestDTO, error) {
 	var mergedAt *time.Time
 	if dbPR.MergedAt.Valid {
 		t := TimeFromTimestamptz(dbPR.MergedAt)
@@ -37,13 +33,13 @@ func PullRequestToEntity(dbPR *db.PullRequest) (*e.PullRequest, error) {
 		mergedAt = nil
 	}
 
-	return e.NewExistingPullRequest(
-		v.ID(dbPR.ID),
-		dbPR.Title,
-		v.ID(dbPR.AuthorID),
-		TimeFromTimestamptz(dbPR.CreatedAt),
-		status,
-		mergedAt,
-		nil,
-	)
+	return &dto.PullRequestDTO{
+		ID:          v.ID(dbPR.ID),
+		Title:       dbPR.Title,
+		AuthorID:    v.ID(dbPR.AuthorID),
+		CreatedAt:   TimeFromTimestamptz(dbPR.CreatedAt),
+		Status:      dbPR.Status,
+		MergedAt:    mergedAt,
+		ReviewerIDs: nil,
+	}, nil
 }

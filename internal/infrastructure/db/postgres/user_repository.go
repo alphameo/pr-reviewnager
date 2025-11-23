@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 
+	"github.com/alphameo/pr-reviewnager/internal/domain/dto"
 	e "github.com/alphameo/pr-reviewnager/internal/domain/entities"
 	v "github.com/alphameo/pr-reviewnager/internal/domain/valueobjects"
 	db "github.com/alphameo/pr-reviewnager/internal/infrastructure/db/sqlc"
@@ -42,7 +43,7 @@ func (r *UserRepository) Create(user *e.User) error {
 	return nil
 }
 
-func (r *UserRepository) FindByID(id v.ID) (*e.User, error) {
+func (r *UserRepository) FindByID(id v.ID) (*dto.UserDTO, error) {
 	ctx := context.Background()
 
 	user, err := r.queries.GetUser(ctx, uuid.UUID(id))
@@ -52,10 +53,14 @@ func (r *UserRepository) FindByID(id v.ID) (*e.User, error) {
 		return nil, err
 	}
 
-	return e.NewExistingUser(v.ID(user.ID), user.Name, user.Active), nil
+	return &dto.UserDTO{
+		ID:     v.ID(user.ID),
+		Name:   user.Name,
+		Active: user.Active,
+	}, nil
 }
 
-func (r *UserRepository) FindAll() ([]*e.User, error) {
+func (r *UserRepository) FindAll() ([]*dto.UserDTO, error) {
 	ctx := context.Background()
 
 	users, err := r.queries.GetUsers(ctx)
@@ -63,9 +68,13 @@ func (r *UserRepository) FindAll() ([]*e.User, error) {
 		return nil, err
 	}
 
-	entities := make([]*e.User, len(users))
+	entities := make([]*dto.UserDTO, len(users))
 	for i, user := range users {
-		entities[i] = e.NewExistingUser(v.ID(user.ID), user.Name, user.Active)
+		entities[i] = &dto.UserDTO{
+			ID:     v.ID(user.ID),
+			Name:   user.Name,
+			Active: user.Active,
+		}
 	}
 
 	return entities, nil
