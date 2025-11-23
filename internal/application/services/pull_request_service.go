@@ -3,8 +3,8 @@ package services
 import (
 	"errors"
 
-	"github.com/alphameo/pr-reviewnager/internal/application/dto"
 	"github.com/alphameo/pr-reviewnager/internal/application/mappers"
+	"github.com/alphameo/pr-reviewnager/internal/domain/dto"
 	r "github.com/alphameo/pr-reviewnager/internal/domain/repositories"
 	ds "github.com/alphameo/pr-reviewnager/internal/domain/services"
 	v "github.com/alphameo/pr-reviewnager/internal/domain/valueobjects"
@@ -13,7 +13,7 @@ import (
 type PullRequestService interface {
 	CreatePullRequest(pullRequest *dto.PullRequestDTO) (*dto.PullRequestDTO, error)
 	MarkAsMerged(pullRequestID v.ID) (*dto.PullRequestDTO, error)
-	ReassignReviewer(userID v.ID, pullRequestID v.ID) (*dto.PullRequestWithNewReviewerIDDTO, error)
+	ReassignReviewer(userID v.ID, pullRequestID v.ID) (*PullRequestWithNewReviewerIDDTO, error)
 	FindPullRequestsByReviewer(userID v.ID) ([]*dto.PullRequestDTO, error)
 }
 
@@ -78,7 +78,7 @@ func (s *DefaultPullRequestService) MarkAsMerged(pullRequestID v.ID) (*dto.PullR
 	return dto, nil
 }
 
-func (s *DefaultPullRequestService) ReassignReviewer(userID v.ID, pullRequestID v.ID) (*dto.PullRequestWithNewReviewerIDDTO, error) {
+func (s *DefaultPullRequestService) ReassignReviewer(userID v.ID, pullRequestID v.ID) (*PullRequestWithNewReviewerIDDTO, error) {
 	newReviewer, err := s.prDomainServ.ReassignReviewer(userID, pullRequestID)
 	if errors.Is(err, ds.ErrPRNotFound) || errors.Is(err, ds.ErrUserNotFound) {
 		return nil, ErrNotFound
@@ -96,7 +96,7 @@ func (s *DefaultPullRequestService) ReassignReviewer(userID v.ID, pullRequestID 
 		return nil, err
 	}
 
-	return &dto.PullRequestWithNewReviewerIDDTO{
+	return &PullRequestWithNewReviewerIDDTO{
 		PullRequest:       d,
 		NewReviewerUserID: newReviewer.NewReviewerID,
 	}, nil
@@ -108,5 +108,5 @@ func (s *DefaultPullRequestService) FindPullRequestsByReviewer(userID v.ID) ([]*
 		return nil, err
 	}
 
-	return mappers.PullRequestsToDTOs(prs)
+	return prs, nil
 }

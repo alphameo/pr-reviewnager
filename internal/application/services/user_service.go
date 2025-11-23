@@ -4,8 +4,8 @@ package services
 import (
 	"errors"
 
-	"github.com/alphameo/pr-reviewnager/internal/application/dto"
 	"github.com/alphameo/pr-reviewnager/internal/application/mappers"
+	"github.com/alphameo/pr-reviewnager/internal/domain/dto"
 	r "github.com/alphameo/pr-reviewnager/internal/domain/repositories"
 	v "github.com/alphameo/pr-reviewnager/internal/domain/valueobjects"
 )
@@ -57,5 +57,6 @@ func (s *DefaultUserService) ListUsers() ([]*dto.UserDTO, error) {
 	if err != nil {
 		return nil, err
 	}
-	return mappers.UsersToDTOs(users)
+
+	return users, nil
 }
