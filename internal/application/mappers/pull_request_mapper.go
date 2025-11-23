@@ -4,9 +4,8 @@ package mappers
 import (
 	"errors"
 
-	"github.com/alphameo/pr-reviewnager/internal/application/dto"
+	"github.com/alphameo/pr-reviewnager/internal/domain/dto"
 	e "github.com/alphameo/pr-reviewnager/internal/domain/entities"
-	v "github.com/alphameo/pr-reviewnager/internal/domain/valueobjects"
 )
 
 func PullRequestToDTO(entity *e.PullRequest) (*dto.PullRequestDTO, error) {
@@ -26,23 +25,7 @@ func PullRequestToDTO(entity *e.PullRequest) (*dto.PullRequestDTO, error) {
 }
 
 func PullRequestToEntity(dto *dto.PullRequestDTO) (*e.PullRequest, error) {
-	if dto == nil {
-		return nil, errors.New("dto cannot be nil")
-	}
-
-	status, err := v.NewPRStatusFromString(dto.Status)
-	if err != nil {
-		return nil, err
-	}
-	return e.NewExistingPullRequest(
-		dto.ID,
-		dto.Title,
-		dto.AuthorID,
-		dto.CreatedAt,
-		status,
-		nil,
-		dto.ReviewerIDs,
-	)
+	return e.NewExistingPullRequest(dto)
 }
 
 func PullRequestsToDTOs(entities []*e.PullRequest) ([]*dto.PullRequestDTO, error) {

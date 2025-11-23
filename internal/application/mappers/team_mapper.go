@@ -3,7 +3,7 @@ package mappers
 import (
 	"errors"
 
-	"github.com/alphameo/pr-reviewnager/internal/application/dto"
+	"github.com/alphameo/pr-reviewnager/internal/domain/dto"
 	e "github.com/alphameo/pr-reviewnager/internal/domain/entities"
 )
 
@@ -20,11 +20,7 @@ func TeamToDTO(entity *e.Team) (*dto.TeamDTO, error) {
 }
 
 func TeamToEntity(dto *dto.TeamDTO) (*e.Team, error) {
-	if dto == nil {
-		return nil, errors.New("dto cannot be nil")
-	}
-
-	return e.NewExistingTeam(dto.ID, dto.Name, dto.UserIDs)
+	return e.NewExistingTeam(dto)
 }
 
 func TeamsToDTOs(entities []*e.Team) ([]*dto.TeamDTO, error) {
