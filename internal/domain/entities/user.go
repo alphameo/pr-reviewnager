@@ -2,6 +2,9 @@
 package entities
 
 import (
+	"errors"
+
+	"github.com/alphameo/pr-reviewnager/internal/domain/dto"
 	v "github.com/alphameo/pr-reviewnager/internal/domain/valueobjects"
 )
 
@@ -11,16 +14,24 @@ type User struct {
 	active bool
 }
 
-func NewExistingUser(id v.ID, name string, active bool) *User {
-	return &User{
-		id:     id,
-		name:   name,
-		active: active,
+func NewExistingUser(user *dto.UserDTO) (*User, error) {
+	if user == nil {
+		return nil, errors.New("dto cannot be nil")
 	}
+
+	return &User{
+		id:     user.ID,
+		name:   user.Name,
+		active: user.Active,
+	}, nil
 }
 
-func NewUser(name string, active bool) *User {
-	return NewExistingUser(v.NewID(), name, active)
+func NewUser(name string, active bool) (*User, error) {
+	return &User{
+		id:     v.NewID(),
+		name:   name,
+		active: active,
+	}, nil
 }
 
 func (u *User) ID() v.ID {
