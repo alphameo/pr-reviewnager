@@ -112,7 +112,6 @@ func (r *TeamRepository) FindByID(id v.ID) (*dto.TeamDTO, error) {
 	return &team, nil
 }
 
-// TODO: rewrite with single querry?
 func (r *TeamRepository) FindAll() ([]*dto.TeamDTO, error) {
 	ctx := context.Background()
 	tx, err := r.dbConn.Begin(ctx)
@@ -123,6 +122,7 @@ func (r *TeamRepository) FindAll() ([]*dto.TeamDTO, error) {
 
 	qtx := r.queries.WithTx(tx)
 
+	// TODO: rewrite with single query?
 	rows, err := qtx.GetTeamsWithUsers(ctx)
 	if err != nil {
 		return nil, err
