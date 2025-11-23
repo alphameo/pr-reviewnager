@@ -6,6 +6,7 @@ import (
 	"slices"
 	"time"
 
+	"github.com/alphameo/pr-reviewnager/internal/domain/dto"
 	v "github.com/alphameo/pr-reviewnager/internal/domain/valueobjects"
 )
 
@@ -23,28 +24,36 @@ type PullRequest struct {
 }
 
 func NewPullRequest(title string, authorID v.ID) (*PullRequest, error) {
-	return NewExistingPullRequest(v.NewID(), title, authorID, time.Now(), v.OPEN, nil, nil)
+	return &PullRequest{
+		v.NewID(),
+		title,
+		authorID,
+		time.Now(),
+		v.OPEN,
+		nil,
+		make([]v.ID, 0, MaxReviewersCount),
+	}, nil
 }
 
-func NewExistingPullRequest(id v.ID, title string, authorID v.ID, createdAt time.Time, status v.PRStatus, mergedAt *time.Time, reviewerIDs []v.ID) (*PullRequest, error) {
-	p := &PullRequest{
-		id:          id,
-		title:       title,
-		authorID:    authorID,
-		createdAt:   createdAt,
-		status:      status,
-		mergedAt:    mergedAt,
-		reviewerIDs: make([]v.ID, 0, MaxCountOfReviewers),
+func NewExistingPullRequest(pullRequest *dto.PullRequestDTO) (*PullRequest, error) {
+	if pullRequest == nil {
+		return nil, errors.New("dto cannot be nil")
 	}
 
-	for _, id := range reviewerIDs {
-		err := p.AssignReviewer(id)
-		if err != nil {
-			return nil, err
-		}
+	status, err := v.NewPRStatusFromString(pullRequest.Status)
+	if err != nil {
+		return nil, err
 	}
 
-	return p, nil
+	if len(pullRequest.ReviewerIDs) > MaxReviewersCount {
+		return  nil, ErrMaxReviewersCount
+	}
+
+	err = validateIDsUniqueness(pullRequest.ReviewerIDs)
+	if err != nil {
+		return nil, fmt.Errorf("pull requests: %w", err)
+	}
+
 }
 
 func (p *PullRequest) ID() v.ID {
@@ -119,4 +128,18 @@ func (p *PullRequest) MarkAsMerged() {
 	time := time.Now()
 	p.status = v.MERGED
 	p.mergedAt = &time
+}
+
+func validateIDsUniqueness(ids []v.ID) error {
+
+	seen := make(map[v.ID]bool)
+
+	for _, id := range ids {
+		if _, exists := seen[id]; exists {
+			return fmt.Errorf("at least one duplicated id=%v", id.String())
+		}
+		seen[id] = true
+	}
+
+	return nil
 }
