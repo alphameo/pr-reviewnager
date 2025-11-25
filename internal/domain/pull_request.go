@@ -7,16 +7,6 @@ import (
 	"time"
 )
 
-type PullRequestDTO struct {
-	ID          ID
-	Title       string
-	AuthorID    ID
-	CreatedAt   time.Time
-	Status      string
-	MergedAt    *time.Time
-	ReviewerIDs []ID
-}
-
 const MaxReviewersCount int = 2
 
 var (
@@ -48,44 +38,27 @@ func NewPullRequest(title string, authorID ID) (*PullRequest, error) {
 	}, nil
 }
 
-func NewExistingPullRequest(pullRequest *PullRequestDTO) (*PullRequest, error) {
-	if pullRequest == nil {
-		return nil, errors.New("dto cannot be nil")
-	}
-
-	status, err := ParsePRStatus(pullRequest.Status)
-	if err != nil {
-		return nil, err
-	}
-
-	if len(pullRequest.ReviewerIDs) > MaxReviewersCount {
-		return nil, ErrMaxReviewersCount
-	}
-
-	err = validateIDsUniqueness(pullRequest.ReviewerIDs)
-	if err != nil {
-		return nil, fmt.Errorf("pull requests: %w", err)
-	}
-
-	if status == PRMerged && pullRequest.MergedAt == nil {
-		return nil, errors.New("PR marked as merged, but time is not specified")
-	}
-	if status == PROpen && pullRequest.MergedAt != nil {
-		return nil, errors.New("PR marked as opened, but merege time not specified")
-	}
-
-	reviewerIDs := make([]ID, 0, MaxReviewersCount)
-	reviewerIDs = append(reviewerIDs, pullRequest.ReviewerIDs...)
+func ExistingPullRequest(
+	id ID,
+	title string,
+	authorID ID,
+	createdAt time.Time,
+	status PRStatus,
+	mergedAt *time.Time,
+	reviewerIDs []ID,
+) *PullRequest {
+	rIDs := make([]ID, 0, MaxReviewersCount)
+	rIDs = append(rIDs, reviewerIDs...)
 
 	return &PullRequest{
-		pullRequest.ID,
-		pullRequest.Title,
-		pullRequest.AuthorID,
-		pullRequest.CreatedAt,
+		id,
+		title,
+		authorID,
+		createdAt,
 		status,
-		pullRequest.MergedAt,
-		reviewerIDs,
-	}, nil
+		mergedAt,
+		rIDs,
+	}
 }
 
 func (p *PullRequest) ID() ID {
@@ -168,6 +141,26 @@ func validateIDsUniqueness(ids []ID) error {
 			return fmt.Errorf("at least one duplicated id=%v", id.String())
 		}
 		seen[id] = true
+	}
+
+	return nil
+}
+
+func (p *PullRequest) Validate() error {
+	if len(p.reviewerIDs) > MaxReviewersCount {
+		return ErrMaxReviewersCount
+	}
+
+	err := validateIDsUniqueness(p.reviewerIDs)
+	if err != nil {
+		return fmt.Errorf("pull requests: %w", err)
+	}
+
+	if p.status == PRMerged && p.mergedAt == nil {
+		return errors.New("PR marked as merged, but time is not specified")
+	}
+	if p.status == PROpen && p.mergedAt != nil {
+		return errors.New("PR marked as opened, but merege time not specified")
 	}
 
 	return nil

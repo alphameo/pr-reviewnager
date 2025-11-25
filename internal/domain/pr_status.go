@@ -12,7 +12,7 @@ const (
 	PRMerged PRStatus = "merged"
 )
 
-func ParsePRStatus(value string) (PRStatus, error) {
+func NewPRStatus(value string) (PRStatus, error) {
 	processed := strings.ToLower(strings.TrimSpace(value))
 	switch processed {
 	case "", "open", "opened":
@@ -22,6 +22,10 @@ func ParsePRStatus(value string) (PRStatus, error) {
 	default:
 		return PRStatus(""), fmt.Errorf("no PR status: %s", processed)
 	}
+}
+
+func ExistingPRStatus(value string) PRStatus {
+	return PRStatus(value)
 }
 
 func (s PRStatus) String() string {

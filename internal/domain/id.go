@@ -11,6 +11,10 @@ func NewID() ID {
 	return ID(uuid.Must(uuid.NewV7()))
 }
 
+func ExistingID(id uuid.UUID) ID {
+	return ID(id)
+}
+
 func NewIDFromString(str string) (ID, error) {
 	value, err := uuid.Parse(str)
 	if err != nil {

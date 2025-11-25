@@ -1,9 +1,9 @@
 package domain
 
 type TeamRepository interface {
-	Repository[Team, TeamDTO, ID]
-	FindByName(teamName string) (*TeamDTO, error)
+	Repository[Team, ID]
+	FindByName(teamName string) (*Team, error)
 	CreateTeamAndModifyUsers(team *Team, users []*User) error
-	FindTeamByTeammateID(userID ID) (*TeamDTO, error)
-	FindActiveUsersByTeamID(teamID ID) ([]*UserDTO, error)
+	FindTeamByTeammateID(userID ID) (*Team, error)
+	FindActiveUsersByTeamID(teamID ID) ([]*User, error)
 }

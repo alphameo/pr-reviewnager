@@ -1,28 +1,21 @@
 package domain
 
-import "errors"
-
-type UserDTO struct {
-	ID     ID
-	Name   string
-	Active bool
-}
 type User struct {
 	id     ID
 	name   string
 	active bool
 }
 
-func NewExistingUser(user *UserDTO) (*User, error) {
-	if user == nil {
-		return nil, errors.New("dto cannot be nil")
-	}
-
+func ExistingUser(
+	id ID,
+	name string,
+	active bool,
+) *User {
 	return &User{
-		id:     user.ID,
-		name:   user.Name,
-		active: user.Active,
-	}, nil
+		id:     id,
+		name:   name,
+		active: active,
+	}
 }
 
 func NewUser(name string, active bool) (*User, error) {

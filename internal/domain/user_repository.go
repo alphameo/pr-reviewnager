@@ -1,5 +1,5 @@
 package domain
 
 type UserRepository interface {
-	Repository[User, UserDTO, ID]
+	Repository[User, ID]
 }

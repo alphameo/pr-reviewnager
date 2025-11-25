@@ -6,12 +6,6 @@ import (
 	"slices"
 )
 
-type TeamDTO struct {
-	ID      ID
-	Name    string
-	UserIDs []ID
-}
-
 const avgUserCountInTeam = 10
 
 var ErrAlreadyTeamMember = errors.New("user is already a team member")
@@ -31,24 +25,19 @@ func NewTeam(name string) (*Team, error) {
 	}, nil
 }
 
-func NewExistingTeam(team *TeamDTO) (*Team, error) {
-	if team == nil {
-		return nil, errors.New("dto cannot be nil")
-	}
-
-	err := validateIDsUniqueness(team.UserIDs)
-	if err != nil {
-		return nil, fmt.Errorf("team members: %w", err)
-	}
-
-	userIDs := make([]ID, 0, max(len(team.UserIDs), avgUserCountInTeam))
-	userIDs = append(userIDs, team.UserIDs...)
+func ExistingTeam(
+	id ID,
+	name string,
+	userIDs []ID,
+) *Team {
+	uIDs := make([]ID, 0, max(len(userIDs), avgUserCountInTeam))
+	uIDs = append(uIDs, userIDs...)
 
 	return &Team{
-		id:      team.ID,
-		name:    team.Name,
-		userIDs: userIDs,
-	}, nil
+		id:      id,
+		name:    name,
+		userIDs: uIDs,
+	}
 }
 
 func (t *Team) ID() ID {
@@ -80,6 +69,15 @@ func (t *Team) RemoveUser(userID ID) error {
 	}
 
 	t.userIDs = slices.Delete(t.userIDs, idx, idx+1)
+
+	return nil
+}
+
+func (t *Team) Validate() error {
+	err := validateIDsUniqueness(t.UserIDs())
+	if err != nil {
+		return fmt.Errorf("error in team members: %w", err)
+	}
 
 	return nil
 }
