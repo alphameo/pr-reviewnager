@@ -35,7 +35,7 @@ func NewPullRequest(title string, authorID v.ID) (*PullRequest, error) {
 		title,
 		authorID,
 		time.Now(),
-		v.OPEN,
+		v.PROpen,
 		nil,
 		make([]v.ID, 0, MaxReviewersCount),
 	}, nil
@@ -60,10 +60,10 @@ func NewExistingPullRequest(pullRequest *dto.PullRequest) (*PullRequest, error) 
 		return nil, fmt.Errorf("pull requests: %w", err)
 	}
 
-	if status == v.MERGED && pullRequest.MergedAt == nil {
+	if status == v.PRMerged && pullRequest.MergedAt == nil {
 		return nil, errors.New("PR marked as merged, but time is not specified")
 	}
-	if status == v.OPEN && pullRequest.MergedAt != nil {
+	if status == v.PROpen && pullRequest.MergedAt != nil {
 		return nil, errors.New("PR marked as opened, but merege time not specified")
 	}
 
@@ -118,7 +118,7 @@ func (p *PullRequest) AssignReviewer(reviewerID v.ID) error {
 		return ErrMaxReviewersCount
 	}
 
-	if p.status == v.MERGED {
+	if p.status == v.PRMerged {
 		return ErrPRAlreadyMerged
 	}
 
@@ -131,7 +131,7 @@ func (p *PullRequest) AssignReviewer(reviewerID v.ID) error {
 }
 
 func (p *PullRequest) UnassignReviewer(reviewerID v.ID) error {
-	if p.status == v.MERGED {
+	if p.status == v.PRMerged {
 		return ErrPRAlreadyMerged
 	}
 
@@ -145,11 +145,11 @@ func (p *PullRequest) UnassignReviewer(reviewerID v.ID) error {
 }
 
 func (p *PullRequest) MarkAsMerged() {
-	if p.status == v.MERGED {
+	if p.status == v.PRMerged {
 		return
 	}
 	time := time.Now()
-	p.status = v.MERGED
+	p.status = v.PRMerged
 	p.mergedAt = &time
 }
 
