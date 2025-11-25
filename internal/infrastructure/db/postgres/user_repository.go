@@ -43,7 +43,7 @@ func (r *UserRepository) Create(user *e.User) error {
 	return nil
 }
 
-func (r *UserRepository) FindByID(id v.ID) (*dto.UserDTO, error) {
+func (r *UserRepository) FindByID(id v.ID) (*dto.User, error) {
 	ctx := context.Background()
 
 	user, err := r.queries.GetUser(ctx, uuid.UUID(id))
@@ -53,14 +53,14 @@ func (r *UserRepository) FindByID(id v.ID) (*dto.UserDTO, error) {
 		return nil, err
 	}
 
-	return &dto.UserDTO{
+	return &dto.User{
 		ID:     v.ID(user.ID),
 		Name:   user.Name,
 		Active: user.Active,
 	}, nil
 }
 
-func (r *UserRepository) FindAll() ([]*dto.UserDTO, error) {
+func (r *UserRepository) FindAll() ([]*dto.User, error) {
 	ctx := context.Background()
 
 	users, err := r.queries.GetUsers(ctx)
@@ -68,9 +68,9 @@ func (r *UserRepository) FindAll() ([]*dto.UserDTO, error) {
 		return nil, err
 	}
 
-	entities := make([]*dto.UserDTO, len(users))
+	entities := make([]*dto.User, len(users))
 	for i, user := range users {
-		entities[i] = &dto.UserDTO{
+		entities[i] = &dto.User{
 			ID:     v.ID(user.ID),
 			Name:   user.Name,
 			Active: user.Active,

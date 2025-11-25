@@ -49,7 +49,7 @@ func (s Server) PostPullRequestCreate(ctx echo.Context) error {
 		return err
 	}
 
-	req := dto.PullRequestDTO{
+	req := dto.PullRequest{
 		ID:          prID,
 		Title:       input.PullRequestName,
 		AuthorID:    authorID,

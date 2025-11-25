@@ -8,12 +8,12 @@ import (
 	e "github.com/alphameo/pr-reviewnager/internal/domain/entities"
 )
 
-func PullRequestToDTO(entity *e.PullRequest) (*dto.PullRequestDTO, error) {
+func PullRequestToDTO(entity *e.PullRequest) (*dto.PullRequest, error) {
 	if entity == nil {
 		return nil, errors.New("entity cannot be nil")
 	}
 
-	return &dto.PullRequestDTO{
+	return &dto.PullRequest{
 		ID:          entity.ID(),
 		Title:       entity.Title(),
 		AuthorID:    entity.AuthorID(),
@@ -24,14 +24,14 @@ func PullRequestToDTO(entity *e.PullRequest) (*dto.PullRequestDTO, error) {
 	}, nil
 }
 
-func PullRequestToEntity(dto *dto.PullRequestDTO) (*e.PullRequest, error) {
+func PullRequestToEntity(dto *dto.PullRequest) (*e.PullRequest, error) {
 	return e.NewExistingPullRequest(dto)
 }
 
-func PullRequestsToDTOs(entities []*e.PullRequest) ([]*dto.PullRequestDTO, error) {
+func PullRequestsToDTOs(entities []*e.PullRequest) ([]*dto.PullRequest, error) {
 	return EntitiesToDTOs(entities, PullRequestToDTO)
 }
 
-func PullRequestsToEntities(dtos []*dto.PullRequestDTO) ([]*e.PullRequest, error) {
+func PullRequestsToEntities(dtos []*dto.PullRequest) ([]*e.PullRequest, error) {
 	return DTOsToEntities(dtos, PullRequestToEntity)
 }

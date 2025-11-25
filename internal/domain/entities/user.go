@@ -14,7 +14,7 @@ type User struct {
 	active bool
 }
 
-func NewExistingUser(user *dto.UserDTO) (*User, error) {
+func NewExistingUser(user *dto.User) (*User, error) {
 	if user == nil {
 		return nil, errors.New("dto cannot be nil")
 	}

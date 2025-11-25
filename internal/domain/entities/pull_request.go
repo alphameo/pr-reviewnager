@@ -41,7 +41,7 @@ func NewPullRequest(title string, authorID v.ID) (*PullRequest, error) {
 	}, nil
 }
 
-func NewExistingPullRequest(pullRequest *dto.PullRequestDTO) (*PullRequest, error) {
+func NewExistingPullRequest(pullRequest *dto.PullRequest) (*PullRequest, error) {
 	if pullRequest == nil {
 		return nil, errors.New("dto cannot be nil")
 	}

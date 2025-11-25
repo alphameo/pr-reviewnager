@@ -6,7 +6,7 @@ import (
 	v "github.com/alphameo/pr-reviewnager/internal/domain/valueobjects"
 )
 
-type PullRequestDTO struct {
+type PullRequest struct {
 	ID          v.ID
 	Title       string
 	AuthorID    v.ID

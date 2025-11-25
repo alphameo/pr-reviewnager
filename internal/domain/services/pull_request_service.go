@@ -168,7 +168,7 @@ func (s *DefaultPullRequestDomainService) ReassignReviewer(userID v.ID, pullRequ
 	}, nil
 }
 
-func chooseRandomUser(availableUsers []*dto.UserDTO, except ...v.ID) *dto.UserDTO {
+func chooseRandomUser(availableUsers []*dto.User, except ...v.ID) *dto.User {
 	for i, u := range availableUsers {
 		for _, exceptionalU := range except {
 			if u.ID == exceptionalU {
@@ -182,7 +182,7 @@ func chooseRandomUser(availableUsers []*dto.UserDTO, except ...v.ID) *dto.UserDT
 	return availableUsers[idx]
 }
 
-func chooseRandomUsers(availableUsers []*dto.UserDTO, maxCount int, except ...v.ID) []*dto.UserDTO {
+func chooseRandomUsers(availableUsers []*dto.User, maxCount int, except ...v.ID) []*dto.User {
 	for i, u := range availableUsers {
 		for _, exceptionalU := range except {
 			if u.ID == exceptionalU {
@@ -192,7 +192,7 @@ func chooseRandomUsers(availableUsers []*dto.UserDTO, maxCount int, except ...v.
 		}
 	}
 
-	reviewers := make([]*dto.UserDTO, 0, maxCount)
+	reviewers := make([]*dto.User, 0, maxCount)
 	if len(availableUsers) <= maxCount {
 		for i := range min(maxCount, len(availableUsers)) {
 			reviewers = append(reviewers, availableUsers[i])

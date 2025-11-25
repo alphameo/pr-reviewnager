@@ -24,7 +24,7 @@ func TimeFromTimestamptz(ts pgtype.Timestamptz) time.Time {
 	return time.Time{}
 }
 
-func PullRequestToEntity(dbPR *db.PullRequest) (*dto.PullRequestDTO, error) {
+func PullRequestToEntity(dbPR *db.PullRequest) (*dto.PullRequest, error) {
 	var mergedAt *time.Time
 	if dbPR.MergedAt.Valid {
 		t := TimeFromTimestamptz(dbPR.MergedAt)
@@ -33,7 +33,7 @@ func PullRequestToEntity(dbPR *db.PullRequest) (*dto.PullRequestDTO, error) {
 		mergedAt = nil
 	}
 
-	return &dto.PullRequestDTO{
+	return &dto.PullRequest{
 		ID:          v.ID(dbPR.ID),
 		Title:       dbPR.Title,
 		AuthorID:    v.ID(dbPR.AuthorID),

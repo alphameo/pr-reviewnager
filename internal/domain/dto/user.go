@@ -3,7 +3,7 @@ package dto
 
 import v "github.com/alphameo/pr-reviewnager/internal/domain/valueobjects"
 
-type UserDTO struct {
+type User struct {
 	ID     v.ID
 	Name   string
 	Active bool

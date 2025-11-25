@@ -21,11 +21,11 @@ type TeamService interface {
 type TeamWithUsersDTO struct {
 	ID        v.ID
 	TeamName  string
-	TeamUsers []*dto.UserDTO
+	TeamUsers []*dto.User
 }
 
 type UserWithTeamNameDTO struct {
-	User     *dto.UserDTO
+	User     *dto.User
 	TeamName string
 }
 
@@ -76,7 +76,7 @@ func (s *DefaultTeamService) CreateTeamWithUsers(teamDTO *TeamWithUsersDTO) erro
 	if teamDTO.ID == v.ID(uuid.Nil) {
 		team, err = e.NewTeam(teamDTO.TeamName)
 	} else {
-		tDTO := dto.TeamDTO{ID: teamDTO.ID, Name: teamDTO.TeamName, UserIDs: nil}
+		tDTO := dto.Team{ID: teamDTO.ID, Name: teamDTO.TeamName, UserIDs: nil}
 		team, err = e.NewExistingTeam(&tDTO)
 	}
 	if err != nil {
@@ -105,7 +105,7 @@ func (s *DefaultTeamService) FindTeamByName(name string) (*TeamWithUsersDTO, err
 	if team == nil {
 		return nil, ErrNotFound
 	}
-	users := make([]*dto.UserDTO, len(team.UserIDs))
+	users := make([]*dto.User, len(team.UserIDs))
 	for i, userID := range team.UserIDs {
 		user, err := s.userRepo.FindByID(userID)
 		if err != nil {

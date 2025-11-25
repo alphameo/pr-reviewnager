@@ -12,14 +12,14 @@ import (
 )
 
 type PullRequestService interface {
-	CreatePullRequest(pullRequest *dto.PullRequestDTO) (*dto.PullRequestDTO, error)
-	MarkAsMerged(pullRequestID v.ID) (*dto.PullRequestDTO, error)
+	CreatePullRequest(pullRequest *dto.PullRequest) (*dto.PullRequest, error)
+	MarkAsMerged(pullRequestID v.ID) (*dto.PullRequest, error)
 	ReassignReviewer(userID v.ID, pullRequestID v.ID) (*PullRequestWithNewReviewerIDDTO, error)
-	FindPullRequestsByReviewer(userID v.ID) ([]*dto.PullRequestDTO, error)
+	FindPullRequestsByReviewer(userID v.ID) ([]*dto.PullRequest, error)
 }
 
 type PullRequestWithNewReviewerIDDTO struct {
-	PullRequest       *dto.PullRequestDTO
+	PullRequest       *dto.PullRequest
 	NewReviewerUserID v.ID
 }
 
@@ -45,7 +45,7 @@ func NewDefaultPullRequestService(
 	}, nil
 }
 
-func (s *DefaultPullRequestService) CreatePullRequest(pullRequest *dto.PullRequestDTO) (*dto.PullRequestDTO, error) {
+func (s *DefaultPullRequestService) CreatePullRequest(pullRequest *dto.PullRequest) (*dto.PullRequest, error) {
 	entity, err := mappers.PullRequestToEntity(pullRequest)
 	if err != nil {
 		return nil, err
@@ -65,7 +65,7 @@ func (s *DefaultPullRequestService) CreatePullRequest(pullRequest *dto.PullReque
 	return dto, nil
 }
 
-func (s *DefaultPullRequestService) MarkAsMerged(pullRequestID v.ID) (*dto.PullRequestDTO, error) {
+func (s *DefaultPullRequestService) MarkAsMerged(pullRequestID v.ID) (*dto.PullRequest, error) {
 	pr, err := s.prDomainServ.MarkAsMerged(pullRequestID)
 	if errors.Is(err, ds.ErrPRNotFound) {
 		return nil, ErrNotFound
@@ -103,7 +103,7 @@ func (s *DefaultPullRequestService) ReassignReviewer(userID v.ID, pullRequestID 
 	}, nil
 }
 
-func (s *DefaultPullRequestService) FindPullRequestsByReviewer(userID v.ID) ([]*dto.PullRequestDTO, error) {
+func (s *DefaultPullRequestService) FindPullRequestsByReviewer(userID v.ID) ([]*dto.PullRequest, error) {
 	prs, err := s.prRepo.FindPullRequestsByReviewer(userID)
 	if err != nil {
 		return nil, err

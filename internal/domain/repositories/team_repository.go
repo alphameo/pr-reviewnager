@@ -7,9 +7,9 @@ import (
 )
 
 type TeamRepository interface {
-	Repository[e.Team, dto.TeamDTO, v.ID]
-	FindByName(teamName string) (*dto.TeamDTO, error)
+	Repository[e.Team, dto.Team, v.ID]
+	FindByName(teamName string) (*dto.Team, error)
 	CreateTeamAndModifyUsers(team *e.Team, users []*e.User) error
-	FindTeamByTeammateID(userID v.ID) (*dto.TeamDTO, error)
-	FindActiveUsersByTeamID(teamID v.ID) ([]*dto.UserDTO, error)
+	FindTeamByTeammateID(userID v.ID) (*dto.Team, error)
+	FindActiveUsersByTeamID(teamID v.ID) ([]*dto.User, error)
 }

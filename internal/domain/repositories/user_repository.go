@@ -7,5 +7,5 @@ import (
 )
 
 type UserRepository interface {
-	Repository[e.User, dto.UserDTO, v.ID]
+	Repository[e.User, dto.User, v.ID]
 }

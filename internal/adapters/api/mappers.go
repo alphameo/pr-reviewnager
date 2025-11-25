@@ -22,7 +22,7 @@ func ToAPITeam(d s.TeamWithUsersDTO) Team {
 }
 
 func FromAPITeam(t Team) s.TeamWithUsersDTO {
-	members := make([]*dto.UserDTO, len(t.Members))
+	members := make([]*dto.User, len(t.Members))
 	for i, m := range t.Members {
 		member := FromAPITeamMember(m)
 		members[i] = &member
@@ -34,7 +34,7 @@ func FromAPITeam(t Team) s.TeamWithUsersDTO {
 	}
 }
 
-func ToAPITeamMember(m dto.UserDTO) TeamMember {
+func ToAPITeamMember(m dto.User) TeamMember {
 	return TeamMember{
 		UserId:   m.ID.String(),
 		Username: m.Name,
@@ -42,10 +42,10 @@ func ToAPITeamMember(m dto.UserDTO) TeamMember {
 	}
 }
 
-func FromAPITeamMember(m TeamMember) dto.UserDTO {
+func FromAPITeamMember(m TeamMember) dto.User {
 	id, _ := valueobjects.NewIDFromString(m.UserId)
 
-	return dto.UserDTO{
+	return dto.User{
 		ID:     id,
 		Name:   m.Username,
 		Active: m.IsActive,
@@ -61,7 +61,7 @@ func ToAPIUser(u s.UserWithTeamNameDTO) User {
 	}
 }
 
-func ToAPIPullRequest(d dto.PullRequestDTO) PullRequest {
+func ToAPIPullRequest(d dto.PullRequest) PullRequest {
 	reviewers := make([]string, len(d.ReviewerIDs))
 	for i, rid := range d.ReviewerIDs {
 		reviewers[i] = rid.String()
@@ -83,7 +83,7 @@ func ToAPIPullRequest(d dto.PullRequestDTO) PullRequest {
 	}
 }
 
-func ToAPIPullRequestShort(d dto.PullRequestDTO) PullRequestShort {
+func ToAPIPullRequestShort(d dto.PullRequest) PullRequestShort {
 	return PullRequestShort{
 		PullRequestId:   d.ID.String(),
 		PullRequestName: d.Title,
@@ -92,7 +92,7 @@ func ToAPIPullRequestShort(d dto.PullRequestDTO) PullRequestShort {
 	}
 }
 
-func ToAPIPullRequestShortList(list []*dto.PullRequestDTO) []PullRequestShort {
+func ToAPIPullRequestShortList(list []*dto.PullRequest) []PullRequestShort {
 	out := make([]PullRequestShort, len(list))
 	for i, pr := range list {
 		out[i] = ToAPIPullRequestShort(*pr)

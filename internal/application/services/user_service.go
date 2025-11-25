@@ -11,9 +11,9 @@ import (
 )
 
 type UserService interface {
-	RegisterUser(user *dto.UserDTO) error
+	RegisterUser(user *dto.User) error
 	UnregisterUserByID(userID v.ID) error
-	ListUsers() ([]*dto.UserDTO, error)
+	ListUsers() ([]*dto.User, error)
 }
 
 type DefaultUserService struct {
@@ -28,7 +28,7 @@ func NewDefaultUserService(userRepository r.UserRepository) (*DefaultUserService
 	return &DefaultUserService{userRepo: userRepository}, nil
 }
 
-func (s *DefaultUserService) RegisterUser(user *dto.UserDTO) error {
+func (s *DefaultUserService) RegisterUser(user *dto.User) error {
 	if user == nil {
 		return errors.New("user cannot be nil")
 	}
@@ -52,7 +52,7 @@ func (s *DefaultUserService) UnregisterUserByID(userID v.ID) error {
 	return nil
 }
 
-func (s *DefaultUserService) ListUsers() ([]*dto.UserDTO, error) {
+func (s *DefaultUserService) ListUsers() ([]*dto.User, error) {
 	users, err := s.userRepo.FindAll()
 	if err != nil {
 		return nil, err

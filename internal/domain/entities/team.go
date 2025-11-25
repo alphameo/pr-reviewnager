@@ -28,7 +28,7 @@ func NewTeam(name string) (*Team, error) {
 	}, nil
 }
 
-func NewExistingTeam(team *dto.TeamDTO) (*Team, error) {
+func NewExistingTeam(team *dto.Team) (*Team, error) {
 	if team == nil {
 		return nil, errors.New("dto cannot be nil")
 	}

@@ -7,26 +7,26 @@ import (
 	e "github.com/alphameo/pr-reviewnager/internal/domain/entities"
 )
 
-func TeamToDTO(entity *e.Team) (*dto.TeamDTO, error) {
+func TeamToDTO(entity *e.Team) (*dto.Team, error) {
 	if entity == nil {
 		return nil, errors.New("entity cannot be nil")
 	}
 
-	return &dto.TeamDTO{
+	return &dto.Team{
 		ID:      entity.ID(),
 		Name:    entity.Name(),
 		UserIDs: entity.UserIDs(),
 	}, nil
 }
 
-func TeamToEntity(dto *dto.TeamDTO) (*e.Team, error) {
+func TeamToEntity(dto *dto.Team) (*e.Team, error) {
 	return e.NewExistingTeam(dto)
 }
 
-func TeamsToDTOs(entities []*e.Team) ([]*dto.TeamDTO, error) {
+func TeamsToDTOs(entities []*e.Team) ([]*dto.Team, error) {
 	return EntitiesToDTOs(entities, TeamToDTO)
 }
 
-func TeamsToEntities(dtos []*dto.TeamDTO) ([]*e.Team, error) {
+func TeamsToEntities(dtos []*dto.Team) ([]*e.Team, error) {
 	return DTOsToEntities(dtos, TeamToEntity)
 }
