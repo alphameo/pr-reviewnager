@@ -17,13 +17,13 @@ type RepositoryContainer interface {
 	Close(ctx context.Context) error
 }
 
-type AppServiceContainer struct {
+type ServiceContainer struct {
 	UserService        app.UserService
 	TeamService        app.TeamService
 	PullRequestService app.PullRequestService
 }
 
-func NewServiceContainer(repositoryContainer RepositoryContainer) (*AppServiceContainer, error) {
+func NewServiceContainer(repositoryContainer RepositoryContainer) (*ServiceContainer, error) {
 	if repositoryContainer == nil {
 		return nil, errors.New("storage cannot be nil")
 	}
@@ -57,7 +57,7 @@ func NewServiceContainer(repositoryContainer RepositoryContainer) (*AppServiceCo
 		return nil, fmt.Errorf("failed to create pull request service: %w", err)
 	}
 
-	return &AppServiceContainer{
+	return &ServiceContainer{
 		TeamService:        teamServ,
 		UserService:        userServ,
 		PullRequestService: prServ,

@@ -25,7 +25,7 @@ func main() {
 	}
 
 	ctx := context.Background()
-	repoContainer, err := di.NewPSQLStorage(ctx, dsn)
+	repoContainer, err := di.NewPSQLRepositoryContainer(ctx, dsn)
 	if err != nil {
 		log.Fatalf("Failed to initialize repositories: %v", err)
 	}
