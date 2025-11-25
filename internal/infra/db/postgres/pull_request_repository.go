@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/alphameo/pr-reviewnager/internal/domain"
+	"github.com/alphameo/pr-reviewnager/internal/infra"
 	db "github.com/alphameo/pr-reviewnager/internal/infra/db/sqlc"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
@@ -73,7 +74,7 @@ func (r *PullRequestRepository) Create(pullRequest *domain.PullRequest) error {
 	return tx.Commit(ctx)
 }
 
-func (r *PullRequestRepository) FindByID(id domain.ID) (*domain.PullRequestDTO, error) {
+func (r *PullRequestRepository) FindByID(id domain.ID) (*domain.PullRequest, error) {
 	ctx := context.Background()
 
 	rows, err := r.queries.GetPullRequestWithReviewersByID(ctx, uuid.UUID(id))
@@ -85,7 +86,7 @@ func (r *PullRequestRepository) FindByID(id domain.ID) (*domain.PullRequestDTO, 
 		return nil, nil
 	}
 
-	prMap := make(map[uuid.UUID]*domain.PullRequestDTO)
+	prMap := make(map[uuid.UUID]*infra.PullRequestDTO)
 
 	for _, row := range rows {
 		prID := uuid.UUID(row.ID)
@@ -98,7 +99,7 @@ func (r *PullRequestRepository) FindByID(id domain.ID) (*domain.PullRequestDTO, 
 				mergedAt = &t
 			}
 
-			pr = &domain.PullRequestDTO{
+			pr = &infra.PullRequestDTO{
 				ID:          domain.ID(prID),
 				Title:       row.Title,
 				AuthorID:    domain.ID(row.AuthorID),
@@ -119,8 +120,9 @@ func (r *PullRequestRepository) FindByID(id domain.ID) (*domain.PullRequestDTO, 
 		}
 	}
 
-	prs := make([]*domain.PullRequestDTO, 0, len(prMap))
-	for _, pr := range prMap {
+	prs := make([]*domain.PullRequest, 0, len(prMap))
+	for _, prDTO := range prMap {
+		pr := prDTO.ToEntity()
 		prs = append(prs, pr)
 	}
 
@@ -134,7 +136,7 @@ func (r *PullRequestRepository) FindByID(id domain.ID) (*domain.PullRequestDTO, 
 	return prs[0], nil
 }
 
-func (r *PullRequestRepository) FindAll() ([]*domain.PullRequestDTO, error) {
+func (r *PullRequestRepository) FindAll() ([]*domain.PullRequest, error) {
 	ctx := context.Background()
 
 	rows, err := r.queries.GetPullRequestsWithReviewers(ctx)
@@ -142,7 +144,7 @@ func (r *PullRequestRepository) FindAll() ([]*domain.PullRequestDTO, error) {
 		return nil, err
 	}
 
-	prMap := make(map[uuid.UUID]*domain.PullRequestDTO)
+	prMap := make(map[uuid.UUID]*infra.PullRequestDTO)
 
 	for _, row := range rows {
 		prID := uuid.UUID(row.ID)
@@ -155,7 +157,7 @@ func (r *PullRequestRepository) FindAll() ([]*domain.PullRequestDTO, error) {
 				mergedAt = &t
 			}
 
-			pr = &domain.PullRequestDTO{
+			pr = &infra.PullRequestDTO{
 				ID:          domain.ID(prID),
 				Title:       row.Title,
 				AuthorID:    domain.ID(row.AuthorID),
@@ -176,8 +178,9 @@ func (r *PullRequestRepository) FindAll() ([]*domain.PullRequestDTO, error) {
 		}
 	}
 
-	prs := make([]*domain.PullRequestDTO, 0, len(prMap))
-	for _, pr := range prMap {
+	prs := make([]*domain.PullRequest, 0, len(prMap))
+	for _, prDTO := range prMap {
+		pr := prDTO.ToEntity()
 		prs = append(prs, pr)
 	}
 
@@ -243,7 +246,7 @@ func (r *PullRequestRepository) DeleteByID(id domain.ID) error {
 	return nil
 }
 
-func (r *PullRequestRepository) FindPullRequestsByReviewer(userID domain.ID) ([]*domain.PullRequestDTO, error) {
+func (r *PullRequestRepository) FindPullRequestsByReviewer(userID domain.ID) ([]*domain.PullRequest, error) {
 	ctx := context.Background()
 
 	rows, err := r.queries.GetPullRequestsWithReviewersByReviewerID(ctx, uuid.UUID(userID))
@@ -251,7 +254,7 @@ func (r *PullRequestRepository) FindPullRequestsByReviewer(userID domain.ID) ([]
 		return nil, err
 	}
 
-	prMap := make(map[uuid.UUID]*domain.PullRequestDTO)
+	prMap := make(map[uuid.UUID]*infra.PullRequestDTO)
 
 	for _, row := range rows {
 		prID := uuid.UUID(row.ID)
@@ -264,7 +267,7 @@ func (r *PullRequestRepository) FindPullRequestsByReviewer(userID domain.ID) ([]
 				mergedAt = &t
 			}
 
-			prMap[prID] = &domain.PullRequestDTO{
+			prMap[prID] = &infra.PullRequestDTO{
 				ID:          domain.ID(prID),
 				Title:       row.Title,
 				AuthorID:    domain.ID(row.AuthorID),
@@ -285,8 +288,9 @@ func (r *PullRequestRepository) FindPullRequestsByReviewer(userID domain.ID) ([]
 		}
 	}
 
-	prs := make([]*domain.PullRequestDTO, 0, len(prMap))
-	for _, pr := range prMap {
+	prs := make([]*domain.PullRequest, 0, len(prMap))
+	for _, prDTO := range prMap {
+		pr := prDTO.ToEntity()
 		prs = append(prs, pr)
 	}
 

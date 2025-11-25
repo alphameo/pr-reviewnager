@@ -41,7 +41,7 @@ func (r *UserRepository) Create(user *domain.User) error {
 	return nil
 }
 
-func (r *UserRepository) FindByID(id domain.ID) (*domain.UserDTO, error) {
+func (r *UserRepository) FindByID(id domain.ID) (*domain.User, error) {
 	ctx := context.Background()
 
 	user, err := r.queries.GetUser(ctx, uuid.UUID(id))
@@ -51,14 +51,14 @@ func (r *UserRepository) FindByID(id domain.ID) (*domain.UserDTO, error) {
 		return nil, err
 	}
 
-	return &domain.UserDTO{
-		ID:     domain.ID(user.ID),
-		Name:   user.Name,
-		Active: user.Active,
-	}, nil
+	return domain.ExistingUser(
+		domain.ExistingID(user.ID),
+		user.Name,
+		user.Active,
+	), nil
 }
 
-func (r *UserRepository) FindAll() ([]*domain.UserDTO, error) {
+func (r *UserRepository) FindAll() ([]*domain.User, error) {
 	ctx := context.Background()
 
 	users, err := r.queries.GetUsers(ctx)
@@ -66,13 +66,13 @@ func (r *UserRepository) FindAll() ([]*domain.UserDTO, error) {
 		return nil, err
 	}
 
-	entities := make([]*domain.UserDTO, len(users))
+	entities := make([]*domain.User, len(users))
 	for i, user := range users {
-		entities[i] = &domain.UserDTO{
-			ID:     domain.ID(user.ID),
-			Name:   user.Name,
-			Active: user.Active,
-		}
+		entities[i] = domain.ExistingUser(
+			domain.ExistingID(user.ID),
+			user.Name,
+			user.Active,
+		)
 	}
 
 	return entities, nil
