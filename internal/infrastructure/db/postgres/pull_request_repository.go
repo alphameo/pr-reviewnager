@@ -5,9 +5,7 @@ import (
 	"errors"
 	"time"
 
-	"github.com/alphameo/pr-reviewnager/internal/domain/dto"
-	e "github.com/alphameo/pr-reviewnager/internal/domain/entities"
-	v "github.com/alphameo/pr-reviewnager/internal/domain/valueobjects"
+	"github.com/alphameo/pr-reviewnager/internal/domain"
 	db "github.com/alphameo/pr-reviewnager/internal/infrastructure/db/sqlc"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
@@ -33,7 +31,7 @@ func NewPullRequestRepository(queries *db.Queries, databaseConnection *pgx.Conn)
 	}, nil
 }
 
-func (r *PullRequestRepository) Create(pullRequest *e.PullRequest) error {
+func (r *PullRequestRepository) Create(pullRequest *domain.PullRequest) error {
 	ctx := context.Background()
 	tx, err := r.dbConn.Begin(ctx)
 	if err != nil {
@@ -75,7 +73,7 @@ func (r *PullRequestRepository) Create(pullRequest *e.PullRequest) error {
 	return tx.Commit(ctx)
 }
 
-func (r *PullRequestRepository) FindByID(id v.ID) (*dto.PullRequestDTO, error) {
+func (r *PullRequestRepository) FindByID(id domain.ID) (*domain.PullRequestDTO, error) {
 	ctx := context.Background()
 
 	rows, err := r.queries.GetPullRequestWithReviewersByID(ctx, uuid.UUID(id))
@@ -87,7 +85,7 @@ func (r *PullRequestRepository) FindByID(id v.ID) (*dto.PullRequestDTO, error) {
 		return nil, nil
 	}
 
-	prMap := make(map[uuid.UUID]*dto.PullRequestDTO)
+	prMap := make(map[uuid.UUID]*domain.PullRequestDTO)
 
 	for _, row := range rows {
 		prID := uuid.UUID(row.ID)
@@ -100,20 +98,20 @@ func (r *PullRequestRepository) FindByID(id v.ID) (*dto.PullRequestDTO, error) {
 				mergedAt = &t
 			}
 
-			pr = &dto.PullRequestDTO{
-				ID:          v.ID(prID),
+			pr = &domain.PullRequestDTO{
+				ID:          domain.ID(prID),
 				Title:       row.Title,
-				AuthorID:    v.ID(row.AuthorID),
+				AuthorID:    domain.ID(row.AuthorID),
 				CreatedAt:   TimeFromTimestamptz(row.CreatedAt),
 				Status:      row.Status,
 				MergedAt:    mergedAt,
-				ReviewerIDs: make([]v.ID, 0),
+				ReviewerIDs: make([]domain.ID, 0),
 			}
 			prMap[prID] = pr
 		}
 
 		if row.ReviewerID.Valid {
-			reviewerID, err := v.NewIDFromString(row.ReviewerID.String())
+			reviewerID, err := domain.NewIDFromString(row.ReviewerID.String())
 			if err != nil {
 				return nil, err
 			}
@@ -121,7 +119,7 @@ func (r *PullRequestRepository) FindByID(id v.ID) (*dto.PullRequestDTO, error) {
 		}
 	}
 
-	prs := make([]*dto.PullRequestDTO, 0, len(prMap))
+	prs := make([]*domain.PullRequestDTO, 0, len(prMap))
 	for _, pr := range prMap {
 		prs = append(prs, pr)
 	}
@@ -136,7 +134,7 @@ func (r *PullRequestRepository) FindByID(id v.ID) (*dto.PullRequestDTO, error) {
 	return prs[0], nil
 }
 
-func (r *PullRequestRepository) FindAll() ([]*dto.PullRequestDTO, error) {
+func (r *PullRequestRepository) FindAll() ([]*domain.PullRequestDTO, error) {
 	ctx := context.Background()
 
 	rows, err := r.queries.GetPullRequestsWithReviewers(ctx)
@@ -144,7 +142,7 @@ func (r *PullRequestRepository) FindAll() ([]*dto.PullRequestDTO, error) {
 		return nil, err
 	}
 
-	prMap := make(map[uuid.UUID]*dto.PullRequestDTO)
+	prMap := make(map[uuid.UUID]*domain.PullRequestDTO)
 
 	for _, row := range rows {
 		prID := uuid.UUID(row.ID)
@@ -157,20 +155,20 @@ func (r *PullRequestRepository) FindAll() ([]*dto.PullRequestDTO, error) {
 				mergedAt = &t
 			}
 
-			pr = &dto.PullRequestDTO{
-				ID:          v.ID(prID),
+			pr = &domain.PullRequestDTO{
+				ID:          domain.ID(prID),
 				Title:       row.Title,
-				AuthorID:    v.ID(row.AuthorID),
+				AuthorID:    domain.ID(row.AuthorID),
 				CreatedAt:   TimeFromTimestamptz(row.CreatedAt),
 				Status:      row.Status,
 				MergedAt:    mergedAt,
-				ReviewerIDs: make([]v.ID, 0),
+				ReviewerIDs: make([]domain.ID, 0),
 			}
 			prMap[prID] = pr
 		}
 
 		if row.ReviewerID.Valid {
-			reviewerID, err := v.NewIDFromString(row.ReviewerID.String())
+			reviewerID, err := domain.NewIDFromString(row.ReviewerID.String())
 			if err != nil {
 				return nil, err
 			}
@@ -178,7 +176,7 @@ func (r *PullRequestRepository) FindAll() ([]*dto.PullRequestDTO, error) {
 		}
 	}
 
-	prs := make([]*dto.PullRequestDTO, 0, len(prMap))
+	prs := make([]*domain.PullRequestDTO, 0, len(prMap))
 	for _, pr := range prMap {
 		prs = append(prs, pr)
 	}
@@ -186,7 +184,7 @@ func (r *PullRequestRepository) FindAll() ([]*dto.PullRequestDTO, error) {
 	return prs, nil
 }
 
-func (r *PullRequestRepository) Update(pullRequest *e.PullRequest) error {
+func (r *PullRequestRepository) Update(pullRequest *domain.PullRequest) error {
 	ctx := context.Background()
 	tx, err := r.dbConn.Begin(ctx)
 	if err != nil {
@@ -234,7 +232,7 @@ func (r *PullRequestRepository) Update(pullRequest *e.PullRequest) error {
 	return tx.Commit(ctx)
 }
 
-func (r *PullRequestRepository) DeleteByID(id v.ID) error {
+func (r *PullRequestRepository) DeleteByID(id domain.ID) error {
 	ctx := context.Background()
 
 	err := r.queries.DeletePullRequest(ctx, uuid.UUID(id))
@@ -245,7 +243,7 @@ func (r *PullRequestRepository) DeleteByID(id v.ID) error {
 	return nil
 }
 
-func (r *PullRequestRepository) FindPullRequestsByReviewer(userID v.ID) ([]*dto.PullRequestDTO, error) {
+func (r *PullRequestRepository) FindPullRequestsByReviewer(userID domain.ID) ([]*domain.PullRequestDTO, error) {
 	ctx := context.Background()
 
 	rows, err := r.queries.GetPullRequestsWithReviewersByReviewerID(ctx, uuid.UUID(userID))
@@ -253,7 +251,7 @@ func (r *PullRequestRepository) FindPullRequestsByReviewer(userID v.ID) ([]*dto.
 		return nil, err
 	}
 
-	prMap := make(map[uuid.UUID]*dto.PullRequestDTO)
+	prMap := make(map[uuid.UUID]*domain.PullRequestDTO)
 
 	for _, row := range rows {
 		prID := uuid.UUID(row.ID)
@@ -266,20 +264,20 @@ func (r *PullRequestRepository) FindPullRequestsByReviewer(userID v.ID) ([]*dto.
 				mergedAt = &t
 			}
 
-			prMap[prID] = &dto.PullRequestDTO{
-				ID:          v.ID(prID),
+			prMap[prID] = &domain.PullRequestDTO{
+				ID:          domain.ID(prID),
 				Title:       row.Title,
-				AuthorID:    v.ID(row.AuthorID),
+				AuthorID:    domain.ID(row.AuthorID),
 				CreatedAt:   TimeFromTimestamptz(row.CreatedAt),
 				Status:      row.Status,
 				MergedAt:    mergedAt,
-				ReviewerIDs: make([]v.ID, 0),
+				ReviewerIDs: make([]domain.ID, 0),
 			}
 			prMap[prID] = pr
 		}
 
 		if row.ReviewerID.Valid {
-			reviewerID, err := v.NewIDFromString(row.ReviewerID.String())
+			reviewerID, err := domain.NewIDFromString(row.ReviewerID.String())
 			if err != nil {
 				return nil, err
 			}
@@ -287,7 +285,7 @@ func (r *PullRequestRepository) FindPullRequestsByReviewer(userID v.ID) ([]*dto.
 		}
 	}
 
-	prs := make([]*dto.PullRequestDTO, 0, len(prMap))
+	prs := make([]*domain.PullRequestDTO, 0, len(prMap))
 	for _, pr := range prMap {
 		prs = append(prs, pr)
 	}

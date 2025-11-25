@@ -1,20 +1,19 @@
-// Package entities provides domain model of service
-package entities
+package domain
 
-import (
-	"errors"
+import "errors"
 
-	"github.com/alphameo/pr-reviewnager/internal/domain/dto"
-	v "github.com/alphameo/pr-reviewnager/internal/domain/valueobjects"
-)
-
+type UserDTO struct {
+	ID     ID
+	Name   string
+	Active bool
+}
 type User struct {
-	id     v.ID
+	id     ID
 	name   string
 	active bool
 }
 
-func NewExistingUser(user *dto.UserDTO) (*User, error) {
+func NewExistingUser(user *UserDTO) (*User, error) {
 	if user == nil {
 		return nil, errors.New("dto cannot be nil")
 	}
@@ -28,13 +27,13 @@ func NewExistingUser(user *dto.UserDTO) (*User, error) {
 
 func NewUser(name string, active bool) (*User, error) {
 	return &User{
-		id:     v.NewID(),
+		id:     NewID(),
 		name:   name,
 		active: active,
 	}, nil
 }
 
-func (u *User) ID() v.ID {
+func (u *User) ID() ID {
 	return u.id
 }
 

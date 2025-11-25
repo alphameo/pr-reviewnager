@@ -1,5 +1,4 @@
-// Package repositories provides interfaces for real repositories
-package repositories
+package domain
 
 type Repository[T any, DTO any, ID any] interface {
 	Create(entity *T) error

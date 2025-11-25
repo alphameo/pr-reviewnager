@@ -3,8 +3,7 @@ package postgres
 import (
 	"time"
 
-	"github.com/alphameo/pr-reviewnager/internal/domain/dto"
-	v "github.com/alphameo/pr-reviewnager/internal/domain/valueobjects"
+	"github.com/alphameo/pr-reviewnager/internal/domain"
 	db "github.com/alphameo/pr-reviewnager/internal/infrastructure/db/sqlc"
 	"github.com/jackc/pgx/v5/pgtype"
 )
@@ -24,7 +23,7 @@ func TimeFromTimestamptz(ts pgtype.Timestamptz) time.Time {
 	return time.Time{}
 }
 
-func PullRequestToEntity(dbPR *db.PullRequest) (*dto.PullRequestDTO, error) {
+func PullRequestToEntity(dbPR *db.PullRequest) (*domain.PullRequestDTO, error) {
 	var mergedAt *time.Time
 	if dbPR.MergedAt.Valid {
 		t := TimeFromTimestamptz(dbPR.MergedAt)
@@ -33,10 +32,10 @@ func PullRequestToEntity(dbPR *db.PullRequest) (*dto.PullRequestDTO, error) {
 		mergedAt = nil
 	}
 
-	return &dto.PullRequestDTO{
-		ID:          v.ID(dbPR.ID),
+	return &domain.PullRequestDTO{
+		ID:          domain.ID(dbPR.ID),
 		Title:       dbPR.Title,
-		AuthorID:    v.ID(dbPR.AuthorID),
+		AuthorID:    domain.ID(dbPR.AuthorID),
 		CreatedAt:   TimeFromTimestamptz(dbPR.CreatedAt),
 		Status:      dbPR.Status,
 		MergedAt:    mergedAt,

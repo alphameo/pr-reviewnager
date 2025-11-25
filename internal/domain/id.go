@@ -1,5 +1,5 @@
-// Package valueobjects provides value objects of domain model
-package valueobjects
+// Package domain provides domain layer of application
+package domain
 
 import (
 	"github.com/google/uuid"

@@ -3,12 +3,11 @@ package api
 import (
 	"time"
 
-	s "github.com/alphameo/pr-reviewnager/internal/application/services"
-	"github.com/alphameo/pr-reviewnager/internal/domain/dto"
-	"github.com/alphameo/pr-reviewnager/internal/domain/valueobjects"
+	app "github.com/alphameo/pr-reviewnager/internal/application"
+	"github.com/alphameo/pr-reviewnager/internal/domain"
 )
 
-func ToAPITeam(d s.TeamWithUsersDTO) Team {
+func ToAPITeam(d app.TeamWithUsersDTO) Team {
 	members := make([]TeamMember, len(d.TeamUsers))
 	for i, m := range d.TeamUsers {
 		member := ToAPITeamMember(*m)
@@ -21,20 +20,20 @@ func ToAPITeam(d s.TeamWithUsersDTO) Team {
 	}
 }
 
-func FromAPITeam(t Team) s.TeamWithUsersDTO {
-	members := make([]*dto.UserDTO, len(t.Members))
+func FromAPITeam(t Team) app.TeamWithUsersDTO {
+	members := make([]*domain.UserDTO, len(t.Members))
 	for i, m := range t.Members {
 		member := FromAPITeamMember(m)
 		members[i] = &member
 	}
 
-	return s.TeamWithUsersDTO{
+	return app.TeamWithUsersDTO{
 		TeamName:  t.TeamName,
 		TeamUsers: members,
 	}
 }
 
-func ToAPITeamMember(m dto.UserDTO) TeamMember {
+func ToAPITeamMember(m domain.UserDTO) TeamMember {
 	return TeamMember{
 		UserId:   m.ID.String(),
 		Username: m.Name,
@@ -42,17 +41,17 @@ func ToAPITeamMember(m dto.UserDTO) TeamMember {
 	}
 }
 
-func FromAPITeamMember(m TeamMember) dto.UserDTO {
-	id, _ := valueobjects.NewIDFromString(m.UserId)
+func FromAPITeamMember(m TeamMember) domain.UserDTO {
+	id, _ := domain.NewIDFromString(m.UserId)
 
-	return dto.UserDTO{
+	return domain.UserDTO{
 		ID:     id,
 		Name:   m.Username,
 		Active: m.IsActive,
 	}
 }
 
-func ToAPIUser(u s.UserWithTeamNameDTO) User {
+func ToAPIUser(u app.UserWithTeamNameDTO) User {
 	return User{
 		UserId:   u.User.ID.String(),
 		Username: u.User.Name,
@@ -61,7 +60,7 @@ func ToAPIUser(u s.UserWithTeamNameDTO) User {
 	}
 }
 
-func ToAPIPullRequest(d dto.PullRequestDTO) PullRequest {
+func ToAPIPullRequest(d domain.PullRequestDTO) PullRequest {
 	reviewers := make([]string, len(d.ReviewerIDs))
 	for i, rid := range d.ReviewerIDs {
 		reviewers[i] = rid.String()
@@ -83,7 +82,7 @@ func ToAPIPullRequest(d dto.PullRequestDTO) PullRequest {
 	}
 }
 
-func ToAPIPullRequestShort(d dto.PullRequestDTO) PullRequestShort {
+func ToAPIPullRequestShort(d domain.PullRequestDTO) PullRequestShort {
 	return PullRequestShort{
 		PullRequestId:   d.ID.String(),
 		PullRequestName: d.Title,
@@ -92,7 +91,7 @@ func ToAPIPullRequestShort(d dto.PullRequestDTO) PullRequestShort {
 	}
 }
 
-func ToAPIPullRequestShortList(list []*dto.PullRequestDTO) []PullRequestShort {
+func ToAPIPullRequestShortList(list []*domain.PullRequestDTO) []PullRequestShort {
 	out := make([]PullRequestShort, len(list))
 	for i, pr := range list {
 		out[i] = ToAPIPullRequestShort(*pr)

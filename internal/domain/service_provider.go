@@ -1,10 +1,9 @@
-package services
+package domain
 
 import (
 	"errors"
 	"fmt"
 
-	"github.com/alphameo/pr-reviewnager/internal/infrastructure"
 )
 
 type ServiceProvider interface {
@@ -15,7 +14,7 @@ type DefaultServiceProvider struct {
 	prServ PullRequestDomainService
 }
 
-func NewDefaultServiceProvider(storage infrastructure.Storage) (*DefaultServiceProvider, error) {
+func NewDefaultServiceProvider(storage RepositoryProvider) (*DefaultServiceProvider, error) {
 	if storage == nil {
 		return nil, errors.New("storage cannot be nil")
 	}

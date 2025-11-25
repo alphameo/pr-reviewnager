@@ -4,9 +4,7 @@ import (
 	"context"
 	"errors"
 
-	"github.com/alphameo/pr-reviewnager/internal/domain/dto"
-	e "github.com/alphameo/pr-reviewnager/internal/domain/entities"
-	v "github.com/alphameo/pr-reviewnager/internal/domain/valueobjects"
+	"github.com/alphameo/pr-reviewnager/internal/domain"
 	db "github.com/alphameo/pr-reviewnager/internal/infrastructure/db/sqlc"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
@@ -24,7 +22,7 @@ func NewUserRepository(queries *db.Queries) (*UserRepository, error) {
 	return &UserRepository{queries: queries}, nil
 }
 
-func (r *UserRepository) Create(user *e.User) error {
+func (r *UserRepository) Create(user *domain.User) error {
 	ctx := context.Background()
 
 	if user == nil {
@@ -43,7 +41,7 @@ func (r *UserRepository) Create(user *e.User) error {
 	return nil
 }
 
-func (r *UserRepository) FindByID(id v.ID) (*dto.UserDTO, error) {
+func (r *UserRepository) FindByID(id domain.ID) (*domain.UserDTO, error) {
 	ctx := context.Background()
 
 	user, err := r.queries.GetUser(ctx, uuid.UUID(id))
@@ -53,14 +51,14 @@ func (r *UserRepository) FindByID(id v.ID) (*dto.UserDTO, error) {
 		return nil, err
 	}
 
-	return &dto.UserDTO{
-		ID:     v.ID(user.ID),
+	return &domain.UserDTO{
+		ID:     domain.ID(user.ID),
 		Name:   user.Name,
 		Active: user.Active,
 	}, nil
 }
 
-func (r *UserRepository) FindAll() ([]*dto.UserDTO, error) {
+func (r *UserRepository) FindAll() ([]*domain.UserDTO, error) {
 	ctx := context.Background()
 
 	users, err := r.queries.GetUsers(ctx)
@@ -68,10 +66,10 @@ func (r *UserRepository) FindAll() ([]*dto.UserDTO, error) {
 		return nil, err
 	}
 
-	entities := make([]*dto.UserDTO, len(users))
+	entities := make([]*domain.UserDTO, len(users))
 	for i, user := range users {
-		entities[i] = &dto.UserDTO{
-			ID:     v.ID(user.ID),
+		entities[i] = &domain.UserDTO{
+			ID:     domain.ID(user.ID),
 			Name:   user.Name,
 			Active: user.Active,
 		}
@@ -80,7 +78,7 @@ func (r *UserRepository) FindAll() ([]*dto.UserDTO, error) {
 	return entities, nil
 }
 
-func (r *UserRepository) Update(user *e.User) error {
+func (r *UserRepository) Update(user *domain.User) error {
 	ctx := context.Background()
 
 	if user == nil {
@@ -99,7 +97,7 @@ func (r *UserRepository) Update(user *e.User) error {
 	return nil
 }
 
-func (r *UserRepository) DeleteByID(id v.ID) error {
+func (r *UserRepository) DeleteByID(id domain.ID) error {
 	ctx := context.Background()
 
 	err := r.queries.DeleteUser(ctx, uuid.UUID(id))

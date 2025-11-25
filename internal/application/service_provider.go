@@ -1,11 +1,11 @@
-package services
+// Package app provides application layer
+package app
 
 import (
 	"errors"
 	"fmt"
 
-	domainserv "github.com/alphameo/pr-reviewnager/internal/domain/services"
-	infra "github.com/alphameo/pr-reviewnager/internal/infrastructure"
+	"github.com/alphameo/pr-reviewnager/internal/domain"
 )
 
 type ServiceProvider interface {
@@ -20,7 +20,7 @@ type DefaultServiceProvider struct {
 	prServ   *DefaultPullRequestService
 }
 
-func NewDefaultServiceProvider(storage infra.Storage, domainServiceProvider domainserv.ServiceProvider) (*DefaultServiceProvider, error) {
+func NewDefaultServiceProvider(storage domain.RepositoryProvider, domainServiceProvider domain.ServiceProvider) (*DefaultServiceProvider, error) {
 	if storage == nil {
 		return nil, errors.New("storage cannot be nil")
 	}

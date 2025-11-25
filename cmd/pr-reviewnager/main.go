@@ -6,8 +6,8 @@ import (
 	"os"
 
 	"github.com/alphameo/pr-reviewnager/internal/adapters/api"
-	s "github.com/alphameo/pr-reviewnager/internal/application/services"
-	ds "github.com/alphameo/pr-reviewnager/internal/domain/services"
+	app "github.com/alphameo/pr-reviewnager/internal/application"
+	"github.com/alphameo/pr-reviewnager/internal/domain"
 	"github.com/alphameo/pr-reviewnager/internal/infrastructure/db/postgres"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -37,12 +37,12 @@ func main() {
 		}
 	}()
 
-	domainServiceProvider, err := ds.NewDefaultServiceProvider(storage)
+	domainServiceProvider, err := domain.NewDefaultServiceProvider(storage)
 	if err != nil {
 		log.Fatalf("Failed to create domain service provider: %v", err)
 	}
 
-	serviceProvider, err := s.NewDefaultServiceProvider(storage, domainServiceProvider)
+	serviceProvider, err := app.NewDefaultServiceProvider(storage, domainServiceProvider)
 	if err != nil {
 		log.Fatalf("Failed to create service provider: %v", err)
 	}

@@ -1,34 +1,37 @@
-package entities
+package domain
 
 import (
 	"errors"
 	"fmt"
 	"slices"
-
-	"github.com/alphameo/pr-reviewnager/internal/domain/dto"
-	v "github.com/alphameo/pr-reviewnager/internal/domain/valueobjects"
 )
+
+type TeamDTO struct {
+	ID      ID
+	Name    string
+	UserIDs []ID
+}
 
 const avgUserCountInTeam = 10
 
 var ErrAlreadyTeamMember = errors.New("user is already a team member")
 
 type Team struct {
-	id   v.ID
+	id   ID
 	name string
 	// slice (not a map) becuse member count cannot be very large
-	userIDs []v.ID
+	userIDs []ID
 }
 
 func NewTeam(name string) (*Team, error) {
 	return &Team{
-		id:      v.NewID(),
+		id:      NewID(),
 		name:    name,
-		userIDs: make([]v.ID, 0, avgUserCountInTeam),
+		userIDs: make([]ID, 0, avgUserCountInTeam),
 	}, nil
 }
 
-func NewExistingTeam(team *dto.TeamDTO) (*Team, error) {
+func NewExistingTeam(team *TeamDTO) (*Team, error) {
 	if team == nil {
 		return nil, errors.New("dto cannot be nil")
 	}
@@ -38,7 +41,7 @@ func NewExistingTeam(team *dto.TeamDTO) (*Team, error) {
 		return nil, fmt.Errorf("team members: %w", err)
 	}
 
-	userIDs := make([]v.ID, 0, max(len(team.UserIDs), avgUserCountInTeam))
+	userIDs := make([]ID, 0, max(len(team.UserIDs), avgUserCountInTeam))
 	userIDs = append(userIDs, team.UserIDs...)
 
 	return &Team{
@@ -48,7 +51,7 @@ func NewExistingTeam(team *dto.TeamDTO) (*Team, error) {
 	}, nil
 }
 
-func (t *Team) ID() v.ID {
+func (t *Team) ID() ID {
 	return t.id
 }
 
@@ -56,11 +59,11 @@ func (t *Team) Name() string {
 	return t.name
 }
 
-func (t *Team) UserIDs() []v.ID {
+func (t *Team) UserIDs() []ID {
 	return slices.Clone(t.userIDs)
 }
 
-func (t *Team) AddUser(userID v.ID) error {
+func (t *Team) AddUser(userID ID) error {
 	if slices.Contains(t.userIDs, userID) {
 		return fmt.Errorf("%w: userID=%v", ErrAlreadyTeamMember, userID)
 	}
@@ -70,7 +73,7 @@ func (t *Team) AddUser(userID v.ID) error {
 	return nil
 }
 
-func (t *Team) RemoveUser(userID v.ID) error {
+func (t *Team) RemoveUser(userID ID) error {
 	idx := slices.Index(t.userIDs, userID)
 	if idx == -1 {
 		return fmt.Errorf("no user with id=%v inside user list", userID)

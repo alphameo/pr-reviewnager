@@ -1,31 +1,27 @@
-package services
+package app
 
 import (
 	"errors"
 	"fmt"
 
-	"github.com/alphameo/pr-reviewnager/internal/application/mappers"
-	"github.com/alphameo/pr-reviewnager/internal/domain/dto"
-	e "github.com/alphameo/pr-reviewnager/internal/domain/entities"
-	r "github.com/alphameo/pr-reviewnager/internal/domain/repositories"
-	v "github.com/alphameo/pr-reviewnager/internal/domain/valueobjects"
+	"github.com/alphameo/pr-reviewnager/internal/domain"
 	"github.com/google/uuid"
 )
 
 type TeamService interface {
 	CreateTeamWithUsers(teamDTO *TeamWithUsersDTO) error
 	FindTeamByName(name string) (*TeamWithUsersDTO, error)
-	SetUserActiveByID(userID v.ID, active bool) (*UserWithTeamNameDTO, error)
+	SetUserActiveByID(userID domain.ID, active bool) (*UserWithTeamNameDTO, error)
 }
 
 type TeamWithUsersDTO struct {
-	ID        v.ID
+	ID        domain.ID
 	TeamName  string
-	TeamUsers []*dto.UserDTO
+	TeamUsers []*domain.UserDTO
 }
 
 type UserWithTeamNameDTO struct {
-	User     *dto.UserDTO
+	User     *domain.UserDTO
 	TeamName string
 }
 
@@ -39,13 +35,13 @@ var (
 )
 
 type DefaultTeamService struct {
-	teamRepo r.TeamRepository
-	userRepo r.UserRepository
+	teamRepo domain.TeamRepository
+	userRepo domain.UserRepository
 }
 
 func NewDefaultTeamService(
-	teamRepository r.TeamRepository,
-	userRepository r.UserRepository,
+	teamRepository domain.TeamRepository,
+	userRepository domain.UserRepository,
 ) (*DefaultTeamService, error) {
 	if teamRepository == nil {
 		return nil, errors.New("teamRepository cannot be nil")
@@ -72,18 +68,18 @@ func (s *DefaultTeamService) CreateTeamWithUsers(teamDTO *TeamWithUsersDTO) erro
 		return fmt.Errorf("team with name=%s already exists", teamDTO.TeamName)
 	}
 
-	var team *e.Team
-	if teamDTO.ID == v.ID(uuid.Nil) {
-		team, err = e.NewTeam(teamDTO.TeamName)
+	var team *domain.Team
+	if teamDTO.ID == domain.ID(uuid.Nil) {
+		team, err = domain.NewTeam(teamDTO.TeamName)
 	} else {
-		tDTO := dto.TeamDTO{ID: teamDTO.ID, Name: teamDTO.TeamName, UserIDs: nil}
-		team, err = e.NewExistingTeam(&tDTO)
+		tDTO := domain.TeamDTO{ID: teamDTO.ID, Name: teamDTO.TeamName, UserIDs: nil}
+		team, err = domain.NewExistingTeam(&tDTO)
 	}
 	if err != nil {
 		return err
 	}
 
-	users, err := mappers.UsersToEntities(teamDTO.TeamUsers)
+	users, err := UsersToEntities(teamDTO.TeamUsers)
 	if err != nil {
 		return err
 	}
@@ -105,7 +101,7 @@ func (s *DefaultTeamService) FindTeamByName(name string) (*TeamWithUsersDTO, err
 	if team == nil {
 		return nil, ErrNotFound
 	}
-	users := make([]*dto.UserDTO, len(team.UserIDs))
+	users := make([]*domain.UserDTO, len(team.UserIDs))
 	for i, userID := range team.UserIDs {
 		user, err := s.userRepo.FindByID(userID)
 		if err != nil {
@@ -121,7 +117,7 @@ func (s *DefaultTeamService) FindTeamByName(name string) (*TeamWithUsersDTO, err
 	}, nil
 }
 
-func (s *DefaultTeamService) SetUserActiveByID(userID v.ID, active bool) (*UserWithTeamNameDTO, error) {
+func (s *DefaultTeamService) SetUserActiveByID(userID domain.ID, active bool) (*UserWithTeamNameDTO, error) {
 	u, err := s.userRepo.FindByID(userID)
 	if err != nil {
 		return nil, err
@@ -131,7 +127,7 @@ func (s *DefaultTeamService) SetUserActiveByID(userID v.ID, active bool) (*UserW
 		return nil, fmt.Errorf("%w: no such user with id=%d", ErrNotFound, userID)
 	}
 
-	user, err := e.NewExistingUser(u)
+	user, err := domain.NewExistingUser(u)
 	if err != nil {
 		return nil, err
 	}
@@ -146,7 +142,7 @@ func (s *DefaultTeamService) SetUserActiveByID(userID v.ID, active bool) (*UserW
 	if err != nil {
 		return nil, err
 	}
-	userDTO, err := mappers.UserToDTO(user)
+	userDTO, err := UserToDTO(user)
 	if err != nil {
 		return nil, err
 	}

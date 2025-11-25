@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	r "github.com/alphameo/pr-reviewnager/internal/domain/repositories"
+	"github.com/alphameo/pr-reviewnager/internal/domain"
 	"github.com/jackc/pgx/v5"
 )
 
@@ -53,15 +53,15 @@ func NewPSQLStorage(ctx context.Context, dsn string) (*PSQLStorage, error) {
 	}, nil
 }
 
-func (s *PSQLStorage) UserRepository() r.UserRepository {
+func (s *PSQLStorage) UserRepository() domain.UserRepository {
 	return s.userRepo
 }
 
-func (s *PSQLStorage) TeamRepository() r.TeamRepository {
+func (s *PSQLStorage) TeamRepository() domain.TeamRepository {
 	return s.teamRepo
 }
 
-func (s *PSQLStorage) PullRequestRepository() r.PullRequestRepository {
+func (s *PSQLStorage) PullRequestRepository() domain.PullRequestRepository {
 	return s.prRepo
 }
 

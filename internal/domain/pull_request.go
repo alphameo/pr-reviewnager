@@ -1,58 +1,65 @@
-package entities
+package domain
 
 import (
 	"errors"
 	"fmt"
 	"slices"
 	"time"
-
-	"github.com/alphameo/pr-reviewnager/internal/domain/dto"
-	v "github.com/alphameo/pr-reviewnager/internal/domain/valueobjects"
 )
+
+type PullRequestDTO struct {
+	ID          ID
+	Title       string
+	AuthorID    ID
+	CreatedAt   time.Time
+	Status      string
+	MergedAt    *time.Time
+	ReviewerIDs []ID
+}
 
 const MaxReviewersCount int = 2
 
 var (
-	ErrPRAlreadyMerged           = errors.New("PR is already MERGED")
+	ErrPRAlreadyMerged           = errors.New("PR is already merged")
 	ErrMaxReviewersCount         = fmt.Errorf("maximum number of reviewers is %d", MaxReviewersCount)
 	ErrAlreadyAssignedAsReviewer = errors.New("user already assiggned as reviewer")
 )
 
 type PullRequest struct {
-	id        v.ID
+	id        ID
 	title     string
-	authorID  v.ID
+	authorID  ID
 	createdAt time.Time
-	status    v.PRStatus
+	status    PRStatus
 	mergedAt  *time.Time
 	// slice (not map) because reviewers count is often not large
-	reviewerIDs []v.ID
+	reviewerIDs []ID
 }
 
-func NewPullRequest(title string, authorID v.ID) (*PullRequest, error) {
+func NewPullRequest(title string, authorID ID) (*PullRequest, error) {
 	return &PullRequest{
-		v.NewID(),
+		NewID(),
 		title,
 		authorID,
 		time.Now(),
-		v.OPEN,
+		OPEN,
 		nil,
-		make([]v.ID, 0, MaxReviewersCount),
+		make([]ID, 0, MaxReviewersCount),
 	}, nil
 }
 
-func NewExistingPullRequest(pullRequest *dto.PullRequestDTO) (*PullRequest, error) {
+func NewExistingPullRequest(pullRequest *PullRequestDTO) (*PullRequest, error) {
 	if pullRequest == nil {
 		return nil, errors.New("dto cannot be nil")
 	}
 
-	status, err := v.NewPRStatusFromString(pullRequest.Status)
+	status, err := NewPRStatusFromString(pullRequest.Status)
 	if err != nil {
 		return nil, err
 	}
 
 	if len(pullRequest.ReviewerIDs) > MaxReviewersCount {
-		return  nil, ErrMaxReviewersCount
+		return nil, ErrMaxReviewersCount
 	}
 
 	err = validateIDsUniqueness(pullRequest.ReviewerIDs)
@@ -60,14 +67,14 @@ func NewExistingPullRequest(pullRequest *dto.PullRequestDTO) (*PullRequest, erro
 		return nil, fmt.Errorf("pull requests: %w", err)
 	}
 
-	if status == v.MERGED && pullRequest.MergedAt == nil {
+	if status == MERGED && pullRequest.MergedAt == nil {
 		return nil, errors.New("PR marked as merged, but time is not specified")
 	}
-	if status == v.OPEN && pullRequest.MergedAt != nil {
+	if status == OPEN && pullRequest.MergedAt != nil {
 		return nil, errors.New("PR marked as opened, but merege time not specified")
 	}
 
-	reviewerIDs := make([]v.ID, 0, MaxReviewersCount)
+	reviewerIDs := make([]ID, 0, MaxReviewersCount)
 	reviewerIDs = append(reviewerIDs, pullRequest.ReviewerIDs...)
 
 	return &PullRequest{
@@ -81,7 +88,7 @@ func NewExistingPullRequest(pullRequest *dto.PullRequestDTO) (*PullRequest, erro
 	}, nil
 }
 
-func (p *PullRequest) ID() v.ID {
+func (p *PullRequest) ID() ID {
 	return p.id
 }
 
@@ -89,11 +96,11 @@ func (p *PullRequest) Title() string {
 	return p.title
 }
 
-func (p *PullRequest) AuthorID() v.ID {
+func (p *PullRequest) AuthorID() ID {
 	return p.authorID
 }
 
-func (p *PullRequest) Status() v.PRStatus {
+func (p *PullRequest) Status() PRStatus {
 	return p.status
 }
 
@@ -109,16 +116,16 @@ func (p *PullRequest) CreatedAt() time.Time {
 	return p.createdAt
 }
 
-func (p *PullRequest) ReviewerIDs() []v.ID {
+func (p *PullRequest) ReviewerIDs() []ID {
 	return slices.Clone(p.reviewerIDs)
 }
 
-func (p *PullRequest) AssignReviewer(reviewerID v.ID) error {
+func (p *PullRequest) AssignReviewer(reviewerID ID) error {
 	if len(p.reviewerIDs) == MaxReviewersCount {
 		return ErrMaxReviewersCount
 	}
 
-	if p.status == v.MERGED {
+	if p.status == MERGED {
 		return ErrPRAlreadyMerged
 	}
 
@@ -130,8 +137,8 @@ func (p *PullRequest) AssignReviewer(reviewerID v.ID) error {
 	return nil
 }
 
-func (p *PullRequest) UnassignReviewer(reviewerID v.ID) error {
-	if p.status == v.MERGED {
+func (p *PullRequest) UnassignReviewer(reviewerID ID) error {
+	if p.status == MERGED {
 		return ErrPRAlreadyMerged
 	}
 
@@ -145,17 +152,16 @@ func (p *PullRequest) UnassignReviewer(reviewerID v.ID) error {
 }
 
 func (p *PullRequest) MarkAsMerged() {
-	if p.status == v.MERGED {
+	if p.status == MERGED {
 		return
 	}
 	time := time.Now()
-	p.status = v.MERGED
+	p.status = MERGED
 	p.mergedAt = &time
 }
 
-func validateIDsUniqueness(ids []v.ID) error {
-
-	seen := make(map[v.ID]bool)
+func validateIDsUniqueness(ids []ID) error {
+	seen := make(map[ID]bool)
 
 	for _, id := range ids {
 		if _, exists := seen[id]; exists {

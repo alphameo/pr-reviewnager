@@ -4,19 +4,18 @@ import (
 	"errors"
 	"net/http"
 
-	s "github.com/alphameo/pr-reviewnager/internal/application/services"
-	"github.com/alphameo/pr-reviewnager/internal/domain/dto"
-	"github.com/alphameo/pr-reviewnager/internal/domain/valueobjects"
+	app "github.com/alphameo/pr-reviewnager/internal/application"
+	"github.com/alphameo/pr-reviewnager/internal/domain"
 	"github.com/labstack/echo/v4"
 )
 
 type Server struct {
-	teamService s.TeamService
-	userService s.UserService
-	prService   s.PullRequestService
+	teamService app.TeamService
+	userService app.UserService
+	prService   app.PullRequestService
 }
 
-func NewServer(teamService s.TeamService, userService s.UserService, pullRequestService s.PullRequestService) (*Server, error) {
+func NewServer(teamService app.TeamService, userService app.UserService, pullRequestService app.PullRequestService) (*Server, error) {
 	if teamService == nil {
 		return nil, errors.New("teamService cannot be nil")
 	}
@@ -40,16 +39,16 @@ func (s Server) PostPullRequestCreate(ctx echo.Context) error {
 		return err
 	}
 
-	prID, err := valueobjects.NewIDFromString(input.PullRequestId)
+	prID, err := domain.NewIDFromString(input.PullRequestId)
 	if err != nil {
 		return err
 	}
-	authorID, err := valueobjects.NewIDFromString(input.AuthorId)
+	authorID, err := domain.NewIDFromString(input.AuthorId)
 	if err != nil {
 		return err
 	}
 
-	req := dto.PullRequestDTO{
+	req := domain.PullRequestDTO{
 		ID:          prID,
 		Title:       input.PullRequestName,
 		AuthorID:    authorID,
@@ -73,7 +72,7 @@ func (s *Server) PostPullRequestMerge(ctx echo.Context) error {
 		return err
 	}
 
-	prID, err := valueobjects.NewIDFromString(input.PullRequestId)
+	prID, err := domain.NewIDFromString(input.PullRequestId)
 	if err != nil {
 		return err
 	}
@@ -94,11 +93,11 @@ func (s *Server) PostPullRequestReassign(ctx echo.Context) error {
 		return err
 	}
 
-	prID, err := valueobjects.NewIDFromString(input.PullRequestId)
+	prID, err := domain.NewIDFromString(input.PullRequestId)
 	if err != nil {
 		return err
 	}
-	oldID, err := valueobjects.NewIDFromString(input.OldUserId)
+	oldID, err := domain.NewIDFromString(input.OldUserId)
 	if err != nil {
 		return err
 	}
@@ -149,7 +148,7 @@ func (s *Server) PostUsersSetIsActive(ctx echo.Context) error {
 		return err
 	}
 
-	userID, err := valueobjects.NewIDFromString(input.UserId)
+	userID, err := domain.NewIDFromString(input.UserId)
 	if err != nil {
 		return err
 	}
@@ -165,7 +164,7 @@ func (s *Server) PostUsersSetIsActive(ctx echo.Context) error {
 }
 
 func (s *Server) GetUsersGetReview(ctx echo.Context, params GetUsersGetReviewParams) error {
-	userID, err := valueobjects.NewIDFromString(params.UserId)
+	userID, err := domain.NewIDFromString(params.UserId)
 	if err != nil {
 		return err
 	}
@@ -183,7 +182,7 @@ func (s *Server) GetUsersGetReview(ctx echo.Context, params GetUsersGetReviewPar
 
 func mapAppErrorToEchoResponse(ctx echo.Context, err error) error {
 	switch {
-	case errors.Is(err, s.ErrTeamExists):
+	case errors.Is(err, app.ErrTeamExists):
 		return ctx.JSON(http.StatusBadRequest, ErrorResponse{
 			Error: struct {
 				Code    ErrorResponseErrorCode `json:"code"`
@@ -194,7 +193,7 @@ func mapAppErrorToEchoResponse(ctx echo.Context, err error) error {
 			},
 		})
 
-	case errors.Is(err, s.ErrPRExists):
+	case errors.Is(err, app.ErrPRExists):
 		return ctx.JSON(http.StatusConflict, ErrorResponse{
 			Error: struct {
 				Code    ErrorResponseErrorCode `json:"code"`
@@ -205,7 +204,7 @@ func mapAppErrorToEchoResponse(ctx echo.Context, err error) error {
 			},
 		})
 
-	case errors.Is(err, s.ErrPRAlreadyMerged):
+	case errors.Is(err, app.ErrPRAlreadyMerged):
 		return ctx.JSON(http.StatusConflict, ErrorResponse{
 			Error: struct {
 				Code    ErrorResponseErrorCode `json:"code"`
@@ -216,7 +215,7 @@ func mapAppErrorToEchoResponse(ctx echo.Context, err error) error {
 			},
 		})
 
-	case errors.Is(err, s.ErrNotAssigned):
+	case errors.Is(err, app.ErrNotAssigned):
 		return ctx.JSON(http.StatusConflict, ErrorResponse{
 			Error: struct {
 				Code    ErrorResponseErrorCode `json:"code"`
@@ -227,7 +226,7 @@ func mapAppErrorToEchoResponse(ctx echo.Context, err error) error {
 			},
 		})
 
-	case errors.Is(err, s.ErrNoCandidate):
+	case errors.Is(err, app.ErrNoCandidate):
 		return ctx.JSON(http.StatusConflict, ErrorResponse{
 			Error: struct {
 				Code    ErrorResponseErrorCode `json:"code"`
@@ -238,7 +237,7 @@ func mapAppErrorToEchoResponse(ctx echo.Context, err error) error {
 			},
 		})
 
-	case errors.Is(err, s.ErrNotFound):
+	case errors.Is(err, app.ErrNotFound):
 		return ctx.JSON(http.StatusNotFound, ErrorResponse{
 			Error: struct {
 				Code    ErrorResponseErrorCode `json:"code"`

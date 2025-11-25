@@ -1,35 +1,29 @@
-// Package services provides domain services for domain model
-package services
+package domain
 
 import (
 	"errors"
 	"fmt"
 	"math/rand"
 	"slices"
-
-	"github.com/alphameo/pr-reviewnager/internal/domain/dto"
-	e "github.com/alphameo/pr-reviewnager/internal/domain/entities"
-	r "github.com/alphameo/pr-reviewnager/internal/domain/repositories"
-	v "github.com/alphameo/pr-reviewnager/internal/domain/valueobjects"
 )
 
 type PullRequestDomainService interface {
 	// CreateWithReviewers() creates a new pull request and automatically assigns
 	// 2 reviewers by randomly selecting from the author's team.
-	CreateWithReviewers(pullRequest *e.PullRequest) (*e.PullRequest, error)
+	CreateWithReviewers(pullRequest *PullRequest) (*PullRequest, error)
 
 	// ReassignReviewer() unassign user-reviewer with given id and assigns another from his team, excluding
 	// him and pr author. After, method returns id of new user-reviewer and pull request
-	ReassignReviewer(userID v.ID, pullRequestID v.ID) (*ReassignReviewerResponse, error)
+	ReassignReviewer(userID ID, pullRequestID ID) (*ReassignReviewerResponse, error)
 
 	// MarkAsMerged() idempotently marks pull request as merged and sets time of marking
-	MarkAsMerged(pullRequestID v.ID) (*e.PullRequest, error)
+	MarkAsMerged(pullRequestID ID) (*PullRequest, error)
 }
 
 type DefaultPullRequestDomainService struct {
-	userRepo r.UserRepository
-	teamRepo r.TeamRepository
-	prRepo   r.PullRequestRepository
+	userRepo UserRepository
+	teamRepo TeamRepository
+	prRepo   PullRequestRepository
 }
 
 var (
@@ -40,13 +34,12 @@ var (
 	ErrUserNotFound       error = errors.New("user not found")
 	ErrUserNotReviewer    error = errors.New("user is not a reviewer")
 	ErrNoReviewCandidates error = errors.New("no users ready to review")
-	ErrPRAlreadyMerged    error = errors.New("cannot change PR state because already merged")
 )
 
 func NewDefaultPullRequestDomainService(
-	userRepository r.UserRepository,
-	pullRequestRepository r.PullRequestRepository,
-	teamRepository r.TeamRepository,
+	userRepository UserRepository,
+	pullRequestRepository PullRequestRepository,
+	teamRepository TeamRepository,
 ) (*DefaultPullRequestDomainService, error) {
 	if userRepository == nil {
 		return nil, errors.New("userRepository cannot be nil")
@@ -65,7 +58,7 @@ func NewDefaultPullRequestDomainService(
 	}, nil
 }
 
-func (s *DefaultPullRequestDomainService) CreateWithReviewers(pullRequest *e.PullRequest) (*e.PullRequest, error) {
+func (s *DefaultPullRequestDomainService) CreateWithReviewers(pullRequest *PullRequest) (*PullRequest, error) {
 	prDTO, err := s.prRepo.FindByID(pullRequest.ID())
 	if err != nil {
 		return nil, err
@@ -97,7 +90,7 @@ func (s *DefaultPullRequestDomainService) CreateWithReviewers(pullRequest *e.Pul
 		return nil, err
 	}
 
-	reviewers := chooseRandomUsers(availableUsers, e.MaxReviewersCount, authorID)
+	reviewers := chooseRandomUsers(availableUsers, MaxReviewersCount, authorID)
 	for _, u := range reviewers {
 		pullRequest.AssignReviewer(u.ID)
 	}
@@ -111,11 +104,11 @@ func (s *DefaultPullRequestDomainService) CreateWithReviewers(pullRequest *e.Pul
 }
 
 type ReassignReviewerResponse struct {
-	NewReviewerID v.ID
-	PullRequest   e.PullRequest
+	NewReviewerID ID
+	PullRequest   PullRequest
 }
 
-func (s *DefaultPullRequestDomainService) ReassignReviewer(userID v.ID, pullRequestID v.ID) (*ReassignReviewerResponse, error) {
+func (s *DefaultPullRequestDomainService) ReassignReviewer(userID ID, pullRequestID ID) (*ReassignReviewerResponse, error) {
 	prDTO, err := s.prRepo.FindByID(pullRequestID)
 	if err != nil {
 		return nil, err
@@ -124,11 +117,11 @@ func (s *DefaultPullRequestDomainService) ReassignReviewer(userID v.ID, pullRequ
 		return nil, ErrPRNotFound
 	}
 
-	pr, err := e.NewExistingPullRequest(prDTO)
+	pr, err := NewExistingPullRequest(prDTO)
 	if err != nil {
 		return nil, err
 	}
-	if pr.Status() == v.MERGED {
+	if pr.Status() == MERGED {
 		return nil, ErrPRAlreadyMerged
 	}
 
@@ -169,7 +162,7 @@ func (s *DefaultPullRequestDomainService) ReassignReviewer(userID v.ID, pullRequ
 	}, nil
 }
 
-func chooseRandomUser(availableUsers []*dto.UserDTO, except ...v.ID) *dto.UserDTO {
+func chooseRandomUser(availableUsers []*UserDTO, except ...ID) *UserDTO {
 	for i, u := range availableUsers {
 		for _, exceptionalU := range except {
 			if u.ID == exceptionalU {
@@ -183,7 +176,7 @@ func chooseRandomUser(availableUsers []*dto.UserDTO, except ...v.ID) *dto.UserDT
 	return availableUsers[idx]
 }
 
-func chooseRandomUsers(availableUsers []*dto.UserDTO, maxCount int, except ...v.ID) []*dto.UserDTO {
+func chooseRandomUsers(availableUsers []*UserDTO, maxCount int, except ...ID) []*UserDTO {
 	for i, u := range availableUsers {
 		for _, exceptionalU := range except {
 			if u.ID == exceptionalU {
@@ -193,7 +186,7 @@ func chooseRandomUsers(availableUsers []*dto.UserDTO, maxCount int, except ...v.
 		}
 	}
 
-	reviewers := make([]*dto.UserDTO, 0, maxCount)
+	reviewers := make([]*UserDTO, 0, maxCount)
 	if len(availableUsers) <= maxCount {
 		for i := range min(maxCount, len(availableUsers)) {
 			reviewers = append(reviewers, availableUsers[i])
@@ -209,7 +202,7 @@ func chooseRandomUsers(availableUsers []*dto.UserDTO, maxCount int, except ...v.
 	return reviewers
 }
 
-func (s *DefaultPullRequestDomainService) MarkAsMerged(pullRequestID v.ID) (*e.PullRequest, error) {
+func (s *DefaultPullRequestDomainService) MarkAsMerged(pullRequestID ID) (*PullRequest, error) {
 	prDTO, err := s.prRepo.FindByID(pullRequestID)
 	if err != nil {
 		return nil, err
@@ -218,12 +211,12 @@ func (s *DefaultPullRequestDomainService) MarkAsMerged(pullRequestID v.ID) (*e.P
 		return nil, ErrPRNotFound
 	}
 
-	pr, err := e.NewExistingPullRequest(prDTO)
+	pr, err := NewExistingPullRequest(prDTO)
 	if err != nil {
 		return nil, err
 	}
 
-	if pr.Status() == v.MERGED {
+	if pr.Status() == MERGED {
 		return pr, nil
 	}
 
