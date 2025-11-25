@@ -5,6 +5,7 @@ import (
 
 	"github.com/alphameo/pr-reviewnager/internal/application/mappers"
 	"github.com/alphameo/pr-reviewnager/internal/domain/dto"
+	"github.com/alphameo/pr-reviewnager/internal/domain/entities"
 	r "github.com/alphameo/pr-reviewnager/internal/domain/repositories"
 	ds "github.com/alphameo/pr-reviewnager/internal/domain/services"
 	v "github.com/alphameo/pr-reviewnager/internal/domain/valueobjects"
@@ -82,7 +83,7 @@ func (s *DefaultPullRequestService) ReassignReviewer(userID v.ID, pullRequestID 
 	newReviewer, err := s.prDomainServ.ReassignReviewer(userID, pullRequestID)
 	if errors.Is(err, ds.ErrPRNotFound) || errors.Is(err, ds.ErrUserNotFound) {
 		return nil, ErrNotFound
-	} else if errors.Is(err, ds.ErrPRAlreadyMerged) {
+	} else if errors.Is(err, entities.ErrPRAlreadyMerged) {
 		return nil, ErrPRAlreadyMerged
 	} else if errors.Is(err, ds.ErrUserNotReviewer) {
 		return nil, ErrNotAssigned
