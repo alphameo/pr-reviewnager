@@ -16,7 +16,7 @@ type PSQLRepositoryContainer struct {
 	conn     *pgx.Conn
 }
 
-func NewPSQLStorage(ctx context.Context, dsn string) (*PSQLRepositoryContainer, error) {
+func NewPSQLRepositoryContainer(ctx context.Context, dsn string) (*PSQLRepositoryContainer, error) {
 	if ctx == nil {
 		ctx = context.Background()
 	}
