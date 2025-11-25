@@ -6,9 +6,9 @@ import (
 	"os"
 
 	"github.com/alphameo/pr-reviewnager/internal/adapters/api"
-	app "github.com/alphameo/pr-reviewnager/internal/application"
+	"github.com/alphameo/pr-reviewnager/internal/app"
 	"github.com/alphameo/pr-reviewnager/internal/domain"
-	"github.com/alphameo/pr-reviewnager/internal/infrastructure/db/postgres"
+	"github.com/alphameo/pr-reviewnager/internal/infra/db/postgres"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )

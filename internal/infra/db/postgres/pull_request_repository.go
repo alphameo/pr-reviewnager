@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/alphameo/pr-reviewnager/internal/domain"
-	db "github.com/alphameo/pr-reviewnager/internal/infrastructure/db/sqlc"
+	db "github.com/alphameo/pr-reviewnager/internal/infra/db/sqlc"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"

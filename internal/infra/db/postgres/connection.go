@@ -4,7 +4,7 @@ package postgres
 import (
 	"context"
 
-	db "github.com/alphameo/pr-reviewnager/internal/infrastructure/db/sqlc"
+	db "github.com/alphameo/pr-reviewnager/internal/infra/db/sqlc"
 	"github.com/jackc/pgx/v5"
 )
 

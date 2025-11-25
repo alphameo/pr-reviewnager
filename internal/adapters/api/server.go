@@ -4,7 +4,7 @@ import (
 	"errors"
 	"net/http"
 
-	app "github.com/alphameo/pr-reviewnager/internal/application"
+	"github.com/alphameo/pr-reviewnager/internal/app"
 	"github.com/alphameo/pr-reviewnager/internal/domain"
 	"github.com/labstack/echo/v4"
 )

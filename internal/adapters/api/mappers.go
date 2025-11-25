@@ -3,7 +3,7 @@ package api
 import (
 	"time"
 
-	app "github.com/alphameo/pr-reviewnager/internal/application"
+	"github.com/alphameo/pr-reviewnager/internal/app"
 	"github.com/alphameo/pr-reviewnager/internal/domain"
 )
 
