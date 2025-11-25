@@ -53,7 +53,7 @@ func NewExistingPullRequest(pullRequest *PullRequestDTO) (*PullRequest, error) {
 		return nil, errors.New("dto cannot be nil")
 	}
 
-	status, err := NewPRStatusFromString(pullRequest.Status)
+	status, err := ParsePRStatus(pullRequest.Status)
 	if err != nil {
 		return nil, err
 	}

@@ -12,7 +12,7 @@ const (
 	PRMerged PRStatus = "merged"
 )
 
-func NewPRStatusFromString(value string) (PRStatus, error) {
+func ParsePRStatus(value string) (PRStatus, error) {
 	processed := strings.ToLower(strings.TrimSpace(value))
 	switch processed {
 	case "", "open", "opened":
