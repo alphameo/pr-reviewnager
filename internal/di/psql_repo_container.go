@@ -1,51 +1,52 @@
-package postgres
+package di
 
 import (
 	"context"
 	"fmt"
 
 	r "github.com/alphameo/pr-reviewnager/internal/domain/repositories"
+	"github.com/alphameo/pr-reviewnager/internal/infrastructure/db/postgres"
 	"github.com/jackc/pgx/v5"
 )
 
-type PSQLStorage struct {
-	userRepo *UserRepository
-	teamRepo *TeamRepository
-	prRepo   *PullRequestRepository
+type PSQLRepositoryContainer struct {
+	userRepo *postgres.UserRepository
+	teamRepo *postgres.TeamRepository
+	prRepo   *postgres.PullRequestRepository
 	conn     *pgx.Conn
 }
 
-func NewPSQLStorage(ctx context.Context, dsn string) (*PSQLStorage, error) {
+func NewPSQLRepositoryContainer(ctx context.Context, dsn string) (*PSQLRepositoryContainer, error) {
 	if ctx == nil {
 		ctx = context.Background()
 	}
 
-	conn, err := NewConnection(ctx, dsn)
+	conn, err := postgres.NewConnection(ctx, dsn)
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to database: %w", err)
 	}
 
-	queries := NewQueries(conn)
+	queries := postgres.NewQueries(conn)
 
-	teamRepo, err := NewTeamRepository(queries, conn)
+	teamRepo, err := postgres.NewTeamRepository(queries, conn)
 	if err != nil {
 		conn.Close(context.Background())
 		return nil, fmt.Errorf("failed to create team repository: %w", err)
 	}
 
-	userRepo, err := NewUserRepository(queries)
+	userRepo, err := postgres.NewUserRepository(queries)
 	if err != nil {
 		conn.Close(context.Background())
 		return nil, fmt.Errorf("failed to create user repository: %w", err)
 	}
 
-	prRepo, err := NewPullRequestRepository(queries, conn)
+	prRepo, err := postgres.NewPullRequestRepository(queries, conn)
 	if err != nil {
 		conn.Close(context.Background())
 		return nil, fmt.Errorf("failed to create pull request repository: %w", err)
 	}
 
-	return &PSQLStorage{
+	return &PSQLRepositoryContainer{
 		teamRepo: teamRepo,
 		userRepo: userRepo,
 		prRepo:   prRepo,
@@ -53,19 +54,19 @@ func NewPSQLStorage(ctx context.Context, dsn string) (*PSQLStorage, error) {
 	}, nil
 }
 
-func (s *PSQLStorage) UserRepository() r.UserRepository {
+func (s *PSQLRepositoryContainer) UserRepository() r.UserRepository {
 	return s.userRepo
 }
 
-func (s *PSQLStorage) TeamRepository() r.TeamRepository {
+func (s *PSQLRepositoryContainer) TeamRepository() r.TeamRepository {
 	return s.teamRepo
 }
 
-func (s *PSQLStorage) PullRequestRepository() r.PullRequestRepository {
+func (s *PSQLRepositoryContainer) PullRequestRepository() r.PullRequestRepository {
 	return s.prRepo
 }
 
-func (s *PSQLStorage) Close(ctx context.Context) error {
+func (s *PSQLRepositoryContainer) Close(ctx context.Context) error {
 	if s.conn == nil {
 		return nil
 	}

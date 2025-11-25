@@ -6,9 +6,7 @@ import (
 	"os"
 
 	"github.com/alphameo/pr-reviewnager/internal/adapters/api"
-	s "github.com/alphameo/pr-reviewnager/internal/application/services"
-	ds "github.com/alphameo/pr-reviewnager/internal/domain/services"
-	"github.com/alphameo/pr-reviewnager/internal/infrastructure/db/postgres"
+	"github.com/alphameo/pr-reviewnager/internal/di"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
@@ -27,22 +25,17 @@ func main() {
 	}
 
 	ctx := context.Background()
-	storage, err := postgres.NewPSQLStorage(ctx, dsn)
+	psqlRepoContainer, err := di.NewPSQLRepositoryContainer(ctx, dsn)
 	if err != nil {
 		log.Fatalf("Failed to initialize storage: %v", err)
 	}
 	defer func() {
-		if err := storage.Close(ctx); err != nil {
+		if err := psqlRepoContainer.Close(ctx); err != nil {
 			log.Fatalf("Error closing storage: %v", err)
 		}
 	}()
 
-	domainServiceProvider, err := ds.NewDefaultServiceProvider(storage)
-	if err != nil {
-		log.Fatalf("Failed to create domain service provider: %v", err)
-	}
-
-	serviceProvider, err := s.NewDefaultServiceProvider(storage, domainServiceProvider)
+	serviceProvider, err := di.NewServiceContainer(psqlRepoContainer)
 	if err != nil {
 		log.Fatalf("Failed to create service provider: %v", err)
 	}
@@ -53,9 +46,9 @@ func main() {
 	e.Use(middleware.Recover())
 
 	serverImpl, err := api.NewServer(
-		serviceProvider.TeamService(),
-		serviceProvider.UserService(),
-		serviceProvider.PullRequestService(),
+		serviceProvider.TeamService,
+		serviceProvider.UserService,
+		serviceProvider.PullRequestService,
 	)
 	if err != nil {
 		log.Fatal("Failed to create server:", err)
