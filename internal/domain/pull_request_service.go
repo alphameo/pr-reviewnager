@@ -121,7 +121,7 @@ func (s *DefaultPullRequestDomainService) ReassignReviewer(userID ID, pullReques
 	if err != nil {
 		return nil, err
 	}
-	if pr.Status() == MERGED {
+	if pr.Status() == PRMerged {
 		return nil, ErrPRAlreadyMerged
 	}
 
@@ -216,7 +216,7 @@ func (s *DefaultPullRequestDomainService) MarkAsMerged(pullRequestID ID) (*PullR
 		return nil, err
 	}
 
-	if pr.Status() == MERGED {
+	if pr.Status() == PRMerged {
 		return pr, nil
 	}
 

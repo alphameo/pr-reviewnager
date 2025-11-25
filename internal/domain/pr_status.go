@@ -8,17 +8,17 @@ import (
 type PRStatus string
 
 const (
-	OPEN   PRStatus = "open"
-	MERGED PRStatus = "merged"
+	PROpen   PRStatus = "open"
+	PRMerged PRStatus = "merged"
 )
 
 func NewPRStatusFromString(value string) (PRStatus, error) {
 	processed := strings.ToLower(strings.TrimSpace(value))
 	switch processed {
 	case "", "open", "opened":
-		return OPEN, nil
+		return PROpen, nil
 	case "merged":
-		return MERGED, nil
+		return PRMerged, nil
 	default:
 		return PRStatus(""), fmt.Errorf("no PR status: %s", processed)
 	}
