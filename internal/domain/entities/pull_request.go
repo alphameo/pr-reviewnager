@@ -13,7 +13,7 @@ import (
 const MaxReviewersCount int = 2
 
 var (
-	ErrPRAlreadyMerged           = errors.New("PR is already MERGED")
+	ErrPRAlreadyMerged           = errors.New("PR is already merged")
 	ErrMaxReviewersCount         = fmt.Errorf("maximum number of reviewers is %d", MaxReviewersCount)
 	ErrAlreadyAssignedAsReviewer = errors.New("user already assiggned as reviewer")
 )

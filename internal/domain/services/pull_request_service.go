@@ -40,7 +40,6 @@ var (
 	ErrUserNotFound       error = errors.New("user not found")
 	ErrUserNotReviewer    error = errors.New("user is not a reviewer")
 	ErrNoReviewCandidates error = errors.New("no users ready to review")
-	ErrPRAlreadyMerged    error = errors.New("cannot change PR state because already merged")
 )
 
 func NewDefaultPullRequestDomainService(
@@ -129,7 +128,7 @@ func (s *DefaultPullRequestDomainService) ReassignReviewer(userID v.ID, pullRequ
 		return nil, err
 	}
 	if pr.Status() == v.MERGED {
-		return nil, ErrPRAlreadyMerged
+		return nil, e.ErrPRAlreadyMerged
 	}
 
 	reviewerIDs := pr.ReviewerIDs()
