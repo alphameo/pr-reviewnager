@@ -2,12 +2,15 @@ package domain
 
 import (
 	"errors"
+	"strings"
 )
 
 type TeamName string
 
 func NewTeamName(name string) (TeamName, error) {
-	tName := ExistingTeamName(name)
+	processed := strings.TrimSpace(name)
+
+	tName := ExistingTeamName(processed)
 	if err := tName.Validate(); err != nil {
 		return "", err
 	}

@@ -2,12 +2,15 @@ package domain
 
 import (
 	"errors"
+	"strings"
 )
 
 type UserName string
 
 func NewUserName(name string) (UserName, error) {
-	uName := ExistingUserName(name)
+	processed := strings.TrimSpace(name)
+
+	uName := ExistingUserName(processed)
 	if err := uName.Validate(); err != nil {
 		return "", err
 	}
