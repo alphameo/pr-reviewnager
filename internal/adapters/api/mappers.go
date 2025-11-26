@@ -21,7 +21,7 @@ func ToAPITeam(d app.TeamWithUsersDTO) Team {
 }
 
 func FromAPITeam(t Team) app.TeamWithUsersDTO {
-	members := make([]*domain.UserDTO, len(t.Members))
+	members := make([]*app.UserDTO, len(t.Members))
 	for i, m := range t.Members {
 		member := FromAPITeamMember(m)
 		members[i] = &member
@@ -33,7 +33,7 @@ func FromAPITeam(t Team) app.TeamWithUsersDTO {
 	}
 }
 
-func ToAPITeamMember(m domain.UserDTO) TeamMember {
+func ToAPITeamMember(m app.UserDTO) TeamMember {
 	return TeamMember{
 		UserId:   m.ID.String(),
 		Username: m.Name,
@@ -41,10 +41,10 @@ func ToAPITeamMember(m domain.UserDTO) TeamMember {
 	}
 }
 
-func FromAPITeamMember(m TeamMember) domain.UserDTO {
+func FromAPITeamMember(m TeamMember) app.UserDTO {
 	id, _ := domain.NewIDFromString(m.UserId)
 
-	return domain.UserDTO{
+	return app.UserDTO{
 		ID:     id,
 		Name:   m.Username,
 		Active: m.IsActive,
@@ -60,7 +60,7 @@ func ToAPIUser(u app.UserWithTeamNameDTO) User {
 	}
 }
 
-func ToAPIPullRequest(d domain.PullRequestDTO) PullRequest {
+func ToAPIPullRequest(d app.PullRequestDTO) PullRequest {
 	reviewers := make([]string, len(d.ReviewerIDs))
 	for i, rid := range d.ReviewerIDs {
 		reviewers[i] = rid.String()
@@ -75,14 +75,14 @@ func ToAPIPullRequest(d domain.PullRequestDTO) PullRequest {
 		PullRequestId:     d.ID.String(),
 		PullRequestName:   d.Title,
 		AuthorId:          d.AuthorID.String(),
-		Status:            PullRequestStatus(d.Status), // "OPEN" / "MERGED"
+		Status:            PullRequestStatus(d.Status),
 		AssignedReviewers: reviewers,
 		CreatedAt:         &d.CreatedAt,
 		MergedAt:          mergedAt,
 	}
 }
 
-func ToAPIPullRequestShort(d domain.PullRequestDTO) PullRequestShort {
+func ToAPIPullRequestShort(d app.PullRequestDTO) PullRequestShort {
 	return PullRequestShort{
 		PullRequestId:   d.ID.String(),
 		PullRequestName: d.Title,
@@ -91,7 +91,7 @@ func ToAPIPullRequestShort(d domain.PullRequestDTO) PullRequestShort {
 	}
 }
 
-func ToAPIPullRequestShortList(list []*domain.PullRequestDTO) []PullRequestShort {
+func ToAPIPullRequestShortList(list []*app.PullRequestDTO) []PullRequestShort {
 	out := make([]PullRequestShort, len(list))
 	for i, pr := range list {
 		out[i] = ToAPIPullRequestShort(*pr)
