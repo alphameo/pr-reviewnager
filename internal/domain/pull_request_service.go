@@ -8,9 +8,9 @@ import (
 )
 
 type PullRequestDomainService interface {
-	// CreateWithReviewers() creates a new pull request and automatically assigns
+	// CreateAndAssignReviewers() creates a new pull request and automatically assigns
 	// 2 reviewers by randomly selecting from the author's team.
-	CreateWithReviewers(pullRequest *PullRequest) (*PullRequest, error)
+	CreateAndAssignReviewers(pullRequest *PullRequest) (*PullRequest, error)
 
 	// ReassignReviewer() unassign user-reviewer with given id and assigns another from his team, excluding
 	// him and pr author. After, method returns id of new user-reviewer and pull request
@@ -58,7 +58,7 @@ func NewDefaultPullRequestDomainService(
 	}, nil
 }
 
-func (s *DefaultPullRequestDomainService) CreateWithReviewers(pullRequest *PullRequest) (*PullRequest, error) {
+func (s *DefaultPullRequestDomainService) CreateAndAssignReviewers(pullRequest *PullRequest) (*PullRequest, error) {
 	prDTO, err := s.prRepo.FindByID(pullRequest.ID())
 	if err != nil {
 		return nil, err
