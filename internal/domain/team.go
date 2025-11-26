@@ -12,12 +12,12 @@ var ErrAlreadyTeamMember = errors.New("user is already a team member")
 
 type Team struct {
 	id   ID
-	name string
+	name TeamName
 	// slice (not a map) becuse member count cannot be very large
 	userIDs []ID
 }
 
-func NewTeam(name string) (*Team, error) {
+func NewTeam(name TeamName) (*Team, error) {
 	return &Team{
 		id:      NewID(),
 		name:    name,
@@ -27,7 +27,7 @@ func NewTeam(name string) (*Team, error) {
 
 func ExistingTeam(
 	id ID,
-	name string,
+	name TeamName,
 	userIDs []ID,
 ) *Team {
 	uIDs := make([]ID, 0, max(len(userIDs), avgUserCountInTeam))
@@ -44,7 +44,7 @@ func (t *Team) ID() ID {
 	return t.id
 }
 
-func (t *Team) Name() string {
+func (t *Team) Name() TeamName {
 	return t.name
 }
 
@@ -74,9 +74,11 @@ func (t *Team) RemoveUser(userID ID) error {
 }
 
 func (t *Team) Validate() error {
-	err := validateIDsUniqueness(t.UserIDs())
-	if err != nil {
+	if err := validateIDsUniqueness(t.UserIDs()); err != nil {
 		return fmt.Errorf("error in team members: %w", err)
+	}
+	if err := t.name.Validate(); err != nil {
+		return err
 	}
 
 	return nil

@@ -42,7 +42,7 @@ func (r *TeamRepository) Create(team *domain.Team) error {
 
 	err = qtx.CreateTeam(ctx, db.CreateTeamParams{
 		ID:   team.ID().Value(),
-		Name: team.Name(),
+		Name: team.Name().Value(),
 	})
 	if err != nil {
 		return err
@@ -98,7 +98,7 @@ func (r *TeamRepository) FindByID(id domain.ID) (*domain.Team, error) {
 
 	team := domain.ExistingTeam(
 		domain.ExistingID(dbTeam.ID),
-		dbTeam.Name,
+		domain.ExistingTeamName(dbTeam.Name),
 		userIDs,
 	)
 
@@ -151,7 +151,7 @@ func (r *TeamRepository) FindAll() ([]*domain.Team, error) {
 	for _, teamDTO := range teamMap {
 		team := domain.ExistingTeam(
 			teamDTO.ID,
-			teamDTO.Name,
+			domain.ExistingTeamName(teamDTO.Name),
 			teamDTO.UserIDs,
 		)
 		teams = append(teams, team)
@@ -172,7 +172,7 @@ func (r *TeamRepository) Update(team *domain.Team) error {
 
 	err = qtx.UpdateTeam(ctx, db.UpdateTeamParams{
 		ID:   team.ID().Value(),
-		Name: team.Name(),
+		Name: team.Name().Value(),
 	})
 	if err != nil {
 		return err
@@ -244,7 +244,7 @@ func (r *TeamRepository) FindByName(teamName string) (*domain.Team, error) {
 
 	team := domain.ExistingTeam(
 		domain.ExistingID(dbTeam.ID),
-		dbTeam.Name,
+		domain.ExistingTeamName(dbTeam.Name),
 		userIDs,
 	)
 
@@ -268,7 +268,7 @@ func (r *TeamRepository) CreateTeamAndModifyUsers(team *domain.Team, users []*do
 
 	err = qtx.CreateTeam(ctx, db.CreateTeamParams{
 		ID:   team.ID().Value(),
-		Name: team.Name(),
+		Name: team.Name().Value(),
 	})
 	if err != nil {
 		return err
@@ -333,7 +333,7 @@ func (r *TeamRepository) FindTeamByTeammateID(userID domain.ID) (*domain.Team, e
 
 	team := domain.ExistingTeam(
 		domain.ExistingID(dbTeam.ID),
-		dbTeam.Name,
+		domain.ExistingTeamName(dbTeam.Name),
 		userIDs,
 	)
 

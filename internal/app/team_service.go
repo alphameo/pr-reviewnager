@@ -56,7 +56,12 @@ func (s *DefaultTeamService) CreateTeamWithUsers(teamDTO *TeamWithUsersDTO) erro
 		return fmt.Errorf("team with name=%s already exists", teamDTO.TeamName)
 	}
 
-	team, err := domain.NewTeam(teamDTO.TeamName)
+	name, err := domain.NewTeamName(teamDTO.TeamName)
+	if err != nil {
+		return err
+	}
+
+	team, err := domain.NewTeam(name)
 	if err != nil {
 		return err
 	}
@@ -97,7 +102,7 @@ func (s *DefaultTeamService) FindTeamByName(name string) (*TeamWithUsersDTO, err
 	}
 
 	return &TeamWithUsersDTO{
-		TeamName:  team.Name(),
+		TeamName:  team.Name().Value(),
 		TeamUsers: users,
 	}, nil
 }
@@ -130,6 +135,6 @@ func (s *DefaultTeamService) SetUserActiveByID(userID domain.ID, active bool) (*
 
 	return &UserWithTeamNameDTO{
 		User:     userDTO,
-		TeamName: team.Name(),
+		TeamName: team.Name().Value(),
 	}, nil
 }

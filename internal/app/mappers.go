@@ -67,7 +67,7 @@ func TeamToDTO(entity *domain.Team) (*TeamDTO, error) {
 
 	return &TeamDTO{
 		ID:      entity.ID(),
-		Name:    entity.Name(),
+		Name:    entity.Name().Value(),
 		UserIDs: entity.UserIDs(),
 	}, nil
 }
@@ -124,7 +124,12 @@ func TeamToDomain(dto *TeamDTO) (*domain.Team, error) {
 		return nil, ErrNilDTO
 	}
 
-	team := domain.ExistingTeam(dto.ID, dto.Name, dto.UserIDs)
+	name, err := domain.NewTeamName(dto.Name)
+	if err != nil {
+		return nil, err
+	}
+
+	team := domain.ExistingTeam(dto.ID, name, dto.UserIDs)
 	if err := team.Validate(); err != nil {
 		return nil, err
 	}
