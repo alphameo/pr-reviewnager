@@ -27,8 +27,12 @@ type PullRequest struct {
 }
 
 func NewPullRequest(title string, authorID ID) (*PullRequest, error) {
+	return NewPullRequestWithID(NewID(), title, authorID)
+}
+
+func NewPullRequestWithID(id ID, title string, authorID ID) (*PullRequest, error) {
 	return &PullRequest{
-		NewID(),
+		id,
 		title,
 		authorID,
 		time.Now(),
