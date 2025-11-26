@@ -47,7 +47,7 @@ func PullRequestToDTO(entity *domain.PullRequest) (*PullRequestDTO, error) {
 
 	return &PullRequestDTO{
 		ID:          entity.ID(),
-		Title:       entity.Title(),
+		Title:       entity.Title().String(),
 		AuthorID:    entity.AuthorID(),
 		CreatedAt:   entity.CreatedAt(),
 		Status:      entity.Status().String(),
@@ -99,12 +99,21 @@ func PullRequestToDomain(dto *PullRequestDTO) (*domain.PullRequest, error) {
 		return nil, ErrNilDTO
 	}
 
+	status, err := domain.NewPRStatus(dto.Status)
+	if err != nil {
+		return nil, err
+	}
+	title, err := domain.NewPRTitle(dto.Title)
+	if err != nil {
+		return nil, err
+	}
+
 	pr := domain.ExistingPullRequest(
 		dto.ID,
-		dto.Title,
+		title,
 		dto.AuthorID,
 		dto.CreatedAt,
-		domain.ExistingPRStatus(dto.Status),
+		status,
 		dto.MergedAt,
 		dto.ReviewerIDs,
 	)

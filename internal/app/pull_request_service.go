@@ -42,9 +42,14 @@ func NewDefaultPullRequestService(
 }
 
 func (s *DefaultPullRequestService) CreatePullRequest(pullRequest *NewPullRequestDTO) (*PullRequestDTO, error) {
+	title, err := domain.NewPRTitle(pullRequest.Title)
+	if err != nil {
+		return nil, err
+	}
+
 	entity, err := domain.NewPullRequestWithID(
 		pullRequest.ID,
-		pullRequest.Title,
+		title,
 		pullRequest.AuthorID,
 	)
 	if err != nil {

@@ -50,7 +50,7 @@ func (r *PullRequestRepository) Create(pullRequest *domain.PullRequest) error {
 
 	err = qtx.CreatePullRequest(ctx, db.CreatePullRequestParams{
 		ID:       pullRequest.ID().Value(),
-		Title:    pullRequest.Title(),
+		Title:    pullRequest.Title().Value(),
 		AuthorID: pullRequest.AuthorID().Value(),
 		Status:   pullRequest.Status().String(),
 		MergedAt: mergedAt,
@@ -105,7 +105,7 @@ func (r *PullRequestRepository) FindByID(id domain.ID) (*domain.PullRequest, err
 
 	return domain.ExistingPullRequest(
 		id,
-		rows[0].Title,
+		domain.ExistingPRTitle(rows[0].Title),
 		domain.ID(rows[0].AuthorID),
 		TimeFromTimestamptz(rows[0].CreatedAt),
 		domain.ExistingPRStatus(rows[0].Status),
@@ -163,7 +163,7 @@ func (r *PullRequestRepository) FindAll() ([]*domain.PullRequest, error) {
 	for id, data := range prMap {
 		pr := domain.ExistingPullRequest(
 			domain.ExistingID(id),
-			data.Title,
+			domain.ExistingPRTitle(data.Title),
 			domain.ExistingID(data.AuthorID),
 			data.CreatedAt,
 			domain.ExistingPRStatus(data.Status),
@@ -195,7 +195,7 @@ func (r *PullRequestRepository) Update(pullRequest *domain.PullRequest) error {
 
 	err = qtx.UpdatePullRequest(ctx, db.UpdatePullRequestParams{
 		ID:       pullRequest.ID().Value(),
-		Title:    pullRequest.Title(),
+		Title:    pullRequest.Title().Value(),
 		AuthorID: pullRequest.AuthorID().Value(),
 		Status:   pullRequest.Status().String(),
 		MergedAt: mergedAt,
@@ -280,7 +280,7 @@ func (r *PullRequestRepository) FindPullRequestsByReviewer(userID domain.ID) ([]
 	for id, data := range prMap {
 		pr := domain.ExistingPullRequest(
 			domain.ExistingID(id),
-			data.Title,
+			domain.ExistingPRTitle(data.Title),
 			domain.ExistingID(data.AuthorID),
 			data.CreatedAt,
 			domain.ExistingPRStatus(data.Status),

@@ -17,7 +17,7 @@ var (
 
 type PullRequest struct {
 	id        ID
-	title     string
+	title     PRTitle
 	authorID  ID
 	createdAt time.Time
 	status    PRStatus
@@ -26,11 +26,11 @@ type PullRequest struct {
 	reviewerIDs []ID
 }
 
-func NewPullRequest(title string, authorID ID) (*PullRequest, error) {
+func NewPullRequest(title PRTitle, authorID ID) (*PullRequest, error) {
 	return NewPullRequestWithID(NewID(), title, authorID)
 }
 
-func NewPullRequestWithID(id ID, title string, authorID ID) (*PullRequest, error) {
+func NewPullRequestWithID(id ID, title PRTitle, authorID ID) (*PullRequest, error) {
 	return &PullRequest{
 		id,
 		title,
@@ -44,7 +44,7 @@ func NewPullRequestWithID(id ID, title string, authorID ID) (*PullRequest, error
 
 func ExistingPullRequest(
 	id ID,
-	title string,
+	title PRTitle,
 	authorID ID,
 	createdAt time.Time,
 	status PRStatus,
@@ -69,7 +69,7 @@ func (p *PullRequest) ID() ID {
 	return p.id
 }
 
-func (p *PullRequest) Title() string {
+func (p *PullRequest) Title() PRTitle {
 	return p.title
 }
 
