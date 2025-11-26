@@ -48,12 +48,10 @@ func (s Server) PostPullRequestCreate(ctx echo.Context) error {
 		return err
 	}
 
-	req := app.PullRequestDTO{
-		ID:          prID,
-		Title:       input.PullRequestName,
-		AuthorID:    authorID,
-		Status:      "OPEN",
-		ReviewerIDs: nil,
+	req := app.NewPullRequestDTO{
+		ID:       prID,
+		Title:    input.PullRequestName,
+		AuthorID: authorID,
 	}
 
 	createdPR, err := s.prService.CreatePullRequest(&req)
