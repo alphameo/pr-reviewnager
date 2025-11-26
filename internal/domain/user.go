@@ -41,3 +41,8 @@ func (u *User) Active() bool {
 func (u *User) SetActive(active bool) {
 	u.active = active
 }
+
+func (u *User) Validate() error {
+	// TODO: validation for name
+	return nil
+}
