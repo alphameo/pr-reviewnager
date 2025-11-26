@@ -49,9 +49,9 @@ func (r *PullRequestRepository) Create(pullRequest *domain.PullRequest) error {
 	}
 
 	err = qtx.CreatePullRequest(ctx, db.CreatePullRequestParams{
-		ID:       uuid.UUID(pullRequest.ID()),
+		ID:       pullRequest.ID().Value(),
 		Title:    pullRequest.Title(),
-		AuthorID: uuid.UUID(pullRequest.AuthorID()),
+		AuthorID: pullRequest.AuthorID().Value(),
 		Status:   pullRequest.Status().String(),
 		MergedAt: mergedAt,
 	})
@@ -61,8 +61,8 @@ func (r *PullRequestRepository) Create(pullRequest *domain.PullRequest) error {
 
 	for _, reviewerID := range pullRequest.ReviewerIDs() {
 		err = qtx.CreatePullRequestReviewer(ctx, db.CreatePullRequestReviewerParams{
-			PullRequestID: uuid.UUID(pullRequest.ID()),
-			ReviewerID:    uuid.UUID(reviewerID),
+			PullRequestID: pullRequest.ID().Value(),
+			ReviewerID:    reviewerID.Value(),
 		})
 		if err != nil {
 			return err
@@ -76,7 +76,7 @@ func (r *PullRequestRepository) Create(pullRequest *domain.PullRequest) error {
 func (r *PullRequestRepository) FindByID(id domain.ID) (*domain.PullRequest, error) {
 	ctx := context.Background()
 
-	rows, err := r.queries.GetPullRequestWithReviewersByID(ctx, uuid.UUID(id))
+	rows, err := r.queries.GetPullRequestWithReviewersByID(ctx, id.Value())
 	if err != nil {
 		return nil, err
 	}
@@ -89,7 +89,7 @@ func (r *PullRequestRepository) FindByID(id domain.ID) (*domain.PullRequest, err
 
 	for _, row := range rows {
 		if row.ReviewerID.Valid {
-			reviewerID, err := domain.NewIDFromString(row.ReviewerID.String())
+			reviewerID, err := domain.ParseID(row.ReviewerID.String())
 			if err != nil {
 				return nil, err
 			}
@@ -151,7 +151,7 @@ func (r *PullRequestRepository) FindAll() ([]*domain.PullRequest, error) {
 		}
 
 		if row.ReviewerID.Valid {
-			reviewerID, err := domain.NewIDFromString(row.ReviewerID.String())
+			reviewerID, err := domain.ParseID(row.ReviewerID.String())
 			if err != nil {
 				return nil, err
 			}
@@ -162,9 +162,9 @@ func (r *PullRequestRepository) FindAll() ([]*domain.PullRequest, error) {
 	prs := make([]*domain.PullRequest, 0, len(prMap))
 	for id, data := range prMap {
 		pr := domain.ExistingPullRequest(
-			domain.ID(id),
+			domain.ExistingID(id),
 			data.Title,
-			domain.ID(data.AuthorID),
+			domain.ExistingID(data.AuthorID),
 			data.CreatedAt,
 			domain.ExistingPRStatus(data.Status),
 			data.MergedAt,
@@ -194,9 +194,9 @@ func (r *PullRequestRepository) Update(pullRequest *domain.PullRequest) error {
 	}
 
 	err = qtx.UpdatePullRequest(ctx, db.UpdatePullRequestParams{
-		ID:       uuid.UUID(pullRequest.ID()),
+		ID:       pullRequest.ID().Value(),
 		Title:    pullRequest.Title(),
-		AuthorID: uuid.UUID(pullRequest.AuthorID()),
+		AuthorID: pullRequest.AuthorID().Value(),
 		Status:   pullRequest.Status().String(),
 		MergedAt: mergedAt,
 	})
@@ -204,7 +204,7 @@ func (r *PullRequestRepository) Update(pullRequest *domain.PullRequest) error {
 		return err
 	}
 
-	err = qtx.DeletePullRequestReviewersByPRID(ctx, uuid.UUID(pullRequest.ID()))
+	err = qtx.DeletePullRequestReviewersByPRID(ctx, pullRequest.ID().Value())
 	if err != nil {
 		return err
 	}
@@ -213,8 +213,8 @@ func (r *PullRequestRepository) Update(pullRequest *domain.PullRequest) error {
 		err := qtx.CreatePullRequestReviewer(
 			ctx,
 			db.CreatePullRequestReviewerParams{
-				PullRequestID: uuid.UUID(pullRequest.ID()),
-				ReviewerID:    uuid.UUID(id),
+				PullRequestID: pullRequest.ID().Value(),
+				ReviewerID:    id.Value(),
 			})
 		if err != nil {
 			return err
@@ -227,13 +227,13 @@ func (r *PullRequestRepository) Update(pullRequest *domain.PullRequest) error {
 func (r *PullRequestRepository) DeleteByID(id domain.ID) error {
 	ctx := context.Background()
 
-	err := r.queries.DeletePullRequest(ctx, uuid.UUID(id))
+	err := r.queries.DeletePullRequest(ctx, id.Value())
 	return err
 }
 
 func (r *PullRequestRepository) FindPullRequestsByReviewer(userID domain.ID) ([]*domain.PullRequest, error) {
 	ctx := context.Background()
-	rows, err := r.queries.GetPullRequestsWithReviewersByReviewerID(ctx, uuid.UUID(userID))
+	rows, err := r.queries.GetPullRequestsWithReviewersByReviewerID(ctx, userID.Value())
 	if err != nil {
 		return nil, err
 	}
@@ -268,7 +268,7 @@ func (r *PullRequestRepository) FindPullRequestsByReviewer(userID domain.ID) ([]
 		}
 
 		if row.ReviewerID.Valid {
-			reviewerID, err := domain.NewIDFromString(row.ReviewerID.String())
+			reviewerID, err := domain.ParseID(row.ReviewerID.String())
 			if err != nil {
 				return nil, err
 			}
@@ -279,9 +279,9 @@ func (r *PullRequestRepository) FindPullRequestsByReviewer(userID domain.ID) ([]
 	prs := make([]*domain.PullRequest, 0, len(prMap))
 	for id, data := range prMap {
 		pr := domain.ExistingPullRequest(
-			domain.ID(id),
+			domain.ExistingID(id),
 			data.Title,
-			domain.ID(data.AuthorID),
+			domain.ExistingID(data.AuthorID),
 			data.CreatedAt,
 			domain.ExistingPRStatus(data.Status),
 			data.MergedAt,

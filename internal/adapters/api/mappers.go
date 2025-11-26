@@ -42,7 +42,7 @@ func ToAPITeamMember(m app.UserDTO) TeamMember {
 }
 
 func FromAPITeamMember(m TeamMember) app.UserDTO {
-	id, _ := domain.NewIDFromString(m.UserId)
+	id, _ := domain.ParseID(m.UserId)
 
 	return app.UserDTO{
 		ID:     id,

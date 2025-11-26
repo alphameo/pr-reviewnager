@@ -15,7 +15,7 @@ func ExistingID(id uuid.UUID) ID {
 	return ID(id)
 }
 
-func NewIDFromString(str string) (ID, error) {
+func ParseID(str string) (ID, error) {
 	value, err := uuid.Parse(str)
 	if err != nil {
 		return ID(uuid.Nil), err
@@ -26,4 +26,8 @@ func NewIDFromString(str string) (ID, error) {
 
 func (id ID) String() string {
 	return uuid.UUID.String(uuid.UUID(id))
+}
+
+func (id ID) Value() uuid.UUID {
+	return uuid.UUID(id)
 }

@@ -6,7 +6,6 @@ import (
 
 	"github.com/alphameo/pr-reviewnager/internal/domain"
 	db "github.com/alphameo/pr-reviewnager/internal/infra/db/sqlc"
-	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 )
 
@@ -30,7 +29,7 @@ func (r *UserRepository) Create(user *domain.User) error {
 	}
 
 	err := r.queries.CreateUser(ctx, db.CreateUserParams{
-		ID:     uuid.UUID(user.ID()),
+		ID:     user.ID().Value(),
 		Name:   user.Name(),
 		Active: user.Active(),
 	})
@@ -44,7 +43,7 @@ func (r *UserRepository) Create(user *domain.User) error {
 func (r *UserRepository) FindByID(id domain.ID) (*domain.User, error) {
 	ctx := context.Background()
 
-	user, err := r.queries.GetUser(ctx, uuid.UUID(id))
+	user, err := r.queries.GetUser(ctx, id.Value())
 	if err == pgx.ErrNoRows {
 		return nil, nil
 	} else if err != nil {
@@ -86,7 +85,7 @@ func (r *UserRepository) Update(user *domain.User) error {
 	}
 
 	err := r.queries.UpdateUser(ctx, db.UpdateUserParams{
-		ID:     uuid.UUID(user.ID()),
+		ID:     user.ID().Value(),
 		Name:   user.Name(),
 		Active: user.Active(),
 	})
@@ -100,7 +99,7 @@ func (r *UserRepository) Update(user *domain.User) error {
 func (r *UserRepository) DeleteByID(id domain.ID) error {
 	ctx := context.Background()
 
-	err := r.queries.DeleteUser(ctx, uuid.UUID(id))
+	err := r.queries.DeleteUser(ctx, id.Value())
 	if err != nil {
 		return err
 	}

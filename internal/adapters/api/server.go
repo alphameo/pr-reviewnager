@@ -39,11 +39,11 @@ func (s Server) PostPullRequestCreate(ctx echo.Context) error {
 		return err
 	}
 
-	prID, err := domain.NewIDFromString(input.PullRequestId)
+	prID, err := domain.ParseID(input.PullRequestId)
 	if err != nil {
 		return err
 	}
-	authorID, err := domain.NewIDFromString(input.AuthorId)
+	authorID, err := domain.ParseID(input.AuthorId)
 	if err != nil {
 		return err
 	}
@@ -70,7 +70,7 @@ func (s *Server) PostPullRequestMerge(ctx echo.Context) error {
 		return err
 	}
 
-	prID, err := domain.NewIDFromString(input.PullRequestId)
+	prID, err := domain.ParseID(input.PullRequestId)
 	if err != nil {
 		return err
 	}
@@ -91,11 +91,11 @@ func (s *Server) PostPullRequestReassign(ctx echo.Context) error {
 		return err
 	}
 
-	prID, err := domain.NewIDFromString(input.PullRequestId)
+	prID, err := domain.ParseID(input.PullRequestId)
 	if err != nil {
 		return err
 	}
-	oldID, err := domain.NewIDFromString(input.OldUserId)
+	oldID, err := domain.ParseID(input.OldUserId)
 	if err != nil {
 		return err
 	}
@@ -146,7 +146,7 @@ func (s *Server) PostUsersSetIsActive(ctx echo.Context) error {
 		return err
 	}
 
-	userID, err := domain.NewIDFromString(input.UserId)
+	userID, err := domain.ParseID(input.UserId)
 	if err != nil {
 		return err
 	}
@@ -162,7 +162,7 @@ func (s *Server) PostUsersSetIsActive(ctx echo.Context) error {
 }
 
 func (s *Server) GetUsersGetReview(ctx echo.Context, params GetUsersGetReviewParams) error {
-	userID, err := domain.NewIDFromString(params.UserId)
+	userID, err := domain.ParseID(params.UserId)
 	if err != nil {
 		return err
 	}
