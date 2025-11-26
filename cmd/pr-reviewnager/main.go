@@ -6,7 +6,7 @@ import (
 	"os"
 
 	"github.com/alphameo/pr-reviewnager/internal/adapters/api"
-	"github.com/alphameo/pr-reviewnager/internal/di"
+	"github.com/alphameo/pr-reviewnager/internal/cfg"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
@@ -25,7 +25,7 @@ func main() {
 	}
 
 	ctx := context.Background()
-	repoContainer, err := di.NewPSQLRepositoryContainer(ctx, dsn)
+	repoContainer, err := cfg.NewPSQLRepositoryContainer(ctx, dsn)
 	if err != nil {
 		log.Fatalf("Failed to initialize repositories: %v", err)
 	}
@@ -35,7 +35,7 @@ func main() {
 		}
 	}()
 
-	serviceProvider, err := di.NewServiceContainer(repoContainer)
+	serviceProvider, err := cfg.NewServiceContainer(repoContainer)
 	if err != nil {
 		log.Fatalf("Failed to create service provider: %v", err)
 	}

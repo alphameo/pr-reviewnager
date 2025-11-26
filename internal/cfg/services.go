@@ -1,5 +1,5 @@
-// Package di provides dependency injection
-package di
+// Package cfg provides assembling of layers
+package cfg
 
 import (
 	"context"
