@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/alphameo/pr-reviewnager/internal/domain"
-	"github.com/alphameo/pr-reviewnager/internal/infra"
 	db "github.com/alphameo/pr-reviewnager/internal/infra/db/sqlc"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
@@ -86,87 +85,69 @@ func (r *PullRequestRepository) FindByID(id domain.ID) (*domain.PullRequest, err
 		return nil, nil
 	}
 
-	prMap := make(map[uuid.UUID]*infra.PullRequestDTO)
+	var reviewerIDs []domain.ID
 
 	for _, row := range rows {
-		prID := uuid.UUID(row.ID)
-		pr, exists := prMap[prID]
-
-		if !exists {
-			var mergedAt *time.Time
-			if row.MergedAt.Valid {
-				t := TimeFromTimestamptz(row.MergedAt)
-				mergedAt = &t
-			}
-
-			pr = &infra.PullRequestDTO{
-				ID:          domain.ID(prID),
-				Title:       row.Title,
-				AuthorID:    domain.ID(row.AuthorID),
-				CreatedAt:   TimeFromTimestamptz(row.CreatedAt),
-				Status:      row.Status,
-				MergedAt:    mergedAt,
-				ReviewerIDs: make([]domain.ID, 0),
-			}
-			prMap[prID] = pr
-		}
-
 		if row.ReviewerID.Valid {
 			reviewerID, err := domain.NewIDFromString(row.ReviewerID.String())
 			if err != nil {
 				return nil, err
 			}
-			pr.ReviewerIDs = append(prMap[prID].ReviewerIDs, reviewerID)
+			reviewerIDs = append(reviewerIDs, reviewerID)
 		}
 	}
 
-	prs := make([]*domain.PullRequest, 0, len(prMap))
-	for _, prDTO := range prMap {
-		pr := prDTO.ToEntity()
-		prs = append(prs, pr)
+	var mergedAt *time.Time
+	if rows[0].MergedAt.Valid {
+		t := TimeFromTimestamptz(rows[0].MergedAt)
+		mergedAt = &t
 	}
 
-	if len(prs) == 0 {
-		return nil, nil
-	}
-	if len(prs) > 1 {
-		return nil, errors.New("unexpected multiple PRs returned for a single ID")
-	}
-
-	return prs[0], nil
+	return domain.ExistingPullRequest(
+		id,
+		rows[0].Title,
+		domain.ID(rows[0].AuthorID),
+		TimeFromTimestamptz(rows[0].CreatedAt),
+		domain.ExistingPRStatus(rows[0].Status),
+		mergedAt,
+		reviewerIDs,
+	), nil
 }
 
 func (r *PullRequestRepository) FindAll() ([]*domain.PullRequest, error) {
 	ctx := context.Background()
-
 	rows, err := r.queries.GetPullRequestsWithReviewers(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	prMap := make(map[uuid.UUID]*infra.PullRequestDTO)
+	type prData struct {
+		Title     string
+		AuthorID  uuid.UUID
+		CreatedAt time.Time
+		Status    string
+		MergedAt  *time.Time
+		Reviewers []domain.ID
+	}
+	prMap := make(map[uuid.UUID]*prData)
 
 	for _, row := range rows {
-		prID := uuid.UUID(row.ID)
-		pr, exists := prMap[prID]
+		prID := row.ID
 
-		if !exists {
+		if prMap[row.ID] == nil {
 			var mergedAt *time.Time
 			if row.MergedAt.Valid {
 				t := TimeFromTimestamptz(row.MergedAt)
 				mergedAt = &t
 			}
-
-			pr = &infra.PullRequestDTO{
-				ID:          domain.ID(prID),
-				Title:       row.Title,
-				AuthorID:    domain.ID(row.AuthorID),
-				CreatedAt:   TimeFromTimestamptz(row.CreatedAt),
-				Status:      row.Status,
-				MergedAt:    mergedAt,
-				ReviewerIDs: make([]domain.ID, 0),
+			prMap[prID] = &prData{
+				Title:     row.Title,
+				AuthorID:  row.AuthorID,
+				CreatedAt: TimeFromTimestamptz(row.CreatedAt),
+				Status:    row.Status,
+				MergedAt:  mergedAt,
+				Reviewers: nil,
 			}
-			prMap[prID] = pr
 		}
 
 		if row.ReviewerID.Valid {
@@ -174,13 +155,21 @@ func (r *PullRequestRepository) FindAll() ([]*domain.PullRequest, error) {
 			if err != nil {
 				return nil, err
 			}
-			pr.ReviewerIDs = append(prMap[prID].ReviewerIDs, reviewerID)
+			prMap[prID].Reviewers = append(prMap[prID].Reviewers, reviewerID)
 		}
 	}
 
 	prs := make([]*domain.PullRequest, 0, len(prMap))
-	for _, prDTO := range prMap {
-		pr := prDTO.ToEntity()
+	for id, data := range prMap {
+		pr := domain.ExistingPullRequest(
+			domain.ID(id),
+			data.Title,
+			domain.ID(data.AuthorID),
+			data.CreatedAt,
+			domain.ExistingPRStatus(data.Status),
+			data.MergedAt,
+			data.Reviewers,
+		)
 		prs = append(prs, pr)
 	}
 
@@ -239,44 +228,43 @@ func (r *PullRequestRepository) DeleteByID(id domain.ID) error {
 	ctx := context.Background()
 
 	err := r.queries.DeletePullRequest(ctx, uuid.UUID(id))
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return err
 }
 
 func (r *PullRequestRepository) FindPullRequestsByReviewer(userID domain.ID) ([]*domain.PullRequest, error) {
 	ctx := context.Background()
-
 	rows, err := r.queries.GetPullRequestsWithReviewersByReviewerID(ctx, uuid.UUID(userID))
 	if err != nil {
 		return nil, err
 	}
 
-	prMap := make(map[uuid.UUID]*infra.PullRequestDTO)
+	type prData struct {
+		Title     string
+		AuthorID  uuid.UUID
+		CreatedAt time.Time
+		Status    string
+		MergedAt  *time.Time
+		Reviewers []domain.ID
+	}
+	prMap := make(map[uuid.UUID]*prData)
 
 	for _, row := range rows {
-		prID := uuid.UUID(row.ID)
-		pr, exists := prMap[prID]
+		prID := row.ID
 
-		if !exists {
+		if prMap[row.ID] == nil {
 			var mergedAt *time.Time
 			if row.MergedAt.Valid {
 				t := TimeFromTimestamptz(row.MergedAt)
 				mergedAt = &t
 			}
-
-			prMap[prID] = &infra.PullRequestDTO{
-				ID:          domain.ID(prID),
-				Title:       row.Title,
-				AuthorID:    domain.ID(row.AuthorID),
-				CreatedAt:   TimeFromTimestamptz(row.CreatedAt),
-				Status:      row.Status,
-				MergedAt:    mergedAt,
-				ReviewerIDs: make([]domain.ID, 0),
+			prMap[prID] = &prData{
+				Title:     row.Title,
+				AuthorID:  row.AuthorID,
+				CreatedAt: TimeFromTimestamptz(row.CreatedAt),
+				Status:    row.Status,
+				MergedAt:  mergedAt,
+				Reviewers: nil,
 			}
-			prMap[prID] = pr
 		}
 
 		if row.ReviewerID.Valid {
@@ -284,13 +272,21 @@ func (r *PullRequestRepository) FindPullRequestsByReviewer(userID domain.ID) ([]
 			if err != nil {
 				return nil, err
 			}
-			pr.ReviewerIDs = append(prMap[prID].ReviewerIDs, reviewerID)
+			prMap[prID].Reviewers = append(prMap[prID].Reviewers, reviewerID)
 		}
 	}
 
 	prs := make([]*domain.PullRequest, 0, len(prMap))
-	for _, prDTO := range prMap {
-		pr := prDTO.ToEntity()
+	for id, data := range prMap {
+		pr := domain.ExistingPullRequest(
+			domain.ID(id),
+			data.Title,
+			domain.ID(data.AuthorID),
+			data.CreatedAt,
+			domain.ExistingPRStatus(data.Status),
+			data.MergedAt,
+			data.Reviewers,
+		)
 		prs = append(prs, pr)
 	}
 

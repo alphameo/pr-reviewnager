@@ -6,7 +6,6 @@ import (
 	"fmt"
 
 	"github.com/alphameo/pr-reviewnager/internal/domain"
-	"github.com/alphameo/pr-reviewnager/internal/infra"
 	db "github.com/alphameo/pr-reviewnager/internal/infra/db/sqlc"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
@@ -111,6 +110,12 @@ func (r *TeamRepository) FindByID(id domain.ID) (*domain.Team, error) {
 	return team, nil
 }
 
+type TeamDTO struct {
+	ID      domain.ID
+	Name    string
+	UserIDs []domain.ID
+}
+
 func (r *TeamRepository) FindAll() ([]*domain.Team, error) {
 	ctx := context.Background()
 	tx, err := r.dbConn.Begin(ctx)
@@ -121,20 +126,19 @@ func (r *TeamRepository) FindAll() ([]*domain.Team, error) {
 
 	qtx := r.queries.WithTx(tx)
 
-	// TODO: rewrite with single query?
 	rows, err := qtx.GetTeamsWithUsers(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	teamMap := make(map[uuid.UUID]*infra.TeamDTO)
+	teamMap := make(map[uuid.UUID]*TeamDTO)
 
 	for _, row := range rows {
 		teamID := uuid.UUID(row.TeamID)
 
 		team, exists := teamMap[teamID]
 		if !exists {
-			team = &infra.TeamDTO{
+			team = &TeamDTO{
 				ID:      domain.ID(row.TeamID),
 				Name:    row.TeamName,
 				UserIDs: make([]domain.ID, 0),
