@@ -295,7 +295,7 @@ func (r *TeamRepository) CreateTeamAndModifyUsers(team *domain.Team, users []*do
 	for _, user := range users {
 		err = qtx.UpsertUser(ctx, db.UpsertUserParams{
 			ID:     user.ID().Value(),
-			Name:   user.Name(),
+			Name:   user.Name().Value(),
 			Active: user.Active(),
 		})
 		if err != nil {
@@ -357,7 +357,7 @@ func (r *TeamRepository) FindActiveUsersByTeamID(teamID domain.ID) ([]*domain.Us
 	for i, user := range users {
 		entities[i] = domain.ExistingUser(
 			domain.ExistingID(user.ID),
-			user.Name,
+			domain.ExistingUserName(user.Name),
 			user.Active,
 		)
 	}

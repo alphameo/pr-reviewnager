@@ -2,13 +2,13 @@ package domain
 
 type User struct {
 	id     ID
-	name   string
+	name   UserName
 	active bool
 }
 
 func ExistingUser(
 	id ID,
-	name string,
+	name UserName,
 	active bool,
 ) *User {
 	return &User{
@@ -18,7 +18,7 @@ func ExistingUser(
 	}
 }
 
-func NewUser(name string, active bool) (*User, error) {
+func NewUser(name UserName, active bool) (*User, error) {
 	return &User{
 		id:     NewID(),
 		name:   name,
@@ -30,7 +30,7 @@ func (u *User) ID() ID {
 	return u.id
 }
 
-func (u *User) Name() string {
+func (u *User) Name() UserName {
 	return u.name
 }
 
@@ -43,6 +43,9 @@ func (u *User) SetActive(active bool) {
 }
 
 func (u *User) Validate() error {
-	// TODO: validation for name
+	if err := u.name.Validate(); err != nil {
+		return err
+	}
+
 	return nil
 }

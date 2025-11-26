@@ -28,7 +28,11 @@ func (s *DefaultUserService) RegisterUser(user *NewUserDTO) error {
 	if user == nil {
 		return errors.New("user cannot be nil")
 	}
-	entity, err := domain.NewUser(user.Name, user.Active)
+	name, err := domain.NewUserName(user.Name)
+	if err != nil {
+		return err
+	}
+	entity, err := domain.NewUser(name, user.Active)
 	if err != nil {
 		return err
 	}

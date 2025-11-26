@@ -30,7 +30,7 @@ func (r *UserRepository) Create(user *domain.User) error {
 
 	err := r.queries.CreateUser(ctx, db.CreateUserParams{
 		ID:     user.ID().Value(),
-		Name:   user.Name(),
+		Name:   user.Name().Value(),
 		Active: user.Active(),
 	})
 	if err != nil {
@@ -52,7 +52,7 @@ func (r *UserRepository) FindByID(id domain.ID) (*domain.User, error) {
 
 	return domain.ExistingUser(
 		domain.ExistingID(user.ID),
-		user.Name,
+		domain.ExistingUserName(user.Name),
 		user.Active,
 	), nil
 }
@@ -69,7 +69,7 @@ func (r *UserRepository) FindAll() ([]*domain.User, error) {
 	for i, user := range users {
 		entities[i] = domain.ExistingUser(
 			domain.ExistingID(user.ID),
-			user.Name,
+			domain.ExistingUserName(user.Name),
 			user.Active,
 		)
 	}
@@ -86,7 +86,7 @@ func (r *UserRepository) Update(user *domain.User) error {
 
 	err := r.queries.UpdateUser(ctx, db.UpdateUserParams{
 		ID:     user.ID().Value(),
-		Name:   user.Name(),
+		Name:   user.Name().Value(),
 		Active: user.Active(),
 	})
 	if err != nil {

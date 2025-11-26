@@ -83,7 +83,7 @@ func UserToDTO(user *domain.User) (*UserDTO, error) {
 
 	return &UserDTO{
 		ID:     user.ID(),
-		Name:   user.Name(),
+		Name:   user.Name().Value(),
 		Active: user.Active(),
 	}, nil
 }
@@ -141,7 +141,12 @@ func UserToDomain(dto *UserDTO) (*domain.User, error) {
 		return nil, ErrNilDTO
 	}
 
-	user := domain.ExistingUser(dto.ID, dto.Name, dto.Active)
+	name, err := domain.NewUserName(dto.Name)
+	if err != nil {
+		return nil, err
+	}
+
+	user := domain.ExistingUser(dto.ID, name, dto.Active)
 	if err := user.Validate(); err != nil {
 		return nil, err
 	}
