@@ -61,7 +61,7 @@ func (s *DefaultTeamService) CreateTeamWithUsers(teamDTO *TeamWithUsersDTO) erro
 		return err
 	}
 
-	users, err := UsersToEntities(teamDTO.TeamUsers)
+	users, err := UsersToDomain(teamDTO.TeamUsers)
 	if err != nil {
 		return err
 	}
