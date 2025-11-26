@@ -7,9 +7,9 @@ import (
 )
 
 type UserService interface {
-	RegisterUser(user *domain.UserDTO) error
+	RegisterUser(user *NewUserDTO) error
 	UnregisterUserByID(userID domain.ID) error
-	ListUsers() ([]*domain.UserDTO, error)
+	ListUsers() ([]*UserDTO, error)
 }
 
 type DefaultUserService struct {
@@ -24,11 +24,11 @@ func NewDefaultUserService(userRepository domain.UserRepository) (*DefaultUserSe
 	return &DefaultUserService{userRepo: userRepository}, nil
 }
 
-func (s *DefaultUserService) RegisterUser(user *domain.UserDTO) error {
+func (s *DefaultUserService) RegisterUser(user *NewUserDTO) error {
 	if user == nil {
 		return errors.New("user cannot be nil")
 	}
-	entity, err := UserToEntity(user)
+	entity, err := domain.NewUser(user.Name, user.Active)
 	if err != nil {
 		return err
 	}
@@ -48,11 +48,11 @@ func (s *DefaultUserService) UnregisterUserByID(userID domain.ID) error {
 	return nil
 }
 
-func (s *DefaultUserService) ListUsers() ([]*domain.UserDTO, error) {
+func (s *DefaultUserService) ListUsers() ([]*UserDTO, error) {
 	users, err := s.userRepo.FindAll()
 	if err != nil {
 		return nil, err
 	}
 
-	return users, nil
+	return UsersToDTOs(users)
 }

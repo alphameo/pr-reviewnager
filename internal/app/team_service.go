@@ -5,24 +5,12 @@ import (
 	"fmt"
 
 	"github.com/alphameo/pr-reviewnager/internal/domain"
-	"github.com/google/uuid"
 )
 
 type TeamService interface {
 	CreateTeamWithUsers(teamDTO *TeamWithUsersDTO) error
 	FindTeamByName(name string) (*TeamWithUsersDTO, error)
 	SetUserActiveByID(userID domain.ID, active bool) (*UserWithTeamNameDTO, error)
-}
-
-type TeamWithUsersDTO struct {
-	ID        domain.ID
-	TeamName  string
-	TeamUsers []*domain.UserDTO
-}
-
-type UserWithTeamNameDTO struct {
-	User     *domain.UserDTO
-	TeamName string
 }
 
 var (
@@ -73,7 +61,6 @@ func (s *DefaultTeamService) CreateTeamWithUsers(teamDTO *TeamWithUsersDTO) erro
 		return err
 	}
 
-	// Validation
 	users, err := UsersToEntities(teamDTO.TeamUsers)
 	if err != nil {
 		return err

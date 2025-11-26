@@ -1,3 +1,4 @@
+// Package app provides application layer
 package app
 
 import (
@@ -7,14 +8,14 @@ import (
 )
 
 type PullRequestService interface {
-	CreatePullRequest(pullRequest *domain.PullRequestDTO) (*domain.PullRequestDTO, error)
-	MarkAsMerged(pullRequestID domain.ID) (*domain.PullRequestDTO, error)
+	CreatePullRequest(pullRequest *NewPullRequestDTO) (*PullRequestDTO, error)
+	MarkAsMerged(pullRequestID domain.ID) (*PullRequestDTO, error)
 	ReassignReviewer(userID domain.ID, pullRequestID domain.ID) (*PullRequestWithNewReviewerIDDTO, error)
-	FindPullRequestsByReviewer(userID domain.ID) ([]*domain.PullRequestDTO, error)
+	FindPullRequestsByReviewer(userID domain.ID) ([]*PullRequestDTO, error)
 }
 
 type PullRequestWithNewReviewerIDDTO struct {
-	PullRequest       *domain.PullRequestDTO
+	PullRequest       *PullRequestDTO
 	NewReviewerUserID domain.ID
 }
 
@@ -40,13 +41,17 @@ func NewDefaultPullRequestService(
 	}, nil
 }
 
-func (s *DefaultPullRequestService) CreatePullRequest(pullRequest *domain.PullRequestDTO) (*domain.PullRequestDTO, error) {
-	entity, err := PullRequestToEntity(pullRequest)
+func (s *DefaultPullRequestService) CreatePullRequest(pullRequest *NewPullRequestDTO) (*PullRequestDTO, error) {
+	entity, err := domain.NewPullRequestWithID(
+		pullRequest.ID,
+		pullRequest.Title,
+		pullRequest.AuthorID,
+	)
 	if err != nil {
 		return nil, err
 	}
 
-	pr, err := s.prDomainServ.CreateWithReviewers(entity)
+	pr, err := s.prDomainServ.CreateAndAssignReviewers(entity)
 	if errors.Is(err, domain.ErrAuthorNotFound) || errors.Is(err, domain.ErrTeamNotFound) {
 	} else if errors.Is(err, domain.ErrPRAlreadyExists) {
 		return nil, ErrPRExists
@@ -60,7 +65,7 @@ func (s *DefaultPullRequestService) CreatePullRequest(pullRequest *domain.PullRe
 	return dto, nil
 }
 
-func (s *DefaultPullRequestService) MarkAsMerged(pullRequestID domain.ID) (*domain.PullRequestDTO, error) {
+func (s *DefaultPullRequestService) MarkAsMerged(pullRequestID domain.ID) (*PullRequestDTO, error) {
 	pr, err := s.prDomainServ.MarkAsMerged(pullRequestID)
 	if errors.Is(err, domain.ErrPRNotFound) {
 		return nil, ErrNotFound
@@ -98,11 +103,11 @@ func (s *DefaultPullRequestService) ReassignReviewer(userID domain.ID, pullReque
 	}, nil
 }
 
-func (s *DefaultPullRequestService) FindPullRequestsByReviewer(userID domain.ID) ([]*domain.PullRequestDTO, error) {
+func (s *DefaultPullRequestService) FindPullRequestsByReviewer(userID domain.ID) ([]*PullRequestDTO, error) {
 	prs, err := s.prRepo.FindPullRequestsByReviewer(userID)
 	if err != nil {
 		return nil, err
 	}
 
-	return prs, nil
+	return PullRequestsToDTOs(prs)
 }
