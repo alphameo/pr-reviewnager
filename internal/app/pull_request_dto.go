@@ -15,3 +15,9 @@ type PullRequestDTO struct {
 	MergedAt    *time.Time
 	ReviewerIDs []domain.ID
 }
+
+type NewPullRequestDTO struct {
+	ID       domain.ID
+	Title    string
+	AuthorID domain.ID
+}

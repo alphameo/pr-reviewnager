@@ -68,17 +68,12 @@ func (s *DefaultTeamService) CreateTeamWithUsers(teamDTO *TeamWithUsersDTO) erro
 		return fmt.Errorf("team with name=%s already exists", teamDTO.TeamName)
 	}
 
-	var team *domain.Team
-	if teamDTO.ID == domain.ID(uuid.Nil) {
-		team, err = domain.NewTeam(teamDTO.TeamName)
-	} else {
-		tDTO := domain.TeamDTO{ID: teamDTO.ID, Name: teamDTO.TeamName, UserIDs: nil}
-		team, err = domain.NewExistingTeam(&tDTO)
-	}
+	team, err := domain.NewTeam(teamDTO.TeamName)
 	if err != nil {
 		return err
 	}
 
+	// Validation
 	users, err := UsersToEntities(teamDTO.TeamUsers)
 	if err != nil {
 		return err
@@ -101,35 +96,32 @@ func (s *DefaultTeamService) FindTeamByName(name string) (*TeamWithUsersDTO, err
 	if team == nil {
 		return nil, ErrNotFound
 	}
-	users := make([]*domain.UserDTO, len(team.UserIDs))
-	for i, userID := range team.UserIDs {
+	users := make([]*UserDTO, len(team.UserIDs()))
+	for i, userID := range team.UserIDs() {
 		user, err := s.userRepo.FindByID(userID)
 		if err != nil {
 			return nil, err
 		}
-		users[i] = user
+		userDTO, err := UserToDTO(user)
+		if err != nil {
+			return nil, err
+		}
+		users[i] = userDTO
 	}
 
 	return &TeamWithUsersDTO{
-		ID:        team.ID,
-		TeamName:  team.Name,
+		TeamName:  team.Name(),
 		TeamUsers: users,
 	}, nil
 }
 
 func (s *DefaultTeamService) SetUserActiveByID(userID domain.ID, active bool) (*UserWithTeamNameDTO, error) {
-	u, err := s.userRepo.FindByID(userID)
+	user, err := s.userRepo.FindByID(userID)
 	if err != nil {
 		return nil, err
 	}
-
-	if u == nil {
+	if user == nil {
 		return nil, fmt.Errorf("%w: no such user with id=%d", ErrNotFound, userID)
-	}
-
-	user, err := domain.NewExistingUser(u)
-	if err != nil {
-		return nil, err
 	}
 
 	user.SetActive(active)
@@ -138,10 +130,12 @@ func (s *DefaultTeamService) SetUserActiveByID(userID domain.ID, active bool) (*
 	if err != nil {
 		return nil, err
 	}
+
 	team, err := s.teamRepo.FindTeamByTeammateID(userID)
 	if err != nil {
 		return nil, err
 	}
+
 	userDTO, err := UserToDTO(user)
 	if err != nil {
 		return nil, err
@@ -149,6 +143,6 @@ func (s *DefaultTeamService) SetUserActiveByID(userID domain.ID, active bool) (*
 
 	return &UserWithTeamNameDTO{
 		User:     userDTO,
-		TeamName: team.Name,
+		TeamName: team.Name(),
 	}, nil
 }
