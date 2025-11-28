@@ -1,0 +1,50 @@
+version: "2"
+
+run:
+  timeout: 5m
+  tests: false
+  relative-path-mode: gomod
+
+linters:
+  default: all
+  disable:
+    - wsl
+  enable:
+    - staticcheck
+    - lll
+    - dupl
+    - govet
+    - errcheck
+    - gocyclo
+    - gocritic
+    - revive
+    - unused
+    - wsl_v5
+
+  settings:
+    gocyclo:
+      min-complexity: 15
+
+  exclusions:
+    generated: lax
+
+    paths:
+      - "internal/infra/db/sqlc/*"
+      - "generated/.*"
+      - "internal/adapters/api/gen_api.go"
+
+issues:
+  max-issues-per-linter: 0
+  max-same-issues: 0
+  uniq-by-line: false
+  new: true
+  fix: false
+
+output:
+  formats:
+    text:
+      path: stdout
+      colors: true
+
+severity:
+  default: error
