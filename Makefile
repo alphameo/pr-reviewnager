@@ -1,3 +1,5 @@
+.PHONY generate-api run stop logs logs-app logs-db install-tools install-deps fmt lint help
+
 OAPI_CODEGEN_OUTPUT := internal/adapters/api/gen_api.go
 
 generate-api:
