@@ -17,7 +17,7 @@ services:
 
   migrate:
     build: .
-    command: sh -c "migrate -path /app/migrations -database 'postgres://user:password@db:5432/pr_reviewnager?sslmode=disable' up"
+    command: sh -c "migrate -path /app/migrations/postgres -database 'postgres://user:password@db:5432/pr_reviewnager?sslmode=disable' up"
     environment:
       DATABASE_URL: "postgres://user:password@db:5432/pr_reviewnager?sslmode=disable"
     depends_on:
