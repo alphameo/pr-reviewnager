@@ -35,3 +35,16 @@ fmt:
 
 lint:
 	golangci-lint run ./...
+
+help:
+	@echo "All commands:"
+	@echo "    make run           - start in Docker"
+	@echo "    make stop          - stop docker process"
+	@echo "    make logs          - show all logs"
+	@echo "    make logs-app      - show application logs"
+	@echo "    make logs-db       - show database logs"
+	@echo "    make install-tools - install development tools"
+	@echo "    make install-deps  - install dependencies (dev-tools included)"
+	@echo "    make generate-api  - generate api code according to openapi scheme"
+	@echo "    make fmt           - format all code"
+	@echo "    make lint          - lint code"
